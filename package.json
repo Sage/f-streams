@@ -1,0 +1,41 @@
+{
+  "name": "f-streams",
+  "description": "node.js streams with promises and coroutines",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": {
+    "name": "Bruno Jouhier",
+    "email": "bruno.jouhier@sage.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Sage/f-streams.git"
+  },
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "dependencies": {
+    "f-promise": "^1.0.0",
+    "streamline-runtime": "^1.0.37"
+  },
+  "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.33",
+    "@types/mz": "0.0.30",
+    "@types/node": "^6.0.51",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "mz": "^2.6.0",
+    "streamline": "^2.0.13"
+  },
+  "scripts": {
+    "prepublish": "node_modules/streamline/bin/_node --runtime fibers -c index.ts src test",
+    "test": "node_modules/mocha/bin/mocha test/unit"
+  },
+  "main": "index.js",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/Sage/f-streams/issues"
+  },
+  "homepage": "https://github.com/Sage/f-streams#readme"
+}
