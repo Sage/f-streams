@@ -1,4 +1,3 @@
-import { _ } from 'streamline-runtime';
 import * as generic from './generic';
 import * as stopException from '../stop-exception';
 import { Reader } from '../reader';
@@ -21,7 +20,7 @@ var tracer: (...args: any[]) => void; // = console.error;
 export interface Uturn<T> {
 	reader: Reader<T>;
 	writer: Writer<T>;
-	end: (_: _) => void;
+	end(err: Error): void;
 }
 
 export function create<T>(): Uturn<T> {
@@ -179,7 +178,7 @@ export function create<T>(): Uturn<T> {
 					break;
 			}
 		})),
-		end: _.cast((err) => {
+		end(err: Error) {
 			nextTick();
 			tracer && tracer(id, "END", state, err);
 			err = stopException.unwrap(err);
@@ -189,7 +188,7 @@ export function create<T>(): Uturn<T> {
 			bounceReader(error);
 			bounceWriter(error, uturn.writer)
 			bounceStop(error);
-		}),
+		},
 	};
 	return uturn;
 }

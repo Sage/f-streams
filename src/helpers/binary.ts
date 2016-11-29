@@ -2,7 +2,6 @@
 /// ## helpers for binary streams
 /// 
 /// `import * as f from 'f-streams'`  
-import { _ } from "streamline-runtime";
 import { Reader as BaseReader } from "../reader";
 import { Writer as BaseWriter } from "../writer";
 

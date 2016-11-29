@@ -52,7 +52,6 @@
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { _ } from "streamline-runtime";
 import { Reader } from "../reader";
 import { Writer } from "../writer";
 /// * `transform = ez.transforms.json.parser(options)`  

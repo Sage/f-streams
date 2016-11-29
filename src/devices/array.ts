@@ -1,4 +1,3 @@
-import { _ } from 'streamline-runtime';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
 import { nextTick } from '../util';

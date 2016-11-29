@@ -1,5 +1,4 @@
 "use strict";
-import { _ } from 'streamline-runtime';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
 

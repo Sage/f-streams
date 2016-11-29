@@ -5,8 +5,6 @@
 /// `import * as f from 'f-streams'`  
 /// 
 
-import { _ } from 'streamline-runtime';
-
 /// * `mapper = ez.mappers.json.parse()`  
 ///   returns a mapper that parses JSON string.  
 ///   It assumes that the stream has already been split on boundaries that delimit valid JSON strings,

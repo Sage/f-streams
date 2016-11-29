@@ -1,4 +1,3 @@
-import { _ } from 'streamline-runtime';
 import { fixOptions } from './node';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
@@ -56,7 +55,7 @@ function guessType(data: any) {
 /// 
 /// * `server = ez.devices.http.server(listener, options)`  
 ///   Creates an EZ HTTP server.  
-///   The `listener` is called as `listener(request, response, _)`  
+///   The `listener` is called as `listener(request, response)`  
 ///   where `request` is an EZ reader and `response` an EZ writer.  
 ///   For a full description of this API, see `HttpServerRequest/Response` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 

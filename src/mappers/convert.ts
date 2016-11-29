@@ -4,7 +4,6 @@
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { _ } from 'streamline-runtime';
 
 /// * `mapper = ez.mappers.convert.stringify(encoding)`  
 ///   returns a mapper that converts to string

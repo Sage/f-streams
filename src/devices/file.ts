@@ -1,5 +1,4 @@
 import * as fs from 'mz/fs';
-import { _ } from 'streamline-runtime';
 import * as node from './node';
 import * as generic from './generic';
 import { Reader } from '../reader';

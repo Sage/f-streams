@@ -7,7 +7,6 @@
 /// * `transform = ez.transforms.lines.parser(options)`  
 ///   creates a parser transform.
 ///   `options` is reserved for future use.
-import { _ } from "streamline-runtime";
 import { Reader } from "../reader";
 import { Writer } from "../writer";
 

@@ -1,4 +1,3 @@
-import { _ } from 'streamline-runtime';
 import { fixOptions } from './node';
 import * as streams from '../node-wrappers';
 
@@ -9,7 +8,7 @@ import * as streams from '../node-wrappers';
 /// 
 /// * `server = ez.devices.net.server(serverOptions, listener, streamOptions)`  
 ///   Creates an EZ HTTP server.  
-///   The `listener` is called as `listener(stream, _)`  
+///   The `listener` is called as `listener(stream)`  
 ///   where `stream` is an EZ reader and writer.  
 ///   For a full description of this API, see `NetServer` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 

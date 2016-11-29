@@ -3,7 +3,6 @@
 /// ## Transform to cut string and binary streams
 /// 
 /// `import * as f from 'f-streams'`  
-import { _ } from "streamline-runtime";
 import { Reader } from "../reader";
 import { Writer } from "../writer";
 /// 

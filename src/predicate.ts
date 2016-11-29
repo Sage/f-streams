@@ -1,5 +1,3 @@
-import { _ } from "streamline-runtime";
-
 export interface Options {
 	allowEval?: boolean;
 }
