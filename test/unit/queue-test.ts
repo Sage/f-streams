@@ -26,7 +26,7 @@ describe(module.id, () => {
         const queue = ez.devices.queue.create(4);
         const writeTask = run(() => {
             for (var i = 0; i < 6; i++) queue.write(i);
-            queue.write();
+            queue.write(undefined);
         });
         const readTask = run(() => {
             return queue.reader.toArray();

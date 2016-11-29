@@ -2,7 +2,7 @@ import * as generic from './generic';
 import * as stopException from '../stop-exception';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
-import { nextTick, waitCb } from '../util';
+import { nextTick } from '../util';
 import { wait } from 'f-promise';
 
 var lastId = 0;
@@ -49,7 +49,7 @@ export function create<T>(): Uturn<T> {
 	}
 
 	const uturn = {
-		reader: new Reader(() => waitCb<T>(cb => {
+		reader: new Reader(() => wait<T>(cb => {
 			nextTick();
 			tracer && tracer(id, "READ", state, pendingData);
 			const st = state;
@@ -84,7 +84,7 @@ export function create<T>(): Uturn<T> {
 					cb(error || new Error('invalid state ' + st));
 					break;
 			}
-		}), arg => waitCb<void>(cb => {
+		}), arg => wait(cb => {
 			nextTick();
 			error = error || stopException.make(arg);
 			tracer && tracer(id, "STOP READER", state, arg);
@@ -118,7 +118,7 @@ export function create<T>(): Uturn<T> {
 					break;
 			}
 		})),
-		writer: new Writer<T>(data => waitCb(cb => {
+		writer: new Writer<T>(data => wait(cb => {
 			nextTick();
 			tracer && tracer(id, "WRITE", state, data);
 			const st = state;
@@ -151,7 +151,7 @@ export function create<T>(): Uturn<T> {
 					cb(new Error('invalid state ' + st));
 					break;
 			}
-		}), arg => waitCb<void>(cb => {
+		}), arg => wait(cb => {
 			nextTick();
 			tracer && tracer(id, "STOP WRITER", state, arg);
 			error = error || stopException.make(arg);

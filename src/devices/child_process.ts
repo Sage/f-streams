@@ -11,7 +11,6 @@ import * as node from './node';
 import { stringify } from '../mappers/convert';
 import { ChildProcess } from 'child_process';
 import { wait } from 'f-promise';
-import { waitCb } from '../util';
 
 /// * `reader = ez.devices.child_process.reader(proc, options)`  
 ///   wraps a node.js child process as an EZ reader.  
@@ -81,7 +80,7 @@ export function reader(proc: ChildProcess, options?: ReaderOptions) {
 			if (err) throw err;
 		} else {
 			// wait for the close event
-			waitCb(cb => { closeCb = cb; });
+			wait(cb => { closeCb = cb; });
 			stopStreams();
 		}
 		return undefined;

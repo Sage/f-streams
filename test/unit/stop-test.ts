@@ -1,7 +1,6 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
-import { waitCb } from '../../src/util';
 
 const { equal, ok, strictEqual, deepEqual } = assert;
 
@@ -170,7 +169,7 @@ describe(module.id, () => {
         const altF = run(() => dups[0].limit(5).toArray());
         const result = wait(resultF).join();
         const alt = wait(altF).join();
-        waitCb(cb => setTimeout(cb, 0));
+        wait(cb => setTimeout(cb, 0));
         strictEqual(result, '0,1');
         strictEqual(alt, '0,1,2,3,4');
         ok(source.stoppedReason, 'source stopped');

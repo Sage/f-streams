@@ -20,7 +20,6 @@
 /// 
 /// For a simple example of this API in action, 
 /// see the [google client example](../../../examples/streams/googleClient._js)
-import { _ } from 'streamline-runtime';
 import { parse as parseUrl } from 'url';
 import * as os from 'os';
 import * as generic from './devices/generic';
@@ -29,8 +28,7 @@ import { Writer } from './writer';
 import * as http from 'http';
 import * as https from 'https';
 import * as net from 'net';
-import { run, wait } from 'f-promise';
-import { wait_, waitCb } from './util';
+import { run, wait, withContext } from 'f-promise';
 
 /// 
 /// ## Wrapper
@@ -351,7 +349,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 				//
 				if (!this._emitter.write(data)) this._drain();
 			} else {
-				waitCb(cb => this._emitter.end.call(this._emitter, cb));
+				wait(cb => this._emitter.end.call(this._emitter, cb));
 			}
 			return this.writer;
 		});
@@ -626,14 +624,14 @@ export type HttpListener = (request: HttpServerRequest, response: HttpServerResp
 export function httpListener(listener: HttpListener, options: HttpServerOptions) {
 	options = options || {};
 	return (request: http.ServerRequest, response: http.ServerResponse) => {
-		return _.withContext(() => {
+		return withContext(() => {
 			run(() => listener(new HttpServerRequest(request, options), new HttpServerResponse(response, options)))
 				.catch(err => {
 					// handlers do not read GET requests - so we remove the listeners, in case
 					if (!/^(post|put)$/i.test(request.method || 'get')) request.removeAllListeners();
 					if (err) throw err;
 				});
-		})();
+		}, {});
 	};
 };
 
@@ -859,7 +857,7 @@ export class HttpClientRequest extends WritableStream<http.ClientRequest> {
 	/// * `response = request.response()`  
 	///    returns the response. 
 	response() {
-		var response = this._response || waitCb(this._responseCb.bind(this));
+		var response = this._response || wait(this._responseCb.bind(this));
 		return new HttpClientResponse(response, this._options); // options.reader?
 	}
 	setTimeout(ms: number) {
@@ -1078,12 +1076,12 @@ export class SocketServer extends Server<net.Server> {
 			serverOptions = {};
 		}
 		var emitter = net.createServer(serverOptions, (connection) => {
-			_.withContext(() => {
+			withContext(() => {
 				run(() => connectionListener(new SocketStream(connection, streamOptions || {})))
 					.catch(err => {
 						if (err) throw err;
 					});
-			})();
+			}, {});
 		});
 		super(emitter);
 	}

@@ -1,8 +1,7 @@
-import { _ } from 'streamline-runtime';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
 import * as generic from './generic';
-import * as util from '../util';
+import { Queue, QueueOptions } from 'f-promise';
 
 /// !doc
 /// ## Queue device
@@ -25,27 +24,18 @@ import * as util from '../util';
 ///   the data has been discarded because the queue is full. 
 ///   Note that `queue.writer will not discard the data but instead will wait for the queue to become available.
 
-export interface Queue<T> {
-	read(): T;
-	write(item?: T): any;
-	put(item: T, force?: boolean): boolean;
-	end(): void;
-	peek(): T;
-	contents(): T[];
-	adjust(fn: (oldContents: T[]) => T[]): void;
-	length: number;
+export class StreamedQueue<T> extends Queue<T> {
 	reader: Reader<T>;
 	writer: Writer<T>;
+
+	constructor(options?: QueueOptions | number) {
+		super(options);
+		this.reader = generic.reader<T>(() => this.read(), () => this.end())
+		this.writer = generic.writer<T>(val => this.write(val));
+	}
 }
 
 // any and type intersection to the rescuse because queue is not an ES2015 class
-export function create<T>(max?: number): Queue<T> {
-	var q = _.queue(max);
-	const queue = Object.assign({}, q, {
-		read() { return util.wait_(_ => q.read(_)); },
-		write(item?: T) { util.wait_(_ => q.write(_, item)); },
-	}) as Queue<T>;
-	queue.reader = generic.reader<T>(queue.read.bind(queue), function () { queue.end.call(queue); })
-	queue.writer = generic.writer<T>(queue.write.bind(queue))
-	return queue;
+export function create<T>(options?: QueueOptions) {
+	return new StreamedQueue(options);
 }

@@ -31,8 +31,8 @@ import { convert as predicate } from "./predicate";
 import { Writer } from './writer';
 import * as stopException from './stop-exception';
 import * as nodeStream from "stream";
-import { nextTick, waitCb, funnel } from './util';
-import { run, wait } from 'f-promise';
+import { nextTick } from './util';
+import { run, wait, funnel } from 'f-promise';
 
 function tryCatch<R>(that: any, fn: () => R) {
 	try {
@@ -494,7 +494,7 @@ export class Reader<T> {
 		}
 		fill();
 
-		return new Reader(() => waitCb<T>(cb => {
+		return new Reader(() => wait(cb => {
 			if (buffered.length > 0) {
 				var val = buffered.shift();
 				fill();
@@ -685,7 +685,7 @@ export class StreamGroup<T> implements Stoppable {
 			};
 			next();
 		});
-		return new Reader(() => waitCb<T>(cb => {
+		return new Reader(() => wait(cb => {
 			if (alive <= 0) return cb(null), void 0;
 			const res = results.shift();
 			if (res) {
@@ -790,7 +790,7 @@ export class StreamGroup<T> implements Stoppable {
 			});
 			if (count === 0) throw new Error("bad joiner: must pick and reset at least one value");
 		}
-		return new Reader(() => waitCb<T>(cb => {
+		return new Reader(() => wait(cb => {
 			if (done) {
 				cb(undefined);
 				return;

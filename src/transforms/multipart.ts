@@ -4,12 +4,11 @@
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { _ } from "streamline-runtime";
 import { Reader } from "../reader";
 import { Writer } from "../writer";
 import * as binary from '../helpers/binary';
 import * as generic from '../devices/generic';
-import { wait_ } from '../util';
+import { wait, handshake } from 'f-promise';
 
 function parseContentType(contentType?: string) {
 	if (!contentType) throw new Error("content-type missing");
@@ -42,7 +41,7 @@ export function parser(options: ParserOptions) {
 
 	return (reader: Reader<Buffer>, writer: Writer<any>) => {
 		const binReader = binary.reader(reader);
-		const handshake = _.handshake();
+		const hk = handshake();
 		while (true) {
 			var buf = binReader.readData(2048);
 			if (!buf || !buf.length) return;
@@ -62,7 +61,7 @@ export function parser(options: ParserOptions) {
 				const len = Math.max(boundary.length, 256);
 				const buf = binReader.readData(32 * len);
 				if (!buf || !buf.length) {
-					handshake.notify();
+					hk.notify();
 					return;
 				}
 				// would be nice if Buffer had an indexOf. Would avoid a conversion to string.
@@ -73,7 +72,7 @@ export function parser(options: ParserOptions) {
 					const j = s.indexOf('\n', boundary.length);
 					if (j < 0) throw new Error("newline missing after boundary");
 					binReader.unread(buf.length - j - 1);
-					handshake.notify();
+					hk.notify();
 					return undefined;
 				} else if (i > 0) {
 					var j = s.lastIndexOf('\n', i);
@@ -88,7 +87,7 @@ export function parser(options: ParserOptions) {
 			const partReader = generic.reader(read);
 			partReader.headers = headers;
 			writer.write(partReader);
-			wait_(_ => handshake.wait(_));
+			hk.wait();
 		}
 	};
 }

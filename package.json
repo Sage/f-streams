@@ -15,8 +15,7 @@
     "node": ">=4.0.0"
   },
   "dependencies": {
-    "f-promise": "^1.0.0",
-    "streamline-runtime": "^1.0.37"
+    "f-promise": "^1.0.0"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
@@ -26,10 +25,10 @@
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
     "mz": "^2.6.0",
-    "streamline": "^2.0.13"
+    "typescript": "^2.0.10"
   },
   "scripts": {
-    "prepublish": "node_modules/streamline/bin/_node --runtime fibers -c index.ts src test",
+    "prepublish": "node_modules/typescript/bin/tsc -p .",
     "test": "node_modules/mocha/bin/mocha test/unit"
   },
   "main": "index.js",
