@@ -159,13 +159,13 @@ export class PreImpl<T> {
 }
 
 export interface Pre<T> extends PreImpl<T> {
-	map<U>(fn: (elt: U, index?: number) => T, thisObj?: any): Writer<U>;
+	map<U>(fn: (elt: U, index?: number) => T): Writer<U>;
 	tee(writer: Writer<T>): Writer<T>;
 	concat(readers: Reader<T>[]): Writer<T>;
-	transform<U>(fn: (reader: Reader<U>, writer: Writer<T>) => void, thisObj?: any): Writer<U>;
-	filter(fn: (elt: T, index?: number) => boolean, thisObj?: any): Writer<T>;
-	until(fn: (elt: T, index?: number) => boolean, thisObj?: any): Writer<T>;
-	while(fn: (elt: T, index?: number) => boolean, thisObj?: any): Writer<T>;
+	transform<U>(fn: (reader: Reader<U>, writer: Writer<T>) => void): Writer<U>;
+	filter(fn: (elt: T, index?: number) => boolean): Writer<T>;
+	until(fn: (elt: T, index?: number) => boolean): Writer<T>;
+	while(fn: (elt: T, index?: number) => boolean): Writer<T>;
 	limit(n: number, stopArg?: any): Writer<T>;
 	skip(n: number): Writer<T>;
 	parallel(options: ParallelOptions | number, consumer: (source: any) => Reader<T>): Writer<T>;

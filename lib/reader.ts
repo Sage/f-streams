@@ -76,48 +76,45 @@ export class Reader<T> {
 		if (stop) this._stop = stop;
 	}
 
-	/// * `count = reader.forEach(fn, thisObj)`  
+	/// * `count = reader.forEach(fn)`  
 	///   Similar to `forEach` on arrays.  
 	///   The `fn` function is called as `fn(elt, i)`.  
 	///   This call is asynchonous. It returns the number of entries processed when the end of stream is reached.
-	forEach(fn: (value: T, index: number) => void, thisObj?: any) {
-		thisObj = thisObj !== undefined ? thisObj : this;
+	forEach(fn: (value: T, index: number) => void) {
 		return tryCatch(this, () => {
 			var i: number, val: any;
 			for (i = 0; (val = this.read()) !== undefined; i++) {
-				fn.call(thisObj, val, i);
+				fn.call(null, val, i);
 			}
 			return i;
 		});
 	}
 
-	/// * `reader = reader.map(fn, thisObj)`  
+	/// * `reader = reader.map(fn)`  
 	///   Similar to `map` on arrays.  
 	///   The `fn` function is called as `fn(elt, i)`.  
 	///   Returns another reader on which other operations may be chained.
-	map<U>(fn: (value: T, index?: number) => U, thisObj?: any): Reader<U> {
-		thisObj = thisObj !== undefined ? thisObj : this;
+	map<U>(fn: (value: T, index?: number) => U): Reader<U> {
 		return new Reader(() => {
 			var count = 0;
 			var val = this.read();
 			if (val === undefined) return undefined;
-			return fn.call(thisObj, val, count++);
+			return fn.call(null, val, count++);
 		}, undefined, this);
 	}
 
-	/// * `result = reader.every(fn, thisObj)`  
+	/// * `result = reader.every(fn)`  
 	///   Similar to `every` on arrays.  
 	///   The `fn` function is called as `fn(elt)`.  
 	///   Returns true at the end of stream if `fn` returned true on every entry.  
 	///   Stops streaming and returns false as soon as `fn` returns false on an entry.
-	every(fn: ((value: T) => boolean) | {}, thisObj?: any) {
-		thisObj = thisObj !== undefined ? thisObj : this;
+	every(fn: ((value: T) => boolean) | {}) {
 		const f = resolvePredicate(fn);
 		return tryCatch(this, () => {
 			while (true) {
 				var val = this.read();
 				if (val === undefined) return true;
-				if (!f.call(thisObj, val)) {
+				if (!f.call(null, val)) {
 					this.stop();
 					return false;
 				};
@@ -125,19 +122,18 @@ export class Reader<T> {
 		});
 	}
 
-	/// * `result = reader.some(fn, thisObj)`  
+	/// * `result = reader.some(fn)`  
 	///   Similar to `some` on arrays.  
 	///   The `fn` function is called as `fn(elt)`.  
 	///   Returns false at the end of stream if `fn` returned false on every entry.  
 	///   Stops streaming and returns true as soon as `fn` returns true on an entry.
-	some(fn: ((value: T) => boolean) | {}, thisObj?: any) {
-		thisObj = thisObj !== undefined ? thisObj : this;
+	some(fn: ((value: T) => boolean) | {}) {
 		const f = resolvePredicate(fn);
 		return tryCatch(this, () => {
 			while (true) {
 				var val = this.read();
 				if (val === undefined) return false;
-				if (f.call(thisObj, val)) {
+				if (f.call(null, val)) {
 					this.stop();
 					return true;
 				}
@@ -145,18 +141,17 @@ export class Reader<T> {
 		});
 	}
 
-	/// * `result = reader.reduce(fn, initial, thisObj)`  
+	/// * `result = reader.reduce(fn, initial)`  
 	///   Similar to `reduce` on arrays.  
 	///   The `fn` function is called as `fn(current, elt)` where `current` is `initial` on the first entry and
 	///   the result of the previous `fn` call otherwise.
 	///   Returns the value returned by the last `fn` call.
-	reduce<U>(fn: (prev: U, value: T) => U, v: U, thisObj?: any): U {
-		thisObj = thisObj !== undefined ? thisObj : this;
+	reduce<U>(fn: (prev: U, value: T) => U, v: U): U {
 		return tryCatch(this, () => {
 			while (true) {
 				var val = this.read();
 				if (val === undefined) return v;
-				v = fn.call(thisObj, v, val);
+				v = fn.call(null, v, val);
 			}
 		});
 	}
@@ -307,24 +302,22 @@ export class Reader<T> {
 	///   where `reader` is the `stream` to which `transform` is applied,
 	///   and writer is a writer which is piped into the next element of the chain.  
 	///   Returns another reader on which other operations may be chained.
-	transform<U>(fn: (reader: Reader<T>, writer: Writer<U>) => void, thisObj?: any): Reader<U> {
-		thisObj = thisObj !== undefined ? thisObj : this;
+	transform<U>(fn: (reader: Reader<T>, writer: Writer<U>) => void): Reader<U> {
 		const parent = this;
 		const uturn = require('./devices/uturn').create();
 		function afterTransform(err?: any) {
 			// stop parent at end
 			run(() => parent.stop()).then(() => uturn.end(err), e => uturn.end(err || e));
 		}
-		run(() => fn.call(thisObj, parent, uturn.writer)).then(() => afterTransform(), err => afterTransform(err));
+		run(() => fn.call(null, parent, uturn.writer)).then(() => afterTransform(), err => afterTransform(err));
 		return uturn.reader;
 	}
 
-	/// * `result = reader.filter(fn, thisObj)`  
+	/// * `result = reader.filter(fn)`  
 	///   Similar to `filter` on arrays.  
 	///   The `fn` function is called as `fn(elt, i)`.  
 	///   Returns another reader on which other operations may be chained.
-	filter(fn: ((value: T, index?: number) => boolean) | {}, thisObj?: any) {
-		thisObj = thisObj !== undefined ? thisObj : this;
+	filter(fn: ((value: T, index?: number) => boolean) | {}) {
 		const f = resolvePredicate(fn);
 		const parent = this;
 		var i = 0, done = false;
@@ -332,41 +325,40 @@ export class Reader<T> {
 			while (!done) {
 				var val = parent.read();
 				done = val === undefined;
-				if (done || f.call(thisObj, val, i++)) return val;
+				if (done || f.call(null, val, i++)) return val;
 			}
 			return undefined;
 		}, undefined, parent);
 	}
 
-	/// * `result = reader.until(fn, testVal, thisObj, stopArg)`  
+	/// * `result = reader.until(fn, testVal, stopArg)`  
 	///   Cuts the stream by when the `fn` condition becomes true.  
 	///   The `fn` function is called as `fn(elt, i)`.  
 	///   `stopArg` is an optional argument which is passed to `stop` when `fn` becomes true.  
 	///   Returns another reader on which other operations may be chained.
-	until(fn: ((value: T, index?: number) => boolean) | {}, thisObj?: any, stopArg?: any) {
-		thisObj = thisObj !== undefined ? thisObj : this;
+	until(fn: ((value: T, index?: number) => boolean) | {}, stopArg?: any) {
 		const f = resolvePredicate(fn);
 		const parent = this;
 		var i = 0;
 		return new Reader(function () {
 			var val = parent.read();
 			if (val === undefined) return undefined;
-			if (!f.call(thisObj, val, i++)) return val;
+			if (!f.call(null, val, i++)) return val;
 			parent.stop(stopArg);
 			return undefined;
 		}, undefined, parent);
 	}
 
-	/// * `result = reader.while(fn, testVal, thisObj, stopArg)`  
+	/// * `result = reader.while(fn, testVal, stopArg)`  
 	///   Cuts the stream by when the `fn` condition becomes false.  
 	///   This is different from `filter` in that the result streams _ends_ when the condition
 	///   becomes false, instead of just skipping the entries.
 	///   The `fn` function is called as `fn(elt, i)`.  
 	///   `stopArg` is an optional argument which is passed to `stop` when `fn` becomes false.  
 	///   Returns another reader on which other operations may be chained.
-	while(fn: ((value: T, index?: number) => boolean) | {}, thisObj?: any, stopArg?: any) {
+	while(fn: ((value: T, index?: number) => boolean) | {}, stopArg?: any) {
 		const f = resolvePredicate(fn);
-		return this.until((val, i) => !f.call(thisObj, val, i), thisObj, stopArg);
+		return this.until((val, i) => !f.call(null, val, i), stopArg);
 	}
 
 	/// * `result = reader.limit(count, stopArg)`  
@@ -374,7 +366,7 @@ export class Reader<T> {
 	///   `stopArg` is an optional argument which is passed to `stop` when the limit is reached.  
 	///   Returns another reader on which other operations may be chained.
 	limit(n: number, stopArg?: any) {
-		return this.until((val, i) => i >= n, this, stopArg);
+		return this.until((val, i) => i >= n, stopArg);
 	}
 
 	/// * `result = reader.skip(count)`  
@@ -505,7 +497,7 @@ export class Reader<T> {
 		}), undefined, parent);
 	}
 
-	join(streams: Reader<T>[] | Reader<T>, thisObj?: any) {
+	join(streams: Reader<T>[] | Reader<T>) {
 		const that: Reader<T> = this;
 		const sts = Array.isArray(streams) ? streams : [streams];
 		return new StreamGroup([that].concat(sts)).dequeue();
@@ -724,7 +716,7 @@ export class StreamGroup<T> implements Stoppable {
 		}, undefined, this);
 	}
 
-	/// * `reader = group.join(fn, thisObj)`  
+	/// * `reader = group.join(fn)`  
 	///   Combines the values read from the readers to produce a single value.
 	///   `fn` is called as `fn(values)` where `values` is the set of values produced by 
 	///   all the readers that are still active.  
@@ -732,9 +724,7 @@ export class StreamGroup<T> implements Stoppable {
 	///   that it has consumed. The next `read()` on the joined stream will fetch these values. 
 	///   Note that the length of the `values` array will decrease every time an input stream is exhausted.
 	///   Returns a stream on which other operations may be chained.
-	join(fn: (values: (T | undefined)[]) => T | undefined, thisObj?: any) {
-		thisObj = thisObj !== undefined ? thisObj : this;
-
+	join(fn: (values: (T | undefined)[]) => T | undefined) {
 		var last = 0; // index of last value read by default fn 
 		if (!fn) fn = ((values) => {
 			var i = last;
@@ -768,7 +758,7 @@ export class StreamGroup<T> implements Stoppable {
 			const vals = values.filter(val => val !== undefined);
 			if (vals.length === active) {
 				var val: T;
-				run(() => fn.call(thisObj, values)).then(val => {
+				run(() => fn.call(null, values)).then(val => {
 					// be careful with re-entrancy
 					const rep = reply;
 					reply = undefined;

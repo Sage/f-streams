@@ -8,25 +8,25 @@
   You do not need to call this function if you create your readers with
   the `ez.devices` modules.   
   Returns `proto` for convenience.
-* `count = reader.forEach(fn, thisObj)`  
+* `count = reader.forEach(fn)`  
   Similar to `forEach` on arrays.  
   The `fn` function is called as `fn(elt, i)`.  
   This call is asynchonous. It returns the number of entries processed when the end of stream is reached.
-* `reader = reader.map(fn, thisObj)`  
+* `reader = reader.map(fn)`  
   Similar to `map` on arrays.  
   The `fn` function is called as `fn(elt, i)`.  
   Returns another reader on which other operations may be chained.
-* `result = reader.every(fn, thisObj)`  
+* `result = reader.every(fn)`  
   Similar to `every` on arrays.  
   The `fn` function is called as `fn(elt)`.  
   Returns true at the end of stream if `fn` returned true on every entry.  
   Stops streaming and returns false as soon as `fn` returns false on an entry.
-* `result = reader.some(fn, thisObj)`  
+* `result = reader.some(fn)`  
   Similar to `some` on arrays.  
   The `fn` function is called as `fn(elt)`.  
   Returns false at the end of stream if `fn` returned false on every entry.  
   Stops streaming and returns true as soon as `fn` returns true on an entry.
-* `result = reader.reduce(fn, initial, thisObj)`  
+* `result = reader.reduce(fn, initial)`  
   Similar to `reduce` on arrays.  
   The `fn` function is called as `fn(current, elt)` where `current` is `initial` on the first entry and
   the result of the previous `fn` call otherwise.
@@ -55,16 +55,16 @@
   where `reader` is the `stream` to which `transform` is applied,
   and writer is a writer which is piped into the next element of the chain.  
   Returns another reader on which other operations may be chained.
-* `result = reader.filter(fn, thisObj)`  
+* `result = reader.filter(fn)`  
   Similar to `filter` on arrays.  
   The `fn` function is called as `fn(elt, i)`.  
   Returns another reader on which other operations may be chained.
-* `result = reader.until(fn, testVal, thisObj, stopArg)`  
+* `result = reader.until(fn, testVal, stopArg)`  
   Cuts the stream by when the `fn` condition becomes true.  
   The `fn` function is called as `fn(elt, i)`.  
   `stopArg` is an optional argument which is passed to `stop` when `fn` becomes true.  
   Returns another reader on which other operations may be chained.
-* `result = reader.while(fn, testVal, thisObj, stopArg)`  
+* `result = reader.while(fn, testVal, stopArg)`  
   Cuts the stream by when the `fn` condition becomes false.  
   This is different from `filter` in that the result streams _ends_ when the condition
   becomes false, instead of just skipping the entries.
@@ -119,7 +119,7 @@
 * `reader = group.rr()`  
   Dequeues values in round robin fashion.
   Returns a stream on which other operations may be chained.
-* `reader = group.join(fn, thisObj)`  
+* `reader = group.join(fn)`  
   Combines the values read from the readers to produce a single value.
   `fn` is called as `fn(values)` where `values` is the set of values produced by 
   all the readers that are still active.  
