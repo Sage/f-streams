@@ -30,7 +30,7 @@
     "typescript": "^2.0.10"
   },
   "scripts": {
-    "prepublish": "rm -r build && node_modules/typescript/bin/tsc",
+    "prepublish": "rm -r build; node_modules/typescript/bin/tsc",
     "test": "node_modules/mocha/bin/mocha build/test/unit"
   },
   "readmeFilename": "README.md",
