@@ -179,7 +179,6 @@ export function create<T>(): Uturn<T> {
 			}
 		})),
 		end(err: Error) {
-			nextTick();
 			tracer && tracer(id, "END", state, err);
 			err = stopException.unwrap(err);
 			error = error || err;

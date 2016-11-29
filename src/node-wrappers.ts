@@ -239,7 +239,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 		if (enc) this._emitter.setEncoding(enc);
 		return this;
 	}
-	/// * `data = stream.read(_[, len])`  
+	/// * `data = stream.read([len])`  
 	///   reads asynchronously from the stream and returns a `string` or a `Buffer` depending on the encoding.  
 	///   If a `len` argument is passed, the `read` call returns when `len` characters or bytes 
 	///   (depending on encoding) have been read, or when the underlying stream has emitted its `end` event 
@@ -351,7 +351,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 				//
 				if (!this._emitter.write(data)) this._drain();
 			} else {
-				wait_(_ => this._emitter.end.call(this._emitter, _));
+				waitCb(cb => this._emitter.end.call(this._emitter, cb));
 			}
 			return this.writer;
 		});
@@ -391,14 +391,9 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 		if (typeof data === "string") data = new Buffer(data, enc || this._encoding || "utf8");
 		else if (data === null) data = undefined;
 		if (data !== undefined) {
-			_.run(_ => this.writer.write(data), err => {
-				if (err) throw err;
-				this.end();
-			});
+			run(() => this.writer.write(data)).then(() => this.end(), err => { throw err; });
 		} else {
-			_.run(_ => this.writer.write(), err => {
-				if (err) throw err;
-			});
+			run(() => this.writer.write()).catch(err => { throw err; });
 		}
 		return this;
 	}
@@ -619,7 +614,7 @@ export class Server<EmitterT extends ServerEmitter> extends Wrapper<EmitterT> {
 /// 
 /// * `server = streams.createHttpServer(requestListener[, options])`    
 ///   creates the wrapper.  
-///   `requestListener` is called as `requestListener(request, response, _)` 
+///   `requestListener` is called as `requestListener(request, response)` 
 ///   where `request` and `response` are wrappers around `http.ServerRequest` and `http.ServerResponse`.  
 ///   A fresh empty global context is set before every call to `requestListener`. See [Global context API](https://github.com/Sage/streamline-runtime/blob/master/index.md).
 /// * `server.listen(port[, host])`
@@ -1061,7 +1056,7 @@ export class SocketClient {
 /// 
 /// * `server = streams.createNetServer([serverOptions,] connectionListener [, streamOptions])`    
 ///   creates the wrapper.  
-///   `connectionListener` is called as `connectionListener(stream, _)` 
+///   `connectionListener` is called as `connectionListener(stream)` 
 ///   where `stream` is a `NetStream` wrapper around the native connection.  
 ///   A fresh empty global context is set before every call to `connectionListener`. See [Global context API](https://github.com/Sage/streamline-runtime/blob/master/index.md).
 /// * `server.listen(port[, host])`  

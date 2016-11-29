@@ -27,7 +27,6 @@
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { _ } from "streamline-runtime";
 import { convert as predicate } from "./predicate";
 import { Writer } from './writer';
 import * as stopException from './stop-exception';
@@ -246,9 +245,9 @@ export class Reader<T> {
 			} else if (!writeStop) {
 				// direct output is stopped.
 				// we continue to read it, to propagate to the secondary output
-				_.run(_ => {
+				run(() => {
 					while (readDirect() !== undefined);
-				});
+				}).catch(err => { throw err; });
 			}
 		}, parent);
 	}
@@ -312,12 +311,11 @@ export class Reader<T> {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		const parent = this;
 		const uturn = require('./devices/uturn').create();
-		_.run(_ => fn.call(thisObj, parent, uturn.writer), err => {
+		function afterTransform(err?: any) {
 			// stop parent at end
-			_.run(_ => parent.stop(), e => {
-				uturn.end(err || e);
-			});
-		});
+			run(() => parent.stop()).then(() => uturn.end(err), e => uturn.end(err || e));
+		}
+		run(() => fn.call(thisObj, parent, uturn.writer)).then(() => afterTransform(), err => afterTransform(err));
 		return uturn.reader;
 	}
 
@@ -473,7 +471,7 @@ export class Reader<T> {
 		const fill = () => {
 			if (pending) return;
 			pending = true;
-			_.run(_ => parent.read(), (e, v) => {
+			const afterRead = (e: any, v?: T) => {
 				pending = false;
 				if (e) err = err || e;
 				else buffered.push(v);
@@ -491,7 +489,8 @@ export class Reader<T> {
 				} else if (buffered.length < max) {
 					if (!err && v !== undefined) setTimeout(fill, 2);
 				}
-			});
+			};
+			run(() => parent.read()).then(v => afterRead(null, v), err => afterRead(err));
 		}
 		fill();
 
@@ -664,7 +663,7 @@ export class StreamGroup<T> implements Stoppable {
 			if (!stream) return;
 			const next = () => {
 				if (alive === 0) return;
-				_.run(_ => stream.read(), (e, v) => {
+				const afterRead = (e: any, v?: T) => {
 					if (!e && v === undefined) alive--;
 					if (e || v !== undefined || alive === 0) {
 						if (resume) {
@@ -681,7 +680,8 @@ export class StreamGroup<T> implements Stoppable {
 							});
 						}
 					}
-				});
+				};
+				run(() => stream.read()).then(v => afterRead(null, v), e => afterRead(e));
 			};
 			next();
 		});
@@ -750,11 +750,11 @@ export class StreamGroup<T> implements Stoppable {
 			return undefined;
 		});
 
-		const values: T[] = [];
+		const values: (T | undefined)[] = [];
 		var active = this.readers.length;
 		var done = false;
 		var reply: ((err?: any, val?: T) => void) | undefined;
-		const callbacks = this.readers.map((reader, i) => ((err: any, data: T) => {
+		const callbacks = this.readers.map((reader, i) => ((err: any, data?: T | undefined) => {
 			if (active === 0) return reply && reply();
 			if (err) {
 				done = true;
@@ -785,7 +785,7 @@ export class StreamGroup<T> implements Stoppable {
 			this.readers.forEach((rd, j) => {
 				if (rd && values[j] === undefined) {
 					count++;
-					_.run(_ => rd.read(), callbacks[j]);
+					run(() => rd.read()).then(v => callbacks[j](null, v), e => callbacks[j](e));
 				}
 			});
 			if (count === 0) throw new Error("bad joiner: must pick and reset at least one value");
