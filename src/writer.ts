@@ -28,7 +28,6 @@
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { _ } from "streamline-runtime";
 import { Reader, ParallelOptions } from "./reader";
 import { create as createUturn } from './devices/uturn';
 import * as nodeStream from "stream";
@@ -83,7 +82,7 @@ export class Writer<T> {
 	///   ends the writer - compatiblity call (errors won't be thrown to caller)
 	end() {
 		if (arguments.length > 0) throw new Error("invalid end call: " + arguments.length + " arg(s)");
-		_.run(_ => this.write(undefined));
+		run(() => this.write(undefined)).catch(err => console.error(`end call failed: ${err && err.message}`));
 		return this;
 	};
 
@@ -105,18 +104,14 @@ export class Writer<T> {
 		const anyStream: any = stream;
 		anyStream._write = function (chunk: any, encoding?: string, done?: Function) {
 			if (chunk && encoding && encoding !== 'buffer') chunk = chunk.toString(encoding);
-			_.run(_ => self.write(chunk), err => {
-				if (err) return stream.emit('error', err) as never;
-				if (done) done();
-			});
+			run(() => self.write(chunk)).then(() => { if (done) done(); }, err => stream.emit('error', err));
 		}
 		// override end to emit undefined marker
 		const end = stream.end;
 		anyStream.end = function (chunk: any, encoding?: string, cb?: (err: any, val?: any) => any) {
 			end.call(stream, chunk, encoding, (err: any) => {
 				if (err) return stream.emit('error', err) as never;
-				cb = cb || ((err) => { });
-				_.run(_ => self.write(undefined), cb);
+				run(() => self.write(undefined)).then(v => cb && cb(null, v), err => cb && cb(err));
 			});
 		};
 		return stream;
