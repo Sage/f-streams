@@ -11,7 +11,7 @@ function test(name: string, fn: () => void) {
 }
 
 
-const sample = __dirname + '/../../test/fixtures/rss-sample.xml';
+const sample = __dirname + '/../../../test/fixtures/rss-sample.xml';
 const zlib = require('zlib');
 
 describe(module.id, () => {
@@ -20,7 +20,7 @@ describe(module.id, () => {
         var sampleReader2 = ez.devices.file.text.reader(sample);
         const stringify = ez.mappers.convert.stringify();
         const cutter = ez.transforms.cut.transform(10);
-        const out = require('fs').createWriteStream(__dirname + '/../../test/fixtures/rss-sample.zip');
+        const out = require('fs').createWriteStream(__dirname + '/../../../test/fixtures/rss-sample.zip');
         sampleReader2 = sampleReader2.nodeTransform(zlib.createGzip()).nodeTransform(zlib.createGunzip()).map(stringify);
         const cmp = sampleReader1.transform(cutter).compare(sampleReader2.transform(cutter));
         equal(cmp, 0);

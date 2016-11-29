@@ -38,7 +38,7 @@ describe(module.id, () => {
 
     test("exit 2", () => {
         const cmd = 'exit2' + (os.type() === 'Windows_NT' ? '.cmd' : '.sh');
-        const proc = cp.spawn(fsp.join(__dirname, '../../test/fixtures', cmd), ['2']);
+        const proc = cp.spawn(fsp.join(__dirname, '../../../test/fixtures', cmd), ['2']);
         try {
             const got = ez.devices.child_process.reader(proc).toArray();
             ok(false);

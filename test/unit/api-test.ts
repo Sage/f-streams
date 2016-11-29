@@ -10,7 +10,7 @@ function test(name: string, fn: () => void) {
 	});
 }
 
-import { Reader } from "../../src/reader";
+import { Reader } from "../../lib/reader";
 
 
 interface TestReader extends Reader<number> {

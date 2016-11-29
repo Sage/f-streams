@@ -3,6 +3,7 @@
 /// 
 import * as streams from '../node-wrappers';
 import { Reader } from '../reader';
+import { Writer } from '../writer';
 
 require('../reader').decorate(streams.ReadableStream.prototype);
 require('../writer').decorate(streams.WritableStream.prototype);

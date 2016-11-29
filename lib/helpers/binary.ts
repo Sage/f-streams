@@ -240,26 +240,41 @@ NUMBERS.forEach(function (pair) {
 	});
 });
 
-function makeEndian(base: Function, verbs: string[], suffix: string) {
-	const construct = function (this: Reader | Writer) {
-		base.apply(this, arguments);
+function endianReader(verbs: string[], suffix: string) {
+	class EndianReader extends Reader {
+		constructor(reader: BaseReader<Buffer>, options: ReaderOptions) {
+			super(reader, options);
+		}
 	}
-	construct.prototype = Object.create(base.prototype);
 	NUMBERS.slice(1).forEach(function (pair) {
 		verbs.forEach(function (verb) {
-			construct.prototype[verb + pair[0]] = base.prototype[verb + pair[0] + suffix];
+			(EndianReader.prototype as any)[verb + pair[0]] = (Reader.prototype as any)[verb + pair[0] + suffix];
 		});
 	});
-	return construct;
+	return EndianReader;
+}
+
+function endianWriter(verbs: string[], suffix: string) {
+	class EndianWriter extends Writer {
+		constructor(writer: BaseWriter<Buffer>, options: WriterOptions) {
+			super(writer, options);
+		}
+	}
+	NUMBERS.slice(1).forEach(function (pair) {
+		verbs.forEach(function (verb) {
+			(EndianWriter.prototype as any)[verb + pair[0]] = (Writer.prototype as any)[verb + pair[0] + suffix];
+		});
+	});
+	return EndianWriter;
 }
 
 // TODO: add ambient definitions for all generated methods
 require('../reader').decorate(Reader.prototype);
 require('../writer').decorate(Writer.prototype);
-const ReaderLE = makeEndian(Reader, ['read', 'peek', 'unread'], 'LE');
-const ReaderBE = makeEndian(Reader, ['read', 'peek', 'unread'], 'BE');
-const WriterLE = makeEndian(Writer, ['write'], 'LE');
-const WriterBE = makeEndian(Writer, ['write'], 'BE');
+const ReaderLE = endianReader(['read', 'peek', 'unread'], 'LE');
+const ReaderBE = endianReader(['read', 'peek', 'unread'], 'BE');
+const WriterLE = endianWriter(['write'], 'LE');
+const WriterBE = endianWriter(['write'], 'BE');
 
 // Interfaces to get the specialized methods in TypeScript
 export interface BinaryReader extends Reader {

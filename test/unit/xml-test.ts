@@ -159,7 +159,7 @@ describe(module.id, () => {
 
 
     test("rss feed", () => {
-        const entries = ez.devices.file.text.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
+        const entries = ez.devices.file.text.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
             .transform(ez.transforms.cut.transform(2)) //
             .transform(ez.transforms.xml.parser("rss/channel/item")).toArray();
         strictEqual(entries.length, 10);
@@ -170,7 +170,7 @@ describe(module.id, () => {
     });
 
     test("binary input", () => {
-        const entries = ez.devices.file.binary.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
+        const entries = ez.devices.file.binary.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
             .transform(ez.transforms.cut.transform(2)) //
             .transform(ez.transforms.xml.parser("rss/channel/item")).toArray();
         strictEqual(entries.length, 10);
@@ -181,8 +181,8 @@ describe(module.id, () => {
     });
 
     test("rss roundtrip", () => {
-        var expected = wait(fs.readFile(__dirname + '/../../test/fixtures/rss-sample.xml', 'utf8'));
-        var result = ez.devices.file.text.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
+        var expected = wait(fs.readFile(__dirname + '/../../../test/fixtures/rss-sample.xml', 'utf8'));
+        var result = ez.devices.file.text.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
             .transform(ez.transforms.cut.transform(5)) //
             .transform(ez.transforms.xml.parser("rss/channel/item")) //
             .transform(ez.transforms.xml.formatter({

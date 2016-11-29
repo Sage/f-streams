@@ -7,6 +7,8 @@
     "name": "Bruno Jouhier",
     "email": "bruno.jouhier@sage.com"
   },
+  "main": "build/index.js",
+  "typings": "build/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git://github.com/Sage/f-streams.git"
@@ -28,10 +30,9 @@
     "typescript": "^2.0.10"
   },
   "scripts": {
-    "prepublish": "node_modules/typescript/bin/tsc -p .",
-    "test": "node_modules/mocha/bin/mocha test/unit"
+    "prepublish": "rm -r build && node_modules/typescript/bin/tsc",
+    "test": "node_modules/mocha/bin/mocha build/test/unit"
   },
-  "main": "index.js",
   "readmeFilename": "README.md",
   "bugs": {
     "url": "https://github.com/Sage/f-streams/issues"
