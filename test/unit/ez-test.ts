@@ -47,7 +47,7 @@ describe(module.id, () => {
             const reply404 = ez.reader("http://localhost:3005?status=404").readAll();
             ok(false, "Reader supposed to throw");
         } catch (ex) {
-            ok(/Status 404/.it(ex.message), "Reader throws ok");
+            ok(/Status 404/.test(ex.message), "Reader throws ok");
         }
     });
 

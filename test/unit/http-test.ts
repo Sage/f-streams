@@ -45,7 +45,7 @@ describe(module.id, () => {
             const nf_reader = ez.factory("http://localhost:3004?status=404").reader();
             ok(false, "Reader supposed to throw");
         } catch (ex) {
-            ok(/Status 404/.it(ex.message), "Reader throws ok");
+            ok(/Status 404/.test(ex.message), "Reader throws ok");
         }
     });
 });
