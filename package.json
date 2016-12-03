@@ -17,6 +17,7 @@
     "node": ">=4.0.0"
   },
   "dependencies": {
+    "@types/mz": "0.0.30",
     "f-promise": "^1.0.0",
     "mz": "^2.6.0"
   },
@@ -24,7 +25,6 @@
     "@types/chai": "^3.4.34",
     "@types/es6-promise": "0.0.32",
     "@types/mocha": "^2.2.33",
-    "@types/mz": "0.0.30",
     "@types/node": "^6.0.51",
     "chai": "^3.5.0",
     "f-mocha": "^1.0.1",
