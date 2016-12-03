@@ -1,19 +1,15 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
-
-function test(name: string, fn: () => void) {
-    it(name, (done) => {
-        run(() => (fn(), undefined)).then(done, done);
-    });
-}
 
 var server: ez.devices.http.HttpServer;
 
 describe(module.id, () => {
-    test("Echo service test", () => {
+    it("Echo service test", () => {
         function _test(type: string, message: any) {
             const writer = ez.factory("http://localhost:3004").writer();
             writer.write(message);
@@ -49,7 +45,7 @@ describe(module.id, () => {
             const nf_reader = ez.factory("http://localhost:3004?status=404").reader();
             ok(false, "Reader supposed to throw");
         } catch (ex) {
-            ok(/Status 404/.test(ex.message), "Reader throws ok");
+            ok(/Status 404/.it(ex.message), "Reader throws ok");
         }
     });
 });

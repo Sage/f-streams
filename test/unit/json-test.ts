@@ -1,14 +1,10 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
-
-function test(name: string, fn: () => void) {
-    it(name, (done) => {
-        run(() => (fn(), undefined)).then(done, done);
-    });
-}
 
 const file = ez.devices.file;
 const jsonTrans = ez.transforms.json;
@@ -35,12 +31,12 @@ function nodeStream(text: string) {
 }
 
 describe(module.id, () => {
-    test("empty", () => {
+    it("empty", () => {
         const stream = nodeStream('[]').transform(jsonTrans.parser());
         strictEqual(stream.read(), undefined, "undefined");
     });
 
-    test("mixed data with node node stream", () => {
+    it("mixed data with node node stream", () => {
         const stream = nodeStream(mixedData);
         const expected = JSON.parse(mixedData);
         stream.transform(jsonTrans.parser()).forEach(function (elt, i) {
@@ -48,7 +44,7 @@ describe(module.id, () => {
         });
     });
 
-    test("fragmented read", () => {
+    it("fragmented read", () => {
         const stream = string.reader(mixedData, 2).transform(jsonTrans.parser());
         const expected = JSON.parse(mixedData);
         stream.forEach(function (elt, i) {
@@ -56,7 +52,7 @@ describe(module.id, () => {
         });
     });
 
-    test("binary input", () => {
+    it("binary input", () => {
         const stream = ez.devices.buffer.reader(new Buffer(mixedData, 'utf8')).transform(jsonTrans.parser());
         const expected = JSON.parse(mixedData);
         stream.forEach(function (elt, i) {
@@ -64,7 +60,7 @@ describe(module.id, () => {
         });
     });
 
-    test("roundtrip", () => {
+    it("roundtrip", () => {
         const writer = string.writer();
         nodeStream(mixedData).transform(jsonTrans.parser()).map(function (elt) {
             return (elt && elt.lastName) ? elt.lastName : elt;

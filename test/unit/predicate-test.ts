@@ -1,14 +1,10 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { equal, ok } = assert;
-
-function test(name: string, fn: () => void) {
-	it(name, (done) => {
-		run(() => (fn(), undefined)).then(done, done);
-	});
-}
 
 describe(module.id, () => {
 
@@ -22,7 +18,7 @@ describe(module.id, () => {
 		equal(got, expected, JSON.stringify(condition) + " with " + JSON.stringify(obj) + " => " + expected);
 	}
 
-	test("direct values", () => {
+	it("direct values", () => {
 		t(5, 5, true);
 		t(5, 6, false);
 		t('a', 'a', true);
@@ -31,7 +27,7 @@ describe(module.id, () => {
 		t(true, false, false);
 	});
 
-	test("gt", () => {
+	it("gt", () => {
 		t({
 			$gt: 4,
 		}, 5, true);
@@ -45,7 +41,7 @@ describe(module.id, () => {
 		}, 5, false);
 	});
 
-	test("gte", () => {
+	it("gte", () => {
 		t({
 			$gte: 4,
 		}, 5, true);
@@ -59,7 +55,7 @@ describe(module.id, () => {
 		}, 5, false);
 	});
 
-	test("lt", () => {
+	it("lt", () => {
 		t({
 			$lt: 4,
 		}, 5, false);
@@ -73,7 +69,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	test("lte", () => {
+	it("lte", () => {
 		t({
 			$lte: 4,
 		}, 5, false);
@@ -87,7 +83,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	test("ne", () => {
+	it("ne", () => {
 		t({
 			$ne: 4,
 		}, 5, true);
@@ -101,7 +97,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	test("range", () => {
+	it("range", () => {
 		t({
 			$gte: 3,
 			$lte: 7,
@@ -118,12 +114,12 @@ describe(module.id, () => {
 		}, 8, false);
 	});
 
-	test("regexp", () => {
+	it("regexp", () => {
 		t(/^hel/, 'hello', true);
 		t(/^hel/, 'world', false);
 	});
 
-	test("and", () => {
+	it("and", () => {
 		t({
 			$and: [2, 5],
 		}, 5, false);
@@ -133,7 +129,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	test("empty and", () => {
+	it("empty and", () => {
 		t({}, {}, true);
 
 		t({}, {
@@ -141,7 +137,7 @@ describe(module.id, () => {
 		}, true);
 	});
 
-	test("or", () => {
+	it("or", () => {
 		t({
 			$or: [2, 5],
 		}, 5, true);
@@ -151,7 +147,7 @@ describe(module.id, () => {
 		}, 5, false);
 	});
 
-	test("empty or", () => {
+	it("empty or", () => {
 		t({
 			$or: []
 		}, {}, false);
@@ -163,7 +159,7 @@ describe(module.id, () => {
 			}, false);
 	});
 
-	test("nor", () => {
+	it("nor", () => {
 		t({
 			$nor: [2, 5],
 		}, 5, false);
@@ -173,7 +169,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	test("not", () => {
+	it("not", () => {
 		t({
 			$not: {
 				$gt: 2
@@ -187,7 +183,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	test("in", () => {
+	it("in", () => {
 		t({
 			$in: [2, 3, 5]
 		}, 3, true);
@@ -201,7 +197,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	test("not in", () => {
+	it("not in", () => {
 		t({
 			$nin: [2, 3, 5]
 		}, 3, false);
@@ -215,7 +211,7 @@ describe(module.id, () => {
 		}, 5, false);
 	});
 
-	test("exists", () => {
+	it("exists", () => {
 		t({
 			$exists: "a"
 		}, {
@@ -235,7 +231,7 @@ describe(module.id, () => {
 			}, false);
 	});
 
-	test("type", () => {
+	it("type", () => {
 		t({
 			$type: "number"
 		}, 5, true);
@@ -249,7 +245,7 @@ describe(module.id, () => {
 		}, 5, false);
 	});
 
-	test("mod", () => {
+	it("mod", () => {
 		t({
 			$mod: [3, 2]
 		}, 5, true);
@@ -259,7 +255,7 @@ describe(module.id, () => {
 		}, 5, false);
 	});
 
-	test("regex", () => {
+	it("regex", () => {
 		t({
 			$regex: "^hel",
 		}, "hello", true);
@@ -278,7 +274,7 @@ describe(module.id, () => {
 		}, "HeLLo", true);
 	});
 
-	test("where", () => {
+	it("where", () => {
 		t({
 			$where: "this.a === this.b",
 		}, {
@@ -312,7 +308,7 @@ describe(module.id, () => {
 			}, false);
 	});
 
-	test("elemMatch", () => {
+	it("elemMatch", () => {
 		t({
 			$elemMatch: {
 				$gte: 2,
@@ -328,7 +324,7 @@ describe(module.id, () => {
 		}, [1, 5, 6], false);
 	});
 
-	test("all", () => {
+	it("all", () => {
 		t({
 			$all: [2, 4],
 		}, [1, 2, 3, 4, 5], true);
@@ -402,7 +398,7 @@ describe(module.id, () => {
 		}, false);
 	});
 
-	test("size", () => {
+	it("size", () => {
 		t({
 			$size: 2,
 		}, [1, 2], true);
@@ -412,7 +408,7 @@ describe(module.id, () => {
 		}, [1, 2, 3], false);
 	});
 
-	test("single property", () => {
+	it("single property", () => {
 		t({
 			a: 5,
 		}, {
@@ -428,7 +424,7 @@ describe(module.id, () => {
 			}, false);
 	});
 
-	test("implicit and (multiple properties)", () => {
+	it("implicit and (multiple properties)", () => {
 		t({
 			a: 5,
 			b: 3,
@@ -446,7 +442,7 @@ describe(module.id, () => {
 
 	});
 
-	test("walk", () => {
+	it("walk", () => {
 		t({
 			'a.b': /^hel/,
 		}, {

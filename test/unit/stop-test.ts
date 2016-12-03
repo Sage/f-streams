@@ -1,14 +1,10 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
-
-function test(name: string, fn: () => void) {
-    it(name, (done) => {
-        run(() => (fn(), undefined)).then(done, done);
-    });
-}
 
 interface TestReader extends ez.Reader<number> {
     stoppedReason?: {
@@ -32,7 +28,7 @@ function numbers(limit: number): TestReader {
 }
 
 describe(module.id, () => {
-    test("explicit stop", () => {
+    it("explicit stop", () => {
         const source = numbers(100);
         var result = ''
         for (var i = 0; i < 5; i++) result += source.read();
@@ -41,7 +37,7 @@ describe(module.id, () => {
         strictEqual(source.stoppedReason && source.stoppedReason.at, 5);
     });
 
-    test("explicit stop with err", () => {
+    it("explicit stop with err", () => {
         const source = numbers(100);
         var result = ''
         for (var i = 0; i < 5; i++) result += source.read();
@@ -52,14 +48,14 @@ describe(module.id, () => {
     });
 
     // limit exercises transform
-    test("limit stops", () => {
+    it("limit stops", () => {
         var source = numbers(100);
         const result = source.skip(2).limit(5).toArray().join(',');
         strictEqual(result, '2,3,4,5,6');
         ok(source.stoppedReason, 'stopped');
     });
 
-    test("concat stops", () => {
+    it("concat stops", () => {
         const source1 = numbers(5);
         const source2 = numbers(5);
         const source3 = numbers(5);
@@ -70,7 +66,7 @@ describe(module.id, () => {
         ok(source3.stoppedReason, 'source3 stopped');
     });
 
-    test("dup stops on 0 and continues on 1", () => {
+    it("dup stops on 0 and continues on 1", () => {
         const source = numbers(5);
         const dups = source.dup();
         const resultF = run(() => dups[0].limit(2).toArray());
@@ -82,7 +78,7 @@ describe(module.id, () => {
         ok(!source.stoppedReason, 'source not stopped');
     });
 
-    test("dup stops on 1 and continues on 0", () => {
+    it("dup stops on 1 and continues on 0", () => {
         const source = numbers(5);
         const dups = source.dup();
         const resultF = run(() => dups[1].limit(2).toArray());
@@ -94,7 +90,7 @@ describe(module.id, () => {
         ok(!source.stoppedReason, 'source not stopped');
     });
 
-    test("dup stops both silently from 0", () => {
+    it("dup stops both silently from 0", () => {
         const source = numbers(5);
         const dups = source.dup();
         const resultF = run(() => dups[0].limit(2, true).toArray());
@@ -106,7 +102,7 @@ describe(module.id, () => {
         ok(source.stoppedReason, 'source stopped');
     });
 
-    test("dup stops both silently from 1", () => {
+    it("dup stops both silently from 1", () => {
         const source = numbers(5);
         const dups = source.dup();
         const resultF = run(() => dups[1].limit(2, true).toArray());
@@ -118,7 +114,7 @@ describe(module.id, () => {
         ok(source.stoppedReason, 'source stopped');
     });
 
-    test("dup stops with error from 0", () => {
+    it("dup stops with error from 0", () => {
         const source = numbers(5);
         const dups = source.dup();
         const resultF = run(() => dups[0].limit(2, new Error("testing")).toArray());
@@ -134,7 +130,7 @@ describe(module.id, () => {
         ok(source.stoppedReason, 'source stopped');
     });
 
-    test("dup stops with error from 1", () => {
+    it("dup stops with error from 1", () => {
         const source = numbers(5);
         const dups = source.dup();
         const resultF = run(() => dups[1].limit(2, new Error("testing")).toArray());
@@ -150,7 +146,7 @@ describe(module.id, () => {
         ok(source.stoppedReason, 'source stopped');
     });
 
-    test("dup stops 0 first, 1 later", () => {
+    it("dup stops 0 first, 1 later", () => {
         const source = numbers(10);
         const dups = source.dup();
         const resultF = run(() => dups[0].limit(2).toArray());
@@ -162,7 +158,7 @@ describe(module.id, () => {
         ok(source.stoppedReason, 'source stopped');
     });
 
-    test("dup stops 1 first, 0 later", () => {
+    it("dup stops 1 first, 0 later", () => {
         const source = numbers(10);
         const dups = source.dup();
         const resultF = run(() => dups[1].limit(2).toArray());
@@ -175,7 +171,7 @@ describe(module.id, () => {
         ok(source.stoppedReason, 'source stopped');
     });
 
-    test("pre", () => {
+    it("pre", () => {
         const source = numbers(10);
         const target = ez.devices.array.writer();
         source.pipe(target.pre.limit(5));

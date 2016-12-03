@@ -1,14 +1,10 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
-
-function test(name: string, fn: () => void) {
-    it(name, (done) => {
-        run(() => (fn(), undefined)).then(done, done);
-    });
-}
 
 const buffer = ez.devices.buffer;
 const multipart = ez.transforms.multipart
@@ -52,7 +48,7 @@ function testStream() {
 }
 
 describe(module.id, () => {
-    test('basic multipart/mixed', () => {
+    it('basic multipart/mixed', () => {
         const source = testStream();
         const stream = source.transform(multipart.parser(headers("mixed")));
         var part = stream.read();
@@ -79,7 +75,7 @@ describe(module.id, () => {
         equal(part, undefined, "read next part returns undefined");
     });
 
-    test('multipart/mixed roundtrip', () => {
+    it('multipart/mixed roundtrip', () => {
         const heads = headers("mixed");
         const source = testStream();
         const writer = buffer.writer();

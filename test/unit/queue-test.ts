@@ -1,17 +1,13 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
 
-function test(name: string, fn: () => void) {
-    it(name, (done) => {
-        run(() => (fn(), undefined)).then(done, done);
-    });
-}
-
 describe(module.id, () => {
-    test("put (lossy)", () => {
+    it("put (lossy)", () => {
         const queue = ez.devices.queue.create(4);
         for (var i = 0; i < 6; i++) {
             var queued = queue.put(i);
@@ -22,7 +18,7 @@ describe(module.id, () => {
         equal(result.join(','), "0,1,2,3", 'partial queue contents ok');
     });
 
-    test("write (lossless)", () => {
+    it("write (lossless)", () => {
         const queue = ez.devices.queue.create(4);
         const writeTask = run(() => {
             for (var i = 0; i < 6; i++) queue.write(i);

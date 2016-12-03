@@ -1,14 +1,10 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
-
-function test(name: string, fn: () => void) {
-    it(name, (done) => {
-        run(() => (fn(), undefined)).then(done, done);
-    });
-}
 
 const lines = ez.transforms.lines;
 const file = ez.devices.file;
@@ -24,24 +20,24 @@ function nodeStream(text: string) {
 }
 
 describe(module.id, () => {
-    test("empty", () => {
+    it("empty", () => {
         const stream = nodeStream('').transform(lines.parser());
         strictEqual(stream.read(), undefined, "undefined");
     });
 
-    test("non empty line", () => {
+    it("non empty line", () => {
         const stream = nodeStream('a').transform(lines.parser());
         strictEqual(stream.read(), 'a', "a");
         strictEqual(stream.read(), undefined, "undefined");
     });
 
-    test("only newline", () => {
+    it("only newline", () => {
         const stream = nodeStream('\n').transform(lines.parser());
         strictEqual(stream.read(), '', "empty line");
         strictEqual(stream.read(), undefined, "undefined");
     });
 
-    test("mixed", () => {
+    it("mixed", () => {
         const stream = nodeStream('abc\n\ndef\nghi').transform(lines.parser());
         strictEqual(stream.read(), 'abc', 'abc');
         strictEqual(stream.read(), '', "empty line");
@@ -50,14 +46,14 @@ describe(module.id, () => {
         strictEqual(stream.read(), undefined, "undefined");
     });
 
-    test("roundtrip", () => {
+    it("roundtrip", () => {
         const writer = string.writer();
         const text = 'abc\n\ndef\nghi';
         string.reader(text, 2).transform(lines.parser()).transform(lines.formatter()).pipe(writer);
         strictEqual(writer.toString(), text, text);
     });
 
-    test("binary input", () => {
+    it("binary input", () => {
         const writer = string.writer();
         const text = 'abc\n\ndef\nghi';
         ez.devices.buffer.reader(new Buffer(text, 'utf8')).transform(lines.parser()).transform(lines.formatter()).pipe(writer);

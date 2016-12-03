@@ -1,14 +1,10 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
-
-function test(name: string, fn: () => void) {
-    it(name, (done) => {
-        run(() => (fn(), undefined)).then(done, done);
-    });
-}
 
 import * as fs from 'mz/fs';
 
@@ -42,7 +38,7 @@ function rtTest(name: string, xml: string, indent: string | undefined, result: a
 }
 
 describe(module.id, () => {
-    test('simple tag without attributes', () => {
+    it('simple tag without attributes', () => {
         parseTest('<a/>', {
             a: {}
         });
@@ -54,7 +50,7 @@ describe(module.id, () => {
         });
     });
 
-    test('simple tag with attributes', () => {
+    it('simple tag with attributes', () => {
         parseTest('<a x="3" y="4">5</a>', {
             a: {
                 $: {
@@ -81,7 +77,7 @@ describe(module.id, () => {
         });
     });
 
-    test('entities', () => {
+    it('entities', () => {
         parseTest('<a x="a&gt;b&amp;c&lt;"/>', {
             a: {
                 $: {
@@ -94,7 +90,7 @@ describe(module.id, () => {
         });
     });
 
-    test('children', () => {
+    it('children', () => {
         parseTest('<a><b>3</b><c>4</c></a>', {
             a: {
                 b: "3",
@@ -120,7 +116,7 @@ describe(module.id, () => {
         });
     });
 
-    test('cdata', () => {
+    it('cdata', () => {
         parseTest('<a><![CDATA[<abc>]]></a>', {
             a: {
                 $cdata: "<abc>"
@@ -133,13 +129,13 @@ describe(module.id, () => {
         });
     });
 
-    test('comments in text', () => {
+    it('comments in text', () => {
         parseTest('<a>abc <!-- <b>def</b> --> ghi</a>', {
             a: "abc  ghi"
         }, true);
     });
 
-    test('reformatting', () => {
+    it('reformatting', () => {
         rtTest('spaces outside', ' \r\n\t <a/> \t', undefined, '<a/>');
         rtTest('spaces inside tag', '<a  x="v1"\ny="v2"\t/>', undefined, '<a x="v1" y="v2"/>');
         rtTest('spaces around children', '<a> <b />\n<c\n/>\t</a>', undefined, '<a><b/><c/></a>');
@@ -149,7 +145,7 @@ describe(module.id, () => {
         rtTest('indentation', '<a><b x="3">5</b><c><d/></c></a>', '\t', '\n\t<a>\n\t\t<b x="3">5</b>\n\t\t<c>\n\t\t\t<d/>\n\t\t</c>\n\t</a>\n');
     });
 
-    test('empty element in list', () => {
+    it('empty element in list', () => {
         parseTest('<a><b></b><b>x</b><b></b></a>', {
             a: {
                 b: ["", "x", ""]
@@ -158,7 +154,7 @@ describe(module.id, () => {
     });
 
 
-    test("rss feed", () => {
+    it("rss feed", () => {
         const entries = ez.devices.file.text.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
             .transform(ez.transforms.cut.transform(2)) //
             .transform(ez.transforms.xml.parser("rss/channel/item")).toArray();
@@ -169,7 +165,7 @@ describe(module.id, () => {
         strictEqual(entries[9].rss.channel.item.title, "2013's big winners abandoned 'safety' and bet on central bankers");
     });
 
-    test("binary input", () => {
+    it("binary input", () => {
         const entries = ez.devices.file.binary.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
             .transform(ez.transforms.cut.transform(2)) //
             .transform(ez.transforms.xml.parser("rss/channel/item")).toArray();
@@ -180,7 +176,7 @@ describe(module.id, () => {
         strictEqual(entries[9].rss.channel.item.title, "2013's big winners abandoned 'safety' and bet on central bankers");
     });
 
-    test("rss roundtrip", () => {
+    it("rss roundtrip", () => {
         var expected = wait(fs.readFile(__dirname + '/../../../test/fixtures/rss-sample.xml', 'utf8'));
         var result = ez.devices.file.text.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
             .transform(ez.transforms.cut.transform(5)) //
@@ -195,7 +191,7 @@ describe(module.id, () => {
         strictEqual(result, expected);
     });
 
-    test('escaping', () => {
+    it('escaping', () => {
         var xml = '<a>';
         var js = '';
         for (var i = 0; i < 0x10000; i++) {

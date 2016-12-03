@@ -1,14 +1,10 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { strictEqual, deepEqual, equal, ok } = assert;
-
-function test(name: string, fn: () => void) {
-	it(name, (done) => {
-		run(() => (fn(), undefined)).then(done, done);
-	});
-}
 
 import { Reader } from "../../lib/reader";
 
@@ -54,7 +50,7 @@ function minJoiner(values: any[]) {
 
 describe(module.id, () => {
 
-	test("forEach", () => {
+	it("forEach", () => {
 		const results: number[] = [];
 		const source = numbers(5);
 		source.forEach(function (num) {
@@ -64,7 +60,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("forEach error", () => {
+	it("forEach error", () => {
 		const source = numbers(5);
 		try {
 			source.forEach(fail());
@@ -75,7 +71,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("map", () => {
+	it("map", () => {
 		const source = numbers(5);
 		strictEqual(source.map(function (num) {
 			return num * num;
@@ -83,7 +79,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("map error", () => {
+	it("map error", () => {
 		const source = numbers(5);
 		try {
 			source.map(fail(1)).pipe(arraySink());
@@ -94,7 +90,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("every", () => {
+	it("every", () => {
 		var source: TestReader;
 		strictEqual((source = numbers(5)).every(function (num) {
 			return num < 5;
@@ -122,7 +118,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("every error", () => {
+	it("every error", () => {
 		const source = numbers(5);
 		try {
 			source.every(fail(true));
@@ -133,7 +129,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("some", () => {
+	it("some", () => {
 		var source: TestReader;
 		strictEqual((source = numbers(5)).some(function (num) {
 			return num >= 5;
@@ -161,7 +157,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("some error", () => {
+	it("some error", () => {
 		const source = numbers(5);
 		try {
 			source.some(fail(false));
@@ -172,7 +168,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("reduce", () => {
+	it("reduce", () => {
 		const source = numbers(5);
 		strictEqual(source.reduce(function (r, num) {
 			return r + '/' + num;
@@ -180,7 +176,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("reduce error", () => {
+	it("reduce error", () => {
 		const source = numbers(5);
 		try {
 			source.reduce(function (r, v) {
@@ -194,13 +190,13 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("toArray", () => {
+	it("toArray", () => {
 		const source = numbers(5);
 		deepEqual(source.toArray(), [0, 1, 2, 3, 4]);
 		source.finalCheck();
 	});
 
-	test("pipe", () => {
+	it("pipe", () => {
 		const source = numbers(5);
 		strictEqual(source.pipe(arraySink()).toArray().join(','), "0,1,2,3,4");
 		source.finalCheck();
@@ -208,7 +204,7 @@ describe(module.id, () => {
 
 	// pipe error already tested in map
 
-	test("tee", () => {
+	it("tee", () => {
 		const source = numbers(5);
 		const secondary = arraySink();
 		strictEqual(source.tee(secondary).pipe(arraySink()).toArray().join(','), "0,1,2,3,4");
@@ -216,7 +212,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("tee error", () => {
+	it("tee error", () => {
 		const source = numbers(5);
 		const secondary = arraySink();
 		try {
@@ -229,7 +225,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("dup", () => {
+	it("dup", () => {
 		const source = numbers(5);
 		const streams = source.dup();
 		const f1 = run(() => streams[0].toArray());
@@ -239,7 +235,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("dup error 0", () => {
+	it("dup error 0", () => {
 		const source = numbers(5);
 		const streams = source.dup();
 		const f1 = run(() => streams[0].map(fail(2)).toArray());
@@ -259,7 +255,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("dup error 1", () => {
+	it("dup error 1", () => {
 		const source = numbers(5);
 		const streams = source.dup();
 		const f1 = run(() => streams[0].toArray());
@@ -279,7 +275,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("concat", () => {
+	it("concat", () => {
 		var source: TestReader;
 		const rd1 = (source = numbers(5)).concat(numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(12));
 		strictEqual(rd1.toArray().join(), "0,1,2,3,4,6,7,12,13,14");
@@ -289,7 +285,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("concat error", () => {
+	it("concat error", () => {
 		const source = numbers(5);
 		const rd1 = source.concat(numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(2).map(fail(2)));
 		try {
@@ -301,7 +297,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("transform - same number of reads and writes", () => {
+	it("transform - same number of reads and writes", () => {
 		const source = numbers(5);
 		strictEqual(source.transform(function (reader, writer) {
 			var sum = 0, val: number | undefined;
@@ -313,7 +309,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("transform - more reads than writes", () => {
+	it("transform - more reads than writes", () => {
 		const source = numbers(12);
 		strictEqual(source.transform(function (reader, writer) {
 			var str = "", val: number | undefined;
@@ -329,7 +325,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("transform - less reads than writes", () => {
+	it("transform - less reads than writes", () => {
 		const source = numbers(5);
 		strictEqual(source.transform(function (reader, writer) {
 			var str = "", val: number | undefined;
@@ -340,7 +336,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("transform error", () => {
+	it("transform error", () => {
 		const source = numbers(5);
 		try {
 			source.transform(function (reader, writer) {
@@ -357,7 +353,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("filter", () => {
+	it("filter", () => {
 		var source: TestReader;
 		strictEqual((source = numbers(10)).filter(function (val) {
 			return val % 2;
@@ -370,7 +366,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("while", () => {
+	it("while", () => {
 		var source: TestReader;
 		strictEqual((source = numbers()).while(function (val) {
 			return val < 5;
@@ -382,7 +378,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("until", () => {
+	it("until", () => {
 		var source: TestReader;
 		strictEqual((source = numbers()).until(function (val) {
 			return val > 5;
@@ -394,13 +390,13 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("limit", () => {
+	it("limit", () => {
 		const source = numbers();
 		strictEqual(source.limit(5).pipe(arraySink()).toArray().join(','), "0,1,2,3,4");
 		source.finalCheck();
 	});
 
-	test("skip", () => {
+	it("skip", () => {
 		const source = numbers();
 		strictEqual(source.skip(2).limit(5).pipe(arraySink()).toArray().join(','), "2,3,4,5,6");
 		source.finalCheck();
@@ -428,12 +424,12 @@ describe(module.id, () => {
 		};
 	}
 
-	test("simple chain (no buffer)", () => {
+	it("simple chain (no buffer)", () => {
 		const source = numbers();
 		strictEqual(source.skip(2).limit(5).pipe(arraySink()).toArray().join(','), "2,3,4,5,6");
 		source.finalCheck();
 	});
-	test("buffer in simple chain", () => {
+	it("buffer in simple chain", () => {
 		var source: TestReader;
 		strictEqual((source = numbers()).buffer(3).skip(2).limit(5).pipe(arraySink()).toArray().join(','), "2,3,4,5,6");
 		source.finalCheck();
@@ -442,19 +438,19 @@ describe(module.id, () => {
 		strictEqual((source = numbers()).skip(2).limit(5).buffer(3).pipe(arraySink()).toArray().join(','), "2,3,4,5,6");
 		source.finalCheck();
 	});
-	test("buffer with slower input", () => {
+	it("buffer with slower input", () => {
 		const source = numbers();
 		strictEqual(source.limit(10).map(sleep(20)).buffer(5).map(sleep(10)).pipe(arraySink()).toArray().join(','), "0,1,2,3,4,5,6,7,8,9");
 		source.finalCheck();
 	});
 
-	test("buffer with faster input", () => {
+	it("buffer with faster input", () => {
 		const source = numbers();
 		strictEqual(source.limit(10).map(sleep(10)).buffer(5).map(sleep(20)).pipe(arraySink()).toArray().join(','), "0,1,2,3,4,5,6,7,8,9");
 		source.finalCheck();
 	});
 
-	test("parallel preserve order", () => {
+	it("parallel preserve order", () => {
 		const t0 = Date.now();
 		const source = numbers();
 		strictEqual(source.limit(10).parallel(4, function (source) {
@@ -465,7 +461,7 @@ describe(module.id, () => {
 		//ok(dt < 600, "elapsed: " + dt + "ms");
 	});
 
-	test("parallel shuffle", () => {
+	it("parallel shuffle", () => {
 		const t0 = Date.now();
 		const source = numbers();
 		strictEqual(source.limit(10).parallel({
@@ -481,7 +477,7 @@ describe(module.id, () => {
 		//ok(dt < 600, "elapsed: " + dt + "ms");
 	});
 
-	test("fork/join limit before", () => {
+	it("fork/join limit before", () => {
 		const source = numbers();
 		strictEqual(source.limit(10).fork([
 			function (src) { return src.map(sleep(rand(20, 20))).map(pow(2)); },
@@ -490,7 +486,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("fork/join limit after", () => {
+	it("fork/join limit after", () => {
 		const source = numbers();
 		strictEqual(source.fork([
 			function (src) { return src.map(sleep(rand(20, 20))).map(pow(2)); },
@@ -499,7 +495,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("fork/join limit one branch", () => {
+	it("fork/join limit one branch", () => {
 		const source = numbers();
 		strictEqual(source.fork([
 			function (src) { return src.map(sleep(rand(20, 20))).map(pow(2)).limit(3); },
@@ -508,7 +504,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("fork slow and fast", () => {
+	it("fork slow and fast", () => {
 		const source = numbers();
 		const readers = source.fork([
 			function (src) { return src.map(sleep(rand(20, 20))).map(pow(2)); },
@@ -521,7 +517,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("fork slow and fast with different limits (fast ends first)", () => {
+	it("fork slow and fast with different limits (fast ends first)", () => {
 		const source = numbers();
 		const readers = source.fork([
 			function (src) { return src.map(sleep(rand(20, 20))).map(pow(2)).limit(10); },
@@ -534,7 +530,7 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
-	test("fork slow and fast with different limits (slow ends first)", () => {
+	it("fork slow and fast with different limits (slow ends first)", () => {
 		const source = numbers();
 		const readers = source.fork([
 			function (src) { return src.map(sleep(rand(10, 10))).map(pow(2)).limit(10); },

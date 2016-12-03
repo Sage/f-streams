@@ -1,19 +1,15 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
-
-function test(name: string, fn: () => void) {
-    it(name, (done) => {
-        run(() => (fn(), undefined)).then(done, done);
-    });
-}
 
 var server: ez.devices.http.HttpServer;
 
 describe(module.id, () => {
-    test("start echo server", () => {
+    it("start echo server", () => {
         server = ez.devices.http.server(function (req, res) {
             if (req.method === "POST") {
                 const text = req.readAll();
@@ -43,7 +39,7 @@ describe(module.id, () => {
         ok(true, "server started");
     });
 
-    test("http test", () => {
+    it("http test", () => {
         const reply = ez.reader("http://localhost:3005").readAll();
         strictEqual(reply, "reply for GET", "Get test: reader ok");
         // try not found reader
@@ -51,51 +47,51 @@ describe(module.id, () => {
             const reply404 = ez.reader("http://localhost:3005?status=404").readAll();
             ok(false, "Reader supposed to throw");
         } catch (ex) {
-            ok(/Status 404/.test(ex.message), "Reader throws ok");
+            ok(/Status 404/.it(ex.message), "Reader throws ok");
         }
     });
 
-    test("http readers and writers", () => {
+    it("http readers and writers", () => {
         const writer = ez.writer("http://localhost:3005");
         const result = writer.writeAll("hello world").result;
         strictEqual(result, "text/plain: hello world");
     });
 
-    test("http JSON", () => {
+    it("http JSON", () => {
         const writer = ez.writer("http://localhost:3005");
         const result = writer.writeAll([2, 4]).result;
         deepEqual(result, { echo: [2, 4] });
     });
 
-    test("array test", () => {
+    it("array test", () => {
         const reply = ez.reader([2, 3, 4]).readAll();
         deepEqual(reply, [2, 3, 4]);
     });
 
-    test("array readers and writers", () => {
+    it("array readers and writers", () => {
         const writer = ez.writer([]);
         ez.reader([2, 3, 4]).pipe(writer);
         deepEqual(writer.result, [2, 3, 4]);
     });
 
-    test("string test", () => {
+    it("string test", () => {
         const reply = ez.reader("string:hello world").readAll();
         deepEqual(reply, "hello world");
     });
 
-    test("string readers and writers", () => {
+    it("string readers and writers", () => {
         const writer = ez.writer("string:");
         ez.reader("string:hello world").pipe(writer);
         deepEqual(writer.result, "hello world");
     });
 
-    test("buffer test", () => {
+    it("buffer test", () => {
         const buf = new Buffer('hello world', 'utf8');
         const reply = ez.reader(buf).transform(ez.transforms.cut.transform(2)).readAll() as Buffer;
         deepEqual(reply.toString('utf8'), buf.toString('utf8'));
     });
 
-    test("buffer reader and writer", () => {
+    it("buffer reader and writer", () => {
         const buf = new Buffer('hello world', 'utf8');
         const writer = ez.writer(new Buffer(0));
         const reply = ez.reader(buf).pipe(writer);

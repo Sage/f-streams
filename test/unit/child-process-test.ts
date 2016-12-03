@@ -1,14 +1,10 @@
 import * as ez from "../..";
 import { assert } from 'chai';
 import { run, wait } from 'f-promise';
+import { setup } from 'f-mocha';
+setup();
 
 const { equal, ok, deepEqual } = assert;
-
-function test(name: string, fn: () => void) {
-    it(name, (done) => {
-        run(() => (fn(), undefined)).then(done, done);
-    });
-}
 
 import * as cp from "child_process";
 import * as fsp from "path";
@@ -16,7 +12,7 @@ import * as os from "os";
 
 describe(module.id, () => {
 
-    test("echo ok", () => {
+    it("echo ok", () => {
         if (os.type() === 'Windows_NT') {
             ok("Ignore on Windows");
         } else {
@@ -26,7 +22,7 @@ describe(module.id, () => {
         }
     });
 
-    test("bad command", () => {
+    it("bad command", () => {
         const proc = cp.spawn(fsp.join(__dirname, 'foobar.zoo'), ['2']);
         try {
             const got = ez.devices.child_process.reader(proc).toArray();
@@ -36,7 +32,7 @@ describe(module.id, () => {
         }
     });
 
-    test("exit 2", () => {
+    it("exit 2", () => {
         const cmd = 'exit2' + (os.type() === 'Windows_NT' ? '.cmd' : '.sh');
         const proc = cp.spawn(fsp.join(__dirname, '../../../test/fixtures', cmd), ['2']);
         try {
