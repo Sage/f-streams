@@ -561,9 +561,14 @@ export class HttpServerResponse extends WritableStream<http.ServerResponse> {
 	/// * `response.statusCode = value`  
 	get statusCode() { return this._emitter.statusCode; }
 	set statusCode(val: number) { this._emitter.statusCode = val; }
+	/// * `response.statusMessage = value`  
 	get statusMessage() { return this._emitter.statusMessage; }
 	set statusMessage(val: string) { this._emitter.statusMessage = val; }
 	///   (same as `http.ServerResponse`)
+
+	/// * `locals = response.locals`  
+	///   (same as `express.Reponse`)
+	get locals() { return (this._emitter as any).locals; }
 }
 
 function _fixHttpServerOptions(options?: HttpServerOptions) {
