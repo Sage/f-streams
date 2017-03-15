@@ -134,7 +134,7 @@ export function parser(options?: ParserOptions) {
 			push: (tag: string) => {
 				if (elt.$cdata != null) throw error("cannot mix CDATA and children");
 				if (elt.$value != null) throw error("cannot mix value and children");
-				elt.$childCount++;
+				elt.$childCount = (elt.$childCount || 0) + 1;
 				const emit = mustEmit(elt, tag);
 				const child: Element = {
 					$tag: tag,
@@ -223,7 +223,7 @@ export function parser(options?: ParserOptions) {
 
 		function error(msg: string) {
 			var m = str.substring(pos).match(/[\n\>]/);
-			var end = m ? pos + m.index + 1 : str.length;
+			var end = m ? pos + m.index! + 1 : str.length;
 			const line = str.substring(0, pos).split('\n').length;
 			return new Error("Invalid XML: " + msg + " at line " + line + " near " + str.substring(pos, end));
 		}

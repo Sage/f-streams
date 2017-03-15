@@ -67,7 +67,7 @@ export function reader(proc: ChildProcess, options?: ReaderOptions) {
 	if (opts.errorHandler) stderr = opts.errorHandler(stderr);
 	if (opts.errorPrefix || opts.errorThrow) stderr = stderr.map(function (data) {
 		if (opts.errorThrow) throw new Error((opts.errorPrefix || "") + data);
-		return opts.errorPrefix + data;
+		return opts.errorPrefix! + data;
 	});
 	const rd = stdout.join(stderr);
 	return generic.reader(function read() {

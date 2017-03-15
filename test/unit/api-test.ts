@@ -20,7 +20,7 @@ const arraySink = ez.devices.array.writer;
 function numbers(limit?: number): TestReader {
 	var i = 0;
 	const source: any = generic.reader(function read() {
-		return i >= limit ? undefined : i++;
+		return (limit && i >= limit) ? undefined : i++;
 	}, function stop(this: TestReader, arg: number) {
 		this.stopInfo = {
 			at: i,

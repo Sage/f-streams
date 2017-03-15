@@ -94,7 +94,7 @@ export class Reader<T> {
 	///   Similar to `map` on arrays.  
 	///   The `fn` function is called as `fn(elt, i)`.  
 	///   Returns another reader on which other operations may be chained.
-	map<U>(fn: (value: T, index?: number) => U): Reader<U> {
+	map<U>(fn: (value: T, index: number) => U): Reader<U> {
 		return new Reader(() => {
 			var count = 0;
 			var val = this.read();
@@ -317,7 +317,7 @@ export class Reader<T> {
 	///   Similar to `filter` on arrays.  
 	///   The `fn` function is called as `fn(elt, i)`.  
 	///   Returns another reader on which other operations may be chained.
-	filter(fn: ((value: T, index?: number) => boolean) | {}) {
+	filter(fn: ((value: T, index: number) => boolean) | {}) {
 		const f = resolvePredicate(fn);
 		const parent = this;
 		var i = 0, done = false;
@@ -336,7 +336,7 @@ export class Reader<T> {
 	///   The `fn` function is called as `fn(elt, i)`.  
 	///   `stopArg` is an optional argument which is passed to `stop` when `fn` becomes true.  
 	///   Returns another reader on which other operations may be chained.
-	until(fn: ((value: T, index?: number) => boolean) | {}, stopArg?: any) {
+	until(fn: ((value: T, index: number) => boolean) | {}, stopArg?: any) {
 		const f = resolvePredicate(fn);
 		const parent = this;
 		var i = 0;
@@ -356,7 +356,7 @@ export class Reader<T> {
 	///   The `fn` function is called as `fn(elt, i)`.  
 	///   `stopArg` is an optional argument which is passed to `stop` when `fn` becomes false.  
 	///   Returns another reader on which other operations may be chained.
-	while(fn: ((value: T, index?: number) => boolean) | {}, stopArg?: any) {
+	while(fn: ((value: T, index: number) => boolean) | {}, stopArg?: any) {
 		const f = resolvePredicate(fn);
 		return this.until((val, i) => !f.call(null, val, i), stopArg);
 	}
@@ -410,14 +410,14 @@ export class Reader<T> {
 		if (typeof options === "number") opts = {
 			count: options,
 		};
-		else opts = options;
+		else opts = options || {};
 
 		const parent = this;
 		const streams: Reader<T>[] = [];
 		const fun = funnel<T | undefined>(1);
 		var inside = 0;
 		var stopArg: any;
-		for (var i = 0; i < opts.count; i++) {
+		for (var i = 0; i < (opts.count || 1); i++) {
 			((i: number) => { // i for debugging
 				streams.push(consumer(new Reader(function read() {
 					if (stopArg) {
