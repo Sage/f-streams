@@ -86,3 +86,14 @@ transforms.cut.transform = transformHack;
 var queueHack: any = devices.queue.create;
 (devices as any).queue = queueHack;
 devices.queue.create = queueHack;
+
+export {
+	HttpProxyClientRequest,
+	HttpClientRequest,
+	HttpClientResponse,
+	HttpClientOptions,
+	HttpServer,
+	HttpServerRequest,
+	HttpServerResponse,
+	HttpServerOptions,
+} from './devices/http';
