@@ -33,7 +33,7 @@
   },
   "scripts": {
     "prepublish": "rm -r build; node_modules/typescript/bin/tsc",
-    "test": "node_modules/mocha/bin/mocha build/test/unit"
+    "test": "node_modules/mocha/bin/mocha build/test/unit --timeout 5000"
   },
   "readmeFilename": "README.md",
   "bugs": {
