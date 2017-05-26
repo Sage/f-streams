@@ -629,14 +629,14 @@ export type HttpListener = (request: HttpServerRequest, response: HttpServerResp
 export function httpListener(listener: HttpListener, options: HttpServerOptions) {
 	options = options || {};
 	return (request: http.ServerRequest, response: http.ServerResponse) => {
-		return withContext(() => {
-			run(() => listener(new HttpServerRequest(request, options), new HttpServerResponse(response, options)))
-				.catch(err => {
-					// handlers do not read GET requests - so we remove the listeners, in case
-					if (!/^(post|put)$/i.test(request.method || 'get')) request.removeAllListeners();
-					if (err) throw err;
-				});
-		}, {});
+		return run(() =>
+			withContext(() =>
+				listener(new HttpServerRequest(request, options), new HttpServerResponse(response, options)), {}))
+			.catch(err => {
+				// handlers do not read GET requests - so we remove the listeners, in case
+				if (!/^(post|put)$/i.test(request.method || 'get')) request.removeAllListeners();
+				if (err) throw err;
+			});
 	};
 };
 
@@ -1080,14 +1080,13 @@ export class SocketServer extends Server<net.Server> {
 			connectionListener = serverOptions;
 			serverOptions = {};
 		}
-		var emitter = net.createServer(serverOptions, (connection) => {
-			withContext(() => {
-				run(() => connectionListener(new SocketStream(connection, streamOptions || {})))
-					.catch(err => {
-						if (err) throw err;
-					});
-			}, {});
-		});
+		var emitter = net.createServer(serverOptions, connection =>
+			run(() =>
+				withContext(() =>
+					connectionListener(new SocketStream(connection, streamOptions || {})), {}))
+				.catch(err => {
+					if (err) throw err;
+				}));
 		super(emitter);
 	}
 }
