@@ -246,7 +246,7 @@ function endianReader(verbs: string[], suffix: string) {
 			super(reader, options);
 		}
 	}
-	NUMBERS.slice(1).forEach(function (pair) {
+	NUMBERS.slice(2).forEach(function (pair) {
 		verbs.forEach(function (verb) {
 			(EndianReader.prototype as any)[verb + pair[0]] = (Reader.prototype as any)[verb + pair[0] + suffix];
 		});
@@ -260,7 +260,7 @@ function endianWriter(verbs: string[], suffix: string) {
 			super(writer, options);
 		}
 	}
-	NUMBERS.slice(1).forEach(function (pair) {
+	NUMBERS.slice(2).forEach(function (pair) {
 		verbs.forEach(function (verb) {
 			(EndianWriter.prototype as any)[verb + pair[0]] = (Writer.prototype as any)[verb + pair[0] + suffix];
 		});
@@ -282,6 +282,9 @@ export interface BinaryReader extends Reader {
 	readInt8(): number;
 	peekInt8(): number;
 	unreadInt8(): void;
+	readUInt8(): number;
+	peekUInt8(): number;
+	unreadUInt8(): void;
 	readInt16(): number;
 	peekInt16(): number;
 	unreadInt16(): void;
@@ -304,6 +307,7 @@ export interface BinaryReader extends Reader {
 
 export interface BinaryWriter extends Writer {
 	writeInt8(val: number): void;
+	writeUInt8(val: number): void;
 	writeInt16(val: number): void;
 	writeUInt16(val: number): void;
 	writeInt32(val: number): void;

@@ -22,6 +22,7 @@ describe(module.id, () => {
             });
             writer.write(TESTBUF);
             writer.writeInt8(1);
+            writer.writeUInt8(254);
             writer.writeInt16(2);
             writer.writeInt32(3);
             writer.writeFloat(0.5);
@@ -37,6 +38,7 @@ describe(module.id, () => {
             eqbuf(reader.peek(5), TESTBUF.slice(4, 9), 'unread 3 then peek 5');
             eqbuf(reader.read(6), TESTBUF.slice(4), 'read 6');
             equal(reader.readInt8(), 1, 'int8 roundtrip');
+            equal(reader.readUInt8(), 254, 'uint8 roundtrip');
             equal(reader.peekInt16(), 2, 'int16 roundtrip (peek)');
             equal(reader.readInt16(), 2, 'int16 roundtrip');
             equal(reader.readInt32(), 3, 'int32 roundtrip');
