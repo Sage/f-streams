@@ -1,17 +1,16 @@
-"use strict";
 /// !doc
 /// ## Stream transform for MIME multipart
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { Reader } from "../reader";
-import { Writer } from "../writer";
-import * as binary from '../helpers/binary';
+import { handshake, wait } from 'f-promise';
 import * as generic from '../devices/generic';
-import { wait, handshake } from 'f-promise';
+import * as binary from '../helpers/binary';
+import { Reader } from '../reader';
+import { Writer } from '../writer';
 
 function parseContentType(contentType?: string) {
-	if (!contentType) throw new Error("content-type missing");
+	if (!contentType) throw new Error('content-type missing');
 	const match = /^multipart\/([\w\-]*)/.exec(contentType);
 	if (!match) return null;
 	const subType = match[1];
@@ -23,7 +22,7 @@ function parseContentType(contentType?: string) {
 	return {
 		subType: subType,
 		boundary: atbs.boundary,
-	}
+	};
 }
 
 /// * `transform = ez.transforms.multipart.parser(options)`  
@@ -32,24 +31,24 @@ function parseContentType(contentType?: string) {
 ///   is passed via `options['content-type']`.
 export type ParserOptions = {
 	[name: string]: string;
-}
+};
 
 export function parser(options: ParserOptions) {
-	const ct = parseContentType(options && options["content-type"]);
+	const ct = parseContentType(options && options['content-type']);
 	const boundary = ct && ct.boundary;
-	if (!boundary) throw new Error("multipart boundary missing");
+	if (!boundary) throw new Error('multipart boundary missing');
 
 	return (reader: Reader<Buffer>, writer: Writer<any>) => {
 		const binReader = binary.reader(reader);
 		const hk = handshake();
 		while (true) {
-			var buf = binReader.readData(2048);
+			const buf = binReader.readData(2048);
 			if (!buf || !buf.length) return;
-			var str = buf.toString("binary");
-			var i = str.indexOf(boundary);
-			if (i < 0) throw new Error("boundary not found");
-			var lines = str.substring(0, i).split(/\r?\n/);
-			var headers = lines.slice(0, lines.length - 2).reduce((h: any, l: string) => {
+			const str = buf.toString('binary');
+			let i = str.indexOf(boundary);
+			if (i < 0) throw new Error('boundary not found');
+			const lines = str.substring(0, i).split(/\r?\n/);
+			const headers = lines.slice(0, lines.length - 2).reduce((h: any, l: string) => {
 				const kv = l.split(/\s*:\s*/);
 				h[kv[0].toLowerCase()] = kv[1];
 				return h;
@@ -57,31 +56,31 @@ export function parser(options: ParserOptions) {
 			i = str.indexOf('\n', i);
 			binReader.unread(buf.length - i - 1);
 
-			var read = () => {
+			const read = () => {
 				const len = Math.max(boundary.length, 256);
-				const buf = binReader.readData(32 * len);
-				if (!buf || !buf.length) {
+				const bbuf = binReader.readData(32 * len);
+				if (!bbuf || !bbuf.length) {
 					hk.notify();
 					return;
 				}
 				// would be nice if Buffer had an indexOf. Would avoid a conversion to string.
 				// I could use node-buffertools but it introduces a dependency on a binary module.
-				const s = buf.toString("binary");
-				const i = s.indexOf(boundary);
-				if (i === 0) {
+				const s = bbuf.toString('binary');
+				const ii = s.indexOf(boundary);
+				if (ii === 0) {
 					const j = s.indexOf('\n', boundary.length);
-					if (j < 0) throw new Error("newline missing after boundary");
-					binReader.unread(buf.length - j - 1);
+					if (j < 0) throw new Error('newline missing after boundary');
+					binReader.unread(bbuf.length - j - 1);
 					hk.notify();
 					return undefined;
-				} else if (i > 0) {
-					var j = s.lastIndexOf('\n', i);
+				} else if (ii > 0) {
+					let j = s.lastIndexOf('\n', ii);
 					if (s[j - 1] === '\r') j--;
-					binReader.unread(buf.length - i);
-					return buf.slice(0, j);
+					binReader.unread(bbuf.length - ii);
+					return bbuf.slice(0, j);
 				} else {
-					binReader.unread(buf.length - 31 * len);
-					return buf.slice(0, 31 * len);
+					binReader.unread(bbuf.length - 31 * len);
+					return bbuf.slice(0, 31 * len);
 				}
 			};
 			const partReader = generic.reader(read);
@@ -101,24 +100,24 @@ export interface FormatterOptions {
 }
 
 export function formatter(options?: FormatterOptions) {
-	const ct = parseContentType(options && options["content-type"]);
+	const ct = parseContentType(options && options['content-type']);
 	const boundary = ct && ct.boundary;
-	if (!boundary) throw new Error("multipart boundary missing");
+	if (!boundary) throw new Error('multipart boundary missing');
 
 	return (reader: Reader<Reader<string>>, writer: Writer<Buffer>) => {
-		var part: Reader<any> | undefined;
+		let part: Reader<any> | undefined;
 		while ((part = reader.read()) !== undefined) {
-			var headers = part.headers;
-			if (!headers) throw new Error("part does not have headers");
+			const headers = part.headers;
+			if (!headers) throw new Error('part does not have headers');
 			Object.keys(part.headers).forEach(key => {
-				writer.write(new Buffer(key + ": " + headers[key] + "\n", "binary"));
+				writer.write(new Buffer(key + ': ' + headers[key] + '\n', 'binary'));
 			});
-			writer.write(new Buffer("\n" + boundary + "\n"));
+			writer.write(new Buffer('\n' + boundary + '\n'));
 			// cannot use pipe because pipe writes undefined at end.
-			part.forEach((data) => {
+			part.forEach(data => {
 				writer.write(data);
 			});
-			writer.write(new Buffer("\n" + boundary + "\n"));
+			writer.write(new Buffer('\n' + boundary + '\n'));
 		}
-	}
+	};
 }

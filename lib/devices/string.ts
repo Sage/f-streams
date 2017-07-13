@@ -1,6 +1,6 @@
 import { Reader } from '../reader';
-import { Writer } from '../writer';
 import { nextTick } from '../util';
+import { Writer } from '../writer';
 
 /// !doc
 /// ## In-memory string streams
@@ -31,7 +31,6 @@ export class StringWriter extends Writer<string> {
 	}
 }
 
-
 /// * `reader = ez.devices.string.reader(text, options)`  
 ///   creates an EZ reader that reads its chunks from `text`.  
 ///   `reader.read()` will return the chunks asynchronously by default.  
@@ -39,19 +38,19 @@ export class StringWriter extends Writer<string> {
 ///   The default chunk size is 1024. You can override it by passing 
 ///   a `chunkSize` option.
 export function reader(text: string, options?: Options | number) {
-	var opts: Options;
-	if (typeof options === "number") {
+	let opts: Options;
+	if (typeof options === 'number') {
 		opts = {
-			chunkSize: options
+			chunkSize: options,
 		};
 	}
 	else opts = options || {};
 	const chunkSize = opts.chunkSize || 1024;
-	var pos = 0;
+	let pos = 0;
 	return new Reader(function read() {
 		if (!opts.sync) nextTick();
 		if (pos >= text.length) return;
-		const len = typeof chunkSize === "function" ? chunkSize() : chunkSize;
+		const len = typeof chunkSize === 'function' ? chunkSize() : chunkSize;
 		const s = text.substring(pos, pos + len);
 		pos += len;
 		return s;

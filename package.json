@@ -1,7 +1,7 @@
 {
   "name": "f-streams",
   "description": "node.js streams with promises and coroutines",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "license": "MIT",
   "author": {
     "name": "Bruno Jouhier",
@@ -29,11 +29,12 @@
     "chai": "^3.5.0",
     "f-mocha": "^1.0.1",
     "mocha": "^3.2.0",
-    "typescript": "^2.0.10"
+    "typescript": "2.3.4"
   },
   "scripts": {
     "prepublish": "rm -r build; node_modules/typescript/bin/tsc",
-    "test": "node_modules/mocha/bin/mocha build/test/unit --timeout 5000"
+    "test": "node_modules/mocha/bin/mocha build/test/unit --timeout 5000",
+    "lint": "tslint -e 'node_modules/**' {lib,test}/**/*.ts"
   },
   "readmeFilename": "README.md",
   "bugs": {

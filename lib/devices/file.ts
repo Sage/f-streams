@@ -1,9 +1,9 @@
+import { wait } from 'f-promise';
 import * as fs from 'mz/fs';
-import * as node from './node';
-import * as generic from './generic';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
-import { wait } from 'f-promise';
+import * as generic from './generic';
+import * as node from './node';
 
 /// !doc
 /// ## File based EZ streams
@@ -16,7 +16,7 @@ export const text = {
 	///   `encoding` is optional. It defaults to `'utf8'`.  
 	reader(path: string, encoding?: string): Reader<string> {
 		return node.reader(fs.createReadStream(path, {
-			encoding: encoding || 'utf8'
+			encoding: encoding || 'utf8',
 		}));
 	},
 	/// * `writer = ez.devices.file.text.writer(path, encoding)`  
@@ -24,10 +24,10 @@ export const text = {
 	///   `encoding` is optional. It defaults to `'utf8'`.  
 	writer(path: string, encoding?: string): Writer<string> {
 		return node.writer(fs.createWriteStream(path, {
-			encoding: encoding || 'utf8'
+			encoding: encoding || 'utf8',
 		}));
-	}
-}
+	},
+};
 
 export const binary = {
 	/// * `reader = ez.devices.file.binary.reader(path)`  
@@ -39,8 +39,8 @@ export const binary = {
 	///   creates an EZ writer that writes to a binary file.    
 	writer(path: string): Writer<Buffer> {
 		return node.writer(fs.createWriteStream(path));
-	}
-}
+	},
+};
 
 /// * `reader = ez.devices.file.list(path, options)`  
 ///   `reader = ez.devices.file.list(path, recurse, accept)`  
@@ -65,7 +65,7 @@ export interface ListEntry {
 }
 
 export function list(path: string, options?: ListOptions) {
-	var recurse: boolean | 'preorder' | 'postorder', accept: ((entry: ListEntry) => boolean) | undefined;
+	let recurse: boolean | 'preorder' | 'postorder', accept: ((entry: ListEntry) => boolean) | undefined;
 	if (options && typeof options === 'object') {
 		recurse = options.recurse || false;
 		accept = options.accept;
@@ -85,9 +85,11 @@ export function list(path: string, options?: ListOptions) {
 			};
 			if (accept && !accept(entry)) return;
 			if ((recurse || depth === 1) && !postorder) writer.write(entry);
-			if ((recurse || depth === 0) && stat.isDirectory()) wait(fs.readdir(p)).forEach(pp => {
-				process(p + '/' + pp, pp, depth + 1);
-			});
+			if ((recurse || depth === 0) && stat.isDirectory()) {
+				wait(fs.readdir(p)).forEach(pp => {
+					process(p + '/' + pp, pp, depth + 1);
+				});
+			}
 			if ((recurse || depth === 1) && postorder) writer.write(entry);
 		}
 		process(path, path.substring(path.lastIndexOf('/') + 1), 0);

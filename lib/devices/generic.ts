@@ -1,4 +1,3 @@
-"use strict";
 import { Reader } from '../reader';
 import { Writer } from '../writer';
 

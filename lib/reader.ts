@@ -27,12 +27,12 @@
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { convert as predicate } from "./predicate";
-import { Writer } from './writer';
+import { funnel, run, wait } from 'f-promise';
+import * as nodeStream from 'stream';
+import { convert as predicate } from './predicate';
 import * as stopException from './stop-exception';
-import * as nodeStream from "stream";
 import { nextTick } from './util';
-import { run, wait, funnel } from 'f-promise';
+import { Writer } from './writer';
 
 function tryCatch<R>(that: any, fn: () => R) {
 	try {
@@ -69,7 +69,7 @@ export class Reader<T> {
 	stopped: boolean;
 	headers: { [name: string]: string }; // experimental
 	constructor(read: () => T | undefined, stop?: (arg: any) => void, parent?: Stoppable) {
-		if (typeof read !== 'function') throw new Error("invalid reader.read: " + (read && typeof read));
+		if (typeof read !== 'function') throw new Error('invalid reader.read: ' + (read && typeof read));
 		this.parent = parent;
 		this.read = read;
 		this.stopped = false;
@@ -82,7 +82,7 @@ export class Reader<T> {
 	///   This call is asynchonous. It returns the number of entries processed when the end of stream is reached.
 	forEach(fn: (value: T, index: number) => void) {
 		return tryCatch(this, () => {
-			var i: number, val: any;
+			let i: number, val: any;
 			for (i = 0; (val = this.read()) !== undefined; i++) {
 				fn.call(null, val, i);
 			}
@@ -96,8 +96,8 @@ export class Reader<T> {
 	///   Returns another reader on which other operations may be chained.
 	map<U>(fn: (value: T, index: number) => U): Reader<U> {
 		return new Reader(() => {
-			var count = 0;
-			var val = this.read();
+			let count = 0;
+			const val = this.read();
 			if (val === undefined) return undefined;
 			return fn.call(null, val, count++);
 		}, undefined, this);
@@ -112,12 +112,12 @@ export class Reader<T> {
 		const f = resolvePredicate(fn);
 		return tryCatch(this, () => {
 			while (true) {
-				var val = this.read();
+				const val = this.read();
 				if (val === undefined) return true;
 				if (!f.call(null, val)) {
 					this.stop();
 					return false;
-				};
+				}
 			}
 		});
 	}
@@ -131,7 +131,7 @@ export class Reader<T> {
 		const f = resolvePredicate(fn);
 		return tryCatch(this, () => {
 			while (true) {
-				var val = this.read();
+				const val = this.read();
 				if (val === undefined) return false;
 				if (f.call(null, val)) {
 					this.stop();
@@ -149,7 +149,7 @@ export class Reader<T> {
 	reduce<U>(fn: (prev: U, value: T) => U, v: U): U {
 		return tryCatch(this, () => {
 			while (true) {
-				var val = this.read();
+				const val = this.read();
 				if (val === undefined) return v;
 				v = fn.call(null, v, val);
 			}
@@ -164,12 +164,13 @@ export class Reader<T> {
 	// so I relax the return type.
 	pipe(writer: Writer<T>): any {
 		tryCatch(this, () => {
+			let val: T | undefined;
 			do {
-				var val = this.read();
+				val = this.read();
 				try {
 					writer.write(val);
 				} catch (ex) {
-					var arg = stopException.unwrap(ex);
+					const arg = stopException.unwrap(ex);
 					if (arg && arg !== true) {
 						this.stop(arg);
 						throw arg;
@@ -189,14 +190,14 @@ export class Reader<T> {
 	///   Returns another reader on which other operations may be chained.
 	tee(writer: Writer<T>) {
 		const parent = this;
-		var writeStop: [any];
-		var readStop: [any];
-		const stopResult: (arg: any) => T | undefined = (arg) => {
+		let writeStop: [any];
+		let readStop: [any];
+		const stopResult: (arg: any) => T | undefined = arg => {
 			if (!arg || arg === true) return undefined;
 			else throw arg;
-		}
+		};
 		const readDirect = () => {
-			var val = parent.read();
+			let val = parent.read();
 			if (!writeStop) {
 				try {
 					writer.write(val);
@@ -219,7 +220,7 @@ export class Reader<T> {
 				}
 			}
 			return val;
-		}
+		};
 
 		return new Reader(function read() {
 			if (readStop) return stopResult(readStop[0]);
@@ -259,9 +260,9 @@ export class Reader<T> {
 	///   Works like array.concat: you can pass the readers as separate arguments, or pass an array of readers.  
 	concat(...readers: (Reader<T> | Reader<T>[])[]) {
 		const streams: Reader<T>[] = Array.prototype.concat.apply([], arguments);
-		var stream: Reader<T> | undefined = this;
+		let stream: Reader<T> | undefined = this;
 		return new Reader(function read() {
-			var val: T | undefined;
+			let val: T | undefined;
 			while (stream && (val = stream.read()) === undefined) stream = streams.shift();
 			return val;
 		}, function stop(arg) {
@@ -309,7 +310,7 @@ export class Reader<T> {
 			// stop parent at end
 			run(() => parent.stop()).then(() => uturn.end(err), e => uturn.end(err || e));
 		}
-		run(() => fn.call(null, parent, uturn.writer)).then(() => afterTransform(), err => afterTransform(err));
+		run(() => fn.call(null, parent, uturn.writer)).then(afterTransform, afterTransform);
 		return uturn.reader;
 	}
 
@@ -320,10 +321,10 @@ export class Reader<T> {
 	filter(fn: ((value: T, index: number) => boolean) | {}) {
 		const f = resolvePredicate(fn);
 		const parent = this;
-		var i = 0, done = false;
+		let i = 0, done = false;
 		return new Reader(function () {
 			while (!done) {
-				var val = parent.read();
+				const val = parent.read();
 				done = val === undefined;
 				if (done || f.call(null, val, i++)) return val;
 			}
@@ -339,9 +340,9 @@ export class Reader<T> {
 	until(fn: ((value: T, index: number) => boolean) | {}, stopArg?: any) {
 		const f = resolvePredicate(fn);
 		const parent = this;
-		var i = 0;
+		let i = 0;
 		return new Reader(function () {
-			var val = parent.read();
+			const val = parent.read();
 			if (val === undefined) return undefined;
 			if (!f.call(null, val, i++)) return val;
 			parent.stop(stopArg);
@@ -388,16 +389,16 @@ export class Reader<T> {
 		if (consumers.length === 1) {
 			readers.push(consumers[0](parent));
 		} else {
-			var source = parent;
-			for (var i = 0; i < consumers.length - 1; i++) {
-				var dup = source.dup()
+			let source = parent;
+			for (let i = 0; i < consumers.length - 1; i++) {
+				const dup = source.dup();
 				readers.push(consumers[i](dup[0]));
 				source = dup[1];
 			}
 			readers.push(consumers[consumers.length - 1](source));
 		}
 		return new StreamGroup(readers);
-	};
+	}
 
 	/// * `group = reader.parallel(count, consumer)`  
 	///   Parallelizes by distributing the values to a set of  `count` identical consumers.  
@@ -406,27 +407,25 @@ export class Reader<T> {
 	///   Returns a `StreamGroup` on which other operations can be chained.  
 	///   Note: transformed entries may be delivered out of order.
 	parallel(options: ParallelOptions | number, consumer: (source: any) => Reader<T>) {
-		var opts: ParallelOptions;
-		if (typeof options === "number") opts = {
-			count: options,
-		};
+		let opts: ParallelOptions;
+		if (typeof options === 'number') opts = { count: options };
 		else opts = options || {};
 
 		const parent = this;
 		const streams: Reader<T>[] = [];
 		const fun = funnel<T | undefined>(1);
-		var inside = 0;
-		var stopArg: any;
-		for (var i = 0; i < (opts.count || 1); i++) {
-			((i: number) => { // i for debugging
+		let inside = 0;
+		let stopArg: any;
+		for (let i = 0; i < (opts.count || 1); i++) {
+			((ii: number) => { // i for debugging
 				streams.push(consumer(new Reader(function read() {
 					if (stopArg) {
 						if (stopArg === true) return undefined;
 						else throw stopArg;
 					}
 					return fun(() => {
-						if (inside++ !== 0) throw new Error("funnel error: " + inside);
-						var val = parent.read();
+						if (inside++ !== 0) throw new Error('funnel error: ' + inside);
+						const val = parent.read();
 						inside--;
 						return val;
 					});
@@ -456,9 +455,9 @@ export class Reader<T> {
 	buffer(max: number) {
 		const parent = this;
 		const buffered: (T | undefined)[] = [];
-		var resume: ((err: any, val?: T) => void) | undefined;
-		var err: any;
-		var pending = false;
+		let resume: ((err: any, val?: T) => void) | undefined;
+		let err: any;
+		let pending = false;
 
 		const fill = () => {
 			if (pending) return;
@@ -469,26 +468,26 @@ export class Reader<T> {
 				else buffered.push(v);
 
 				if (resume) {
-					var cb = resume;
+					const cb = resume;
 					resume = undefined;
 					if (buffered.length > 0) {
 						v = buffered.shift();
 						setImmediate(fill);
 						cb(null, v);
 					} else {
-						cb(err)
+						cb(err);
 					}
 				} else if (buffered.length < max) {
 					if (!err && v !== undefined) setTimeout(fill, 2);
 				}
 			};
-			run(() => parent.read()).then(v => afterRead(null, v), err => afterRead(err));
-		}
+			run(() => parent.read()).then(v => afterRead(null, v), afterRead);
+		};
 		fill();
 
 		return new Reader(() => wait(cb => {
 			if (buffered.length > 0) {
-				var val = buffered.shift();
+				const val = buffered.shift();
 				fill();
 				cb(null, val);
 			} else {
@@ -507,13 +506,13 @@ export class Reader<T> {
 	///   converts the reader into a native node Readable stream.  
 	nodify() {
 		const stream = new (require('stream').Readable)();
-		var pending = false;
+		let pending = false;
 		const end = () => {
 			stream.push(null);
-		}
+		};
 		const more = () => {
 			if (pending) return;
-			var sync = true;
+			let sync = true;
 			pending = true;
 			run(() => this.read()).then(result => {
 				pending = false;
@@ -535,9 +534,9 @@ export class Reader<T> {
 			}, err => {
 				pending = false;
 				stream.emit('error', err);
-			})
+			});
 			sync = false;
-		}
+		};
 		stream._read = () => {
 			more();
 		};
@@ -554,19 +553,19 @@ export class Reader<T> {
 	///   compares reader1 and reader2 return 0 if equal,  
 	compare(other: Reader<T>, options?: CompareOptions<T>) {
 		const opts = options || {};
-		var compare = opts.compare;
+		let compare = opts.compare;
 		if (!compare) compare = (a, b) => a === b ? 0 : a < b ? -1 : +1;
-		var cmp = 0;
+		let cmp = 0;
 		while (true) {
-			var data1 = this.read();
-			var data2 = other.read();
+			const data1 = this.read();
+			const data2 = other.read();
 			if (data1 === undefined) return data2 === undefined ? 0 : -1;
 			if (data2 === undefined) return +1;
 			// for now, only strings
 			cmp = compare(data1, data2);
 			if (cmp !== 0) return cmp;
 		}
-	};
+	}
 
 	/// * `reader.stop(arg)`  
 	///   Informs the source that the consumer(s) has(ve) stopped reading.  
@@ -583,9 +582,8 @@ export class Reader<T> {
 		this.stopped = true;
 		if (this._stop) this._stop(arg);
 		else if (this.parent) this.parent.stop(arg);
-	};
+	}
 }
-
 
 export class PeekableReader<T> extends Reader<T> {
 	buffered: (T | undefined)[];
@@ -601,7 +599,7 @@ export class PeekableReader<T> extends Reader<T> {
 		return this; // for chaining
 	}
 	peek() {
-		var val = this.read();
+		const val = this.read();
 		this.unread(val);
 		return val;
 	}
@@ -619,7 +617,7 @@ exports.decorate = function (proto: any) {
 		if (k !== 'constructor' && !proto[k]) proto[k] = readerProto[k];
 	});
 	return proto;
-}
+};
 
 export function create<T>(read: () => T, stop?: (arg: any) => void) {
 	return new Reader(read, stop, undefined);
@@ -649,8 +647,8 @@ export class StreamGroup<T> implements Stoppable {
 			next: () => void;
 		}
 		const results: Result[] = [];
-		var alive = this.readers.length;
-		var resume: ((err: any, val?: T) => void) | undefined;
+		let alive = this.readers.length;
+		let resume: ((err: any, val?: T) => void) | undefined;
 		this.readers.forEach((stream, i) => {
 			if (!stream) return;
 			const next = () => {
@@ -659,7 +657,7 @@ export class StreamGroup<T> implements Stoppable {
 					if (!e && v === undefined) alive--;
 					if (e || v !== undefined || alive === 0) {
 						if (resume) {
-							var cb = resume;
+							const cb = resume;
 							resume = undefined;
 							cb(e, v);
 							next();
@@ -673,7 +671,7 @@ export class StreamGroup<T> implements Stoppable {
 						}
 					}
 				};
-				run(() => stream.read()).then(v => afterRead(null, v), e => afterRead(e));
+				run(() => stream.read()).then(v => afterRead(null, v), afterRead);
 			};
 			next();
 		});
@@ -704,9 +702,9 @@ export class StreamGroup<T> implements Stoppable {
 		});
 		const q = this.readers.map(entry);
 		return new Reader(function () {
-			var elt: Entry | undefined;
+			let elt: Entry | undefined;
 			while (elt = q.shift()) {
-				var val = wait(elt.read());
+				const val = wait(elt.read());
 				if (val !== undefined) {
 					q.push(entry(elt.stream, elt.i));
 					return val;
@@ -725,25 +723,27 @@ export class StreamGroup<T> implements Stoppable {
 	///   Note that the length of the `values` array will decrease every time an input stream is exhausted.
 	///   Returns a stream on which other operations may be chained.
 	join(fn: (values: (T | undefined)[]) => T | undefined) {
-		var last = 0; // index of last value read by default fn 
-		if (!fn) fn = ((values) => {
-			var i = last;
-			do {
-				i = (i + 1) % values.length;
-				var v = values[i];
-				if (v !== undefined) {
-					values[i] = undefined;
-					last = i;
-					return v;
-				}
-			} while (i !== last);
-			return undefined;
-		});
+		let last = 0; // index of last value read by default fn 
+		if (!fn) {
+			fn = (vals => {
+				let i = last;
+				do {
+					i = (i + 1) % vals.length;
+					const v = vals[i];
+					if (v !== undefined) {
+						vals[i] = undefined;
+						last = i;
+						return v;
+					}
+				} while (i !== last);
+				return undefined;
+			});
+		}
 
 		const values: (T | undefined)[] = [];
-		var active = this.readers.length;
-		var done = false;
-		var reply: ((err?: any, val?: T) => void) | undefined;
+		let active = this.readers.length;
+		let done = false;
+		let reply: ((err?: any, val?: T) => void) | undefined;
 		const callbacks = this.readers.map((reader, i) => ((err: any, data?: T | undefined) => {
 			if (active === 0) return reply && reply();
 			if (err) {
@@ -757,29 +757,28 @@ export class StreamGroup<T> implements Stoppable {
 			}
 			const vals = values.filter(val => val !== undefined);
 			if (vals.length === active) {
-				var val: T;
 				run(() => fn.call(null, values)).then(val => {
 					// be careful with re-entrancy
 					const rep = reply;
 					reply = undefined;
 					if (rep) rep(null, val);
-				}, err => {
+				}, e => {
 					done = true;
-					reply && reply(err);
+					reply && reply(e);
 				});
 			}
 		}));
 
 		const refill = () => {
-			var count = 0;
+			let count = 0;
 			this.readers.forEach((rd, j) => {
 				if (rd && values[j] === undefined) {
 					count++;
 					run(() => rd.read()).then(v => callbacks[j](null, v), e => callbacks[j](e));
 				}
 			});
-			if (count === 0) throw new Error("bad joiner: must pick and reset at least one value");
-		}
+			if (count === 0) throw new Error('bad joiner: must pick and reset at least one value');
+		};
 		return new Reader(() => wait(cb => {
 			if (done) {
 				cb(undefined);

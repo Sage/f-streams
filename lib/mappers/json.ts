@@ -1,4 +1,3 @@
-"use strict";
 /// !doc
 /// ## JSON mappers
 /// 
@@ -18,14 +17,14 @@ export function parse(options?: ParseOptions) {
 	const opts = options || {};
 	const sep = opts.sep == null ? ',' : opts.sep;
 	return (data: string | Buffer) => {
-		var str: string;
+		let str: string;
 		if (Buffer.isBuffer(data)) str = data.toString(opts.encoding || 'utf8');
 		else str = data;
 		if (str === '') return;
 		// remove trailing separator, if any
 		if (sep && str.substring(str.length - sep.length) === sep) str = str.substring(0, str.length - sep.length);
 		return JSON.parse(str);
-	}
+	};
 }
 /// * `mapper = ez.mappers.json.stringify()`  
 ///   returns a mapper that converts objects to JSON.
@@ -42,5 +41,5 @@ export function stringify(options?: FormatterOptions) {
 	const sep = opts.sep == null ? ',\n' : opts.sep;
 	return (data: any) => {
 		return JSON.stringify(data, opts.replacer, opts.space) + sep;
-	}
+	};
 }

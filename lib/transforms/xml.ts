@@ -1,5 +1,3 @@
-"use strict";
-
 /// !doc
 /// 
 /// # Simple XML parser and formatter
@@ -33,8 +31,8 @@
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { Reader } from "../reader";
-import { Writer } from "../writer";
+import { Reader } from '../reader';
+import { Writer } from '../writer';
 
 const begWord: any = {},
 	inWord: any = {},
@@ -59,16 +57,16 @@ const begWord: any = {},
 	entitiesByName: { [name: string]: string } = {};
 
 (() => {
-	function add(clas: any, chs: string, i?: number) {
-		chs.split('').forEach((ch) => {
-			clas[ch.charCodeAt(0) + (i || 0)] = true;
+	function add(clas: any, chs: string, n?: number) {
+		chs.split('').forEach(ch => {
+			clas[ch.charCodeAt(0) + (n || 0)] = true;
 		});
 	}
-	for (var i = 0; i <= 9; i++) add(inWord, '0', i);
-	for (var i = 0; i < 26; i++) add(begWord, 'aA', i), add(inWord, 'aA', i);
+	for (let i = 0; i <= 9; i++) add(inWord, '0', i);
+	for (let i = 0; i < 26; i++) add(begWord, 'aA', i), add(inWord, 'aA', i);
 	add(begWord, ':_'), add(inWord, ':_-.');
 	add(space, ' \t\r\n');
-	Object.keys(entitiesByChar).forEach((ch) => {
+	Object.keys(entitiesByChar).forEach(ch => {
 		entitiesByName[entitiesByChar[ch]] = ch;
 	});
 })();
@@ -101,21 +99,21 @@ interface Element {
 
 export function parser(options?: ParserOptions) {
 	const opts = options || {};
-	const ttags: any = typeof opts === "string" ? opts : opts.tags;
-	const tags = typeof ttags === "string" ? ttags.split('/') : ttags;
-	if (!tags) throw new Error("cannot transform XML: 'tags' option missing")
+	const ttags: any = typeof opts === 'string' ? opts : opts.tags;
+	const tags = typeof ttags === 'string' ? ttags.split('/') : ttags;
+	if (!tags) throw new Error("cannot transform XML: 'tags' option missing");
 
 	function builder(error: (message: string) => Error) {
 		const root: Element = {
-			$childCount: 0
+			$childCount: 0,
 		};
-		var elt = root;
+		let elt = root;
 
 		function mustEmit(parent: Element, tag: string) {
 			if (tag !== tags[tags.length - 1]) return false;
 			// TS bugfix: for (var i = tags.length - 2; tag >= 0; tag--) {
-			var p: Element | undefined = parent;
-			for (var i = tags.length - 2; i >= 0; i--) {
+			let p: Element | undefined = parent;
+			for (let i = tags.length - 2; i >= 0; i--) {
 				if (!p || p.$tag !== tags[i]) return false;
 				p = p.$parent;
 			}
@@ -132,8 +130,8 @@ export function parser(options?: ParserOptions) {
 
 		return {
 			push: (tag: string) => {
-				if (elt.$cdata != null) throw error("cannot mix CDATA and children");
-				if (elt.$value != null) throw error("cannot mix value and children");
+				if (elt.$cdata != null) throw error('cannot mix CDATA and children');
+				if (elt.$value != null) throw error('cannot mix value and children');
 				elt.$childCount = (elt.$childCount || 0) + 1;
 				const emit = mustEmit(elt, tag);
 				const child: Element = {
@@ -152,10 +150,10 @@ export function parser(options?: ParserOptions) {
 				elt = child;
 			},
 			pop: (writer: Writer<any>, tag?: string) => {
-				if (tag && tag !== elt.$tag) throw error("closing tag mismatch: expected " + elt.$tag + ", got " + tag);
+				if (tag && tag !== elt.$tag) throw error('closing tag mismatch: expected ' + elt.$tag + ', got ' + tag);
 				const parent = elt.$parent;
 				const emit = elt.$emit;
-				if (!parent) throw error("too many closing tags");
+				if (!parent) throw error('too many closing tags');
 				delete elt.$parent;
 				// if elt does not have attributes, replace it by value in parent
 				if (elt.$value !== undefined && !elt.$) {
@@ -172,34 +170,34 @@ export function parser(options?: ParserOptions) {
 			},
 			attribute: (atb: string, val: any) => {
 				elt.$ = elt.$ || {};
-				if (elt.$[atb] != null) throw error("duplicate attribute: " + atb);
+				if (elt.$[atb] != null) throw error('duplicate attribute: ' + atb);
 				elt.$[atb] = val;
 			},
 			value: (val: any) => {
-				if (elt.$cdata != null) throw error("cannot mix CDATA and value");
-				if (elt.$childCount) throw error("cannot mix children and value");
+				if (elt.$cdata != null) throw error('cannot mix CDATA and value');
+				if (elt.$childCount) throw error('cannot mix children and value');
 				elt.$value = val;
 			},
 			cdata: (val: any) => {
-				if (elt.$value != null) throw error("cannot mix value and CDATA");
-				if (elt.$childCount) throw error("cannot mix children and CDATA");
+				if (elt.$value != null) throw error('cannot mix value and CDATA');
+				if (elt.$childCount) throw error('cannot mix children and CDATA');
 				elt.$cdata = val;
 			},
 			getResult: () => {
-				if (elt !== root) throw error("tag not closed: " + elt.$tag);
-				if (!root.$childCount) throw error("root tag not found");
-				if (root.$childCount !== 1) throw error("too many elements at top level");
+				if (elt !== root) throw error('tag not closed: ' + elt.$tag);
+				if (!root.$childCount) throw error('root tag not found');
+				if (root.$childCount !== 1) throw error('too many elements at top level');
 				delete root.$childCount;
 				return root;
 			},
 		};
 	}
 	return (reader: Reader<string | Buffer>, writer: Writer<any>) => {
-		var data = reader.read();
+		const data = reader.read();
 		if (data === undefined) return;
-		var str = Buffer.isBuffer(data) ? data.toString(opts.encoding || 'utf8') : data;
-		var pos = 0,
-			bld = builder(error);
+		let str = Buffer.isBuffer(data) ? data.toString(opts.encoding || 'utf8') : data;
+		let pos = 0;
+		const bld = builder(error);
 
 		function forget() {
 			str = str.substring(pos);
@@ -208,59 +206,61 @@ export function parser(options?: ParserOptions) {
 
 		function fill(pat: string) {
 			while (true) {
-				var i = str.indexOf(pat, pos);
+				const i = str.indexOf(pat, pos);
 				// read at least 3 chars further to detect <!--
 				if (i >= 0 && i < str.length - 3) return i;
-				var rd = reader.read();
+				const rd = reader.read();
 				if (rd === undefined) return i;
 				str += rd;
 			}
 		}
 
 		pos = fill('<');
-		if (pos < 0) throw new Error("invalid XML: starting < not found");
-		if (!/^\s*$/.test(str.substring(0, pos))) throw new Error("invalid XML: does not start with <");
+		if (pos < 0) throw new Error('invalid XML: starting < not found');
+		if (!/^\s*$/.test(str.substring(0, pos))) throw new Error('invalid XML: does not start with <');
 
 		function error(msg: string) {
-			var m = str.substring(pos).match(/[\n\>]/);
-			var end = m ? pos + m.index! + 1 : str.length;
+			const m = str.substring(pos).match(/[\n\>]/);
+			const end = m ? pos + m.index! + 1 : str.length;
 			const line = str.substring(0, pos).split('\n').length;
-			return new Error("Invalid XML: " + msg + " at line " + line + " near " + str.substring(pos, end));
+			return new Error('Invalid XML: ' + msg + ' at line ' + line + ' near ' + str.substring(pos, end));
 		}
 
 		function eatSpaces() {
 			while (space[ch = str.charCodeAt(pos)]) pos++;
 		}
 
-		function eat(ch: number) {
-			if (str.charCodeAt(pos) !== ch) throw error("expected '" + String.fromCharCode(ch) + "', got '" + str[pos] + "'");
+		function eat(cch: number) {
+			if (str.charCodeAt(pos) !== cch) throw error("expected '" + String.fromCharCode(cch) + "', got '" + str[pos] + "'");
 			pos++;
 		}
 
-		function clean(str: string) {
-			return str.replace(/&([^;]+);/g, (s, ent) => {
-				const ch = entitiesByName[ent];
-				if (ch) return ch;
-				if (ent[0] != '#') throw error("invalid entity: &" + ent + ";");
+		function clean(sstr: string) {
+			return sstr.replace(/&([^;]+);/g, (s, ent) => {
+				const cch = entitiesByName[ent];
+				if (cch) return cch;
+				if (ent[0] !== '#') throw error('invalid entity: &' + ent + ';');
 				ent = ent.substring(1);
 				if (ent[0] === 'x') ent = ent.substring(1);
 				const v = parseInt(ent, 16);
-				if (isNaN(v)) throw error("hex value expected, got " + ent);
+				if (isNaN(v)) throw error('hex value expected, got ' + ent);
 				return String.fromCharCode(v);
 			});
 		}
 
-		function checkEmpty(str: string) {
-			if (str.match(/[^ \t\r\n]/)) throw error("unexpected value: " + str);
+		function checkEmpty(sstr: string) {
+			if (sstr.match(/[^ \t\r\n]/)) throw error('unexpected value: ' + sstr);
 		}
 
+		let ch: number;
+		let npos: number;
 		do {
 			eat(LT);
 			forget();
-			var npos = fill('<');
+			npos = fill('<');
 
-			var beg = pos;
-			var ch = str.charCodeAt(pos++);
+			let beg = pos;
+			ch = str.charCodeAt(pos++);
 			if (begWord[ch]) {
 				// opening tag
 				// read tag name
@@ -277,26 +277,27 @@ export function parser(options?: ParserOptions) {
 						break;
 					} else if (begWord[ch]) {
 						while (inWord[str.charCodeAt(pos)]) pos++;
-						var atb = str.substring(beg, pos);
+						const atb = str.substring(beg, pos);
 						eatSpaces();
 						eat(EQ);
 						eatSpaces();
 						eat(DQUOTE);
 						beg = pos;
 						pos = str.indexOf('"', pos);
-						if (pos < 0) throw error("double quote missing");
+						if (pos < 0) throw error('double quote missing');
 						bld.attribute(atb, clean(str.substring(beg, pos)));
 						pos++;
 					} else if (ch === GT) {
-						var val = "";
+						let val = '';
+						let j: number;
 						while (true) {
-							var j = str.indexOf('<', pos);
-							if (j < 0) throw error("tag not closed");
-							if (str.charCodeAt(j + 1) === EXCLAM && str.substring(j + 2, j + 4) == '--') {
+							j = str.indexOf('<', pos);
+							if (j < 0) throw error('tag not closed');
+							if (str.charCodeAt(j + 1) === EXCLAM && str.substring(j + 2, j + 4) === '--') {
 								val += clean(str.substring(pos, j));
 								pos = j + 4;
 								j = fill('-->');
-								if (j < 0) throw error("unterminated comment");
+								if (j < 0) throw error('unterminated comment');
 								pos = j + 3;
 								fill('<');
 							} else {
@@ -315,8 +316,8 @@ export function parser(options?: ParserOptions) {
 			} else if (ch === SLASH) {
 				// closing tag - read optional tag name
 				beg = pos;
-				var ch = str.charCodeAt(pos);
-				var tag: string | undefined;
+				ch = str.charCodeAt(pos);
+				let tag: string | undefined;
 				if (begWord[ch]) {
 					pos++;
 					while (inWord[str.charCodeAt(pos)]) pos++;
@@ -327,32 +328,32 @@ export function parser(options?: ParserOptions) {
 				bld.pop(writer, tag);
 			} else if (ch === EXCLAM) {
 				// comment
-				var ch = str.charCodeAt(pos++);
+				ch = str.charCodeAt(pos++);
 				if (ch === DASH && str.charCodeAt(pos++) === DASH) {
-					var j = str.indexOf('-->', pos);
-					if (j < 0) throw error("--> missing");
+					const j = str.indexOf('-->', pos);
+					if (j < 0) throw error('--> missing');
 					pos = j + 3;
 				} else if (ch === OBRA && str.substring(pos, pos + 6) === 'CDATA[') {
 					pos += 6;
-					var j = fill(']]>');
-					if (j < 0) throw error("]]> missing");
+					const j = fill(']]>');
+					if (j < 0) throw error(']]> missing');
 					bld.cdata(str.substring(pos, j));
 					pos = j + 3;
 					eatSpaces();
 				} else {
-					throw error("invalid syntax after <!");
+					throw error('invalid syntax after <!');
 				}
 			} else if (ch === QMARK) {
 				// processing instruction
-				var j = str.indexOf('?>', pos);
-				if (j < 0) throw error("?> missing");
+				const j = str.indexOf('?>', pos);
+				if (j < 0) throw error('?> missing');
 				pos = j + 2;
 			} else {
-				throw error("unexpected character: " + str[beg]);
+				throw error('unexpected character: ' + str[beg]);
 			}
 			eatSpaces();
 		} while (npos >= 0);
-		if (pos != str.length) throw error("unexpected trailing text: " + str.substring(pos));
+		if (pos !== str.length) throw error('unexpected trailing text: ' + str.substring(pos));
 	};
 }
 /// * `transform = ez.transforms.xml.formatter(options)`  
@@ -375,30 +376,30 @@ export interface Builder {
 
 export function formatter(options?: FormatterOptions) {
 	const opts = options || {};
-	const ttags: any = typeof opts === "string" ? opts : opts.tags;
-	const tags = typeof ttags === "string" ? ttags.split('/') : ttags;
-	if (!tags) throw new Error("cannot transform XML: 'tags' option missing")
+	const ttags: any = typeof opts === 'string' ? opts : opts.tags;
+	const tags = typeof ttags === 'string' ? ttags.split('/') : ttags;
+	if (!tags) throw new Error("cannot transform XML: 'tags' option missing");
 	const ident = opts && opts.indent;
 
 	function builder(depth: number): Builder {
-		var str = '';
+		let str = '';
 
 		function indent() {
 			str += '\n' + Array(depth + 1).join(opts.indent);
 		}
 
 		function escape(val: any) {
-			return typeof (val) !== "string" ? "" + val : val.replace(/([&<>"']|[^ -~\u00a1-\ud7ff\ue000-\ufffd])/g, (ch: string) => {
+			return typeof (val) !== 'string' ? '' + val : val.replace(/([&<>"']|[^ -~\u00a1-\ud7ff\ue000-\ufffd])/g, (ch: string) => {
 				const ent = entitiesByChar[ch];
 				if (ent) return '&' + ent + ';';
-				var hex = ch.charCodeAt(0).toString(16);
+				let hex = ch.charCodeAt(0).toString(16);
 				while (hex.length < 2) hex = '0' + hex;
 				while (hex.length > 2 && hex.length < 4) hex = '0' + hex;
 				return '&#x' + hex + ';';
 			});
 		}
 		return {
-			beginTag: (tag) => {
+			beginTag: tag => {
 				opts.indent && indent();
 				str += '<' + tag;
 				depth++;
@@ -406,7 +407,7 @@ export function formatter(options?: FormatterOptions) {
 			addAttribute: (atb, val) => {
 				str += ' ' + atb + '="' + escape(val) + '"';
 			},
-			endTag: (close) => {
+			endTag: close => {
 				close && depth--;
 				str += close ? '/>' : '>';
 			},
@@ -419,14 +420,14 @@ export function formatter(options?: FormatterOptions) {
 				}
 				str += '</' + tag + '>';
 			},
-			cdata: (data) => {
+			cdata: data => {
 				str += '<![CDATA[' + data + ']]>';
 			},
-			getResult: (extraIndent) => {
+			getResult: extraIndent => {
 				if (extraIndent) indent();
 				// indexOf to eliminate newline that indent may put before root
 				return str.substring(str.indexOf('<'));
-			}
+			},
 		};
 	}
 
@@ -435,48 +436,48 @@ export function formatter(options?: FormatterOptions) {
 			return new Error(msg);
 		}
 
-		function strfy(bld: Builder, elt: any, tag: string) {
-			if (elt === undefined) return bld;
-			if (Array.isArray(elt)) {
-				elt.forEach((child: any) => {
+		function strfy(bld: Builder, el: any, tag: string) {
+			if (el === undefined) return bld;
+			if (Array.isArray(el)) {
+				el.forEach((child: any) => {
 					strfy(bld, child, tag);
 				});
 				return bld;
 			}
 			bld.beginTag(tag);
-			if (elt === null) {
+			if (el === null) {
 				bld.addAttribute('xsi:nil', 'true');
 				bld.endTag(true);
-			} else if (typeof elt !== "object") {
+			} else if (typeof el !== 'object') {
 				bld.endTag();
-				bld.closeTag(tag, elt);
+				bld.closeTag(tag, el);
 			} else {
-				if (elt.$) {
-					Object.keys(elt.$).forEach((atb) => {
-						var v: any;
-						if ((v = elt.$[atb]) != null) bld.addAttribute(atb, v);
+				if (el.$) {
+					Object.keys(el.$).forEach(atb => {
+						let v: any;
+						if ((v = el.$[atb]) != null) bld.addAttribute(atb, v);
 					});
 				}
-				const keys = Object.keys(elt).filter((key) => key[0] !== '$');
-				if (elt.$value !== undefined) {
-					if (keys.length > 0) throw error("cannot mix $value and $children");
-					if (elt.$cdata) throw error("cannot mix $value and $cdata");
-					if (elt.$value === null) {
+				const keys = Object.keys(el).filter(key => key[0] !== '$');
+				if (el.$value !== undefined) {
+					if (keys.length > 0) throw error('cannot mix $value and $children');
+					if (el.$cdata) throw error('cannot mix $value and $cdata');
+					if (el.$value === null) {
 						bld.addAttribute('xsi:nil', 'true');
 						bld.endTag(true);
 					} else {
 						bld.endTag();
-						bld.closeTag(tag, elt.$value);
+						bld.closeTag(tag, el.$value);
 					}
-				} else if (elt.$cdata != null) {
-					if (keys.length > 0) throw error("cannot mix $cdata and $children");
+				} else if (el.$cdata != null) {
+					if (keys.length > 0) throw error('cannot mix $cdata and $children');
 					bld.endTag();
-					bld.cdata(elt.$cdata);
+					bld.cdata(el.$cdata);
 					bld.closeTag(tag);
 				} else if (keys.length > 0) {
 					bld.endTag();
-					keys.forEach((key) => {
-						strfy(bld, elt[key], key);
+					keys.forEach(key => {
+						strfy(bld, el[key], key);
 					});
 					bld.closeTag(tag);
 				} else {
@@ -485,12 +486,12 @@ export function formatter(options?: FormatterOptions) {
 			}
 			return bld;
 		}
-		function getParent(elt: any) {
-			for (var i = 0; i < tags.length - 1; i++) {
-				elt = elt[tags[i]];
-				if (elt === null) throw new Error("tag not found: " + tags[i]);
+		function getParent(el: any) {
+			for (let i = 0; i < tags.length - 1; i++) {
+				el = el[tags[i]];
+				if (el === null) throw new Error('tag not found: ' + tags[i]);
 			}
-			return elt;
+			return el;
 		}
 
 		const rootTag = tags[0];
@@ -498,7 +499,7 @@ export function formatter(options?: FormatterOptions) {
 
 		const elt = reader.read();
 		if (elt === undefined) return;
-		var parent = getParent(elt);
+		let parent = getParent(elt);
 		const saved = parent[parentTag];
 		parent[parentTag] = MARKER;
 		const envelope = strfy(builder(0), elt[rootTag], rootTag).getResult();
@@ -506,14 +507,14 @@ export function formatter(options?: FormatterOptions) {
 
 		const marker = '<' + parentTag + '>' + MARKER + '</' + parentTag + '>';
 		const markerPos = envelope.indexOf(marker);
-		if (markerPos < 0) throw new Error("internal error: marker not found");
+		if (markerPos < 0) throw new Error('internal error: marker not found');
 
 		const prologue = '<?xml version="1.0"?>' + (opts.indent ? '\n' : '');
 		writer.write(prologue + envelope.substring(0, markerPos));
 		while (true) {
-			var xml = strfy(builder(tags.length - 1), parent[parentTag], parentTag).getResult(true);
+			const xml = strfy(builder(tags.length - 1), parent[parentTag], parentTag).getResult(true);
 			writer.write(xml);
-			var parent = reader.read();
+			parent = reader.read();
 			if (parent === undefined) break;
 			parent = getParent(parent);
 		}

@@ -1,7 +1,7 @@
-import * as ez from "../..";
 import { assert } from 'chai';
-import { run, wait } from 'f-promise';
 import { setup } from 'f-mocha';
+import { run, wait } from 'f-promise';
+import * as ez from '../..';
 setup();
 
 const { equal, ok } = assert;
@@ -10,15 +10,15 @@ describe(module.id, () => {
 
 	const safeConverter = ez.predicate.convert;
 	const unsafeConverter = ez.predicate.converter({
-		allowEval: true
+		allowEval: true,
 	});
 
 	function t(condition: any, obj: any, expected: any, unsafe?: boolean) {
 		const got = (unsafe ? unsafeConverter : safeConverter)(condition)(obj);
-		equal(got, expected, JSON.stringify(condition) + " with " + JSON.stringify(obj) + " => " + expected);
+		equal(got, expected, JSON.stringify(condition) + ' with ' + JSON.stringify(obj) + ' => ' + expected);
 	}
 
-	it("direct values", () => {
+	it('direct values', () => {
 		t(5, 5, true);
 		t(5, 6, false);
 		t('a', 'a', true);
@@ -27,7 +27,7 @@ describe(module.id, () => {
 		t(true, false, false);
 	});
 
-	it("gt", () => {
+	it('gt', () => {
 		t({
 			$gt: 4,
 		}, 5, true);
@@ -41,7 +41,7 @@ describe(module.id, () => {
 		}, 5, false);
 	});
 
-	it("gte", () => {
+	it('gte', () => {
 		t({
 			$gte: 4,
 		}, 5, true);
@@ -55,7 +55,7 @@ describe(module.id, () => {
 		}, 5, false);
 	});
 
-	it("lt", () => {
+	it('lt', () => {
 		t({
 			$lt: 4,
 		}, 5, false);
@@ -69,7 +69,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	it("lte", () => {
+	it('lte', () => {
 		t({
 			$lte: 4,
 		}, 5, false);
@@ -83,7 +83,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	it("ne", () => {
+	it('ne', () => {
 		t({
 			$ne: 4,
 		}, 5, true);
@@ -97,7 +97,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	it("range", () => {
+	it('range', () => {
 		t({
 			$gte: 3,
 			$lte: 7,
@@ -114,12 +114,12 @@ describe(module.id, () => {
 		}, 8, false);
 	});
 
-	it("regexp", () => {
+	it('regexp', () => {
 		t(/^hel/, 'hello', true);
 		t(/^hel/, 'world', false);
 	});
 
-	it("and", () => {
+	it('and', () => {
 		t({
 			$and: [2, 5],
 		}, 5, false);
@@ -129,7 +129,7 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	it("empty and", () => {
+	it('empty and', () => {
 		t({}, {}, true);
 
 		t({}, {
@@ -137,7 +137,7 @@ describe(module.id, () => {
 		}, true);
 	});
 
-	it("or", () => {
+	it('or', () => {
 		t({
 			$or: [2, 5],
 		}, 5, true);
@@ -147,19 +147,19 @@ describe(module.id, () => {
 		}, 5, false);
 	});
 
-	it("empty or", () => {
+	it('empty or', () => {
 		t({
-			$or: []
+			$or: [],
 		}, {}, false);
 
 		t({
-			$or: []
+			$or: [],
 		}, {
 				a: 5,
 			}, false);
 	});
 
-	it("nor", () => {
+	it('nor', () => {
 		t({
 			$nor: [2, 5],
 		}, 5, false);
@@ -169,121 +169,121 @@ describe(module.id, () => {
 		}, 5, true);
 	});
 
-	it("not", () => {
+	it('not', () => {
 		t({
 			$not: {
-				$gt: 2
+				$gt: 2,
 			},
 		}, 5, false);
 
 		t({
 			$not: {
-				$lt: 2
+				$lt: 2,
 			},
 		}, 5, true);
 	});
 
-	it("in", () => {
+	it('in', () => {
 		t({
-			$in: [2, 3, 5]
+			$in: [2, 3, 5],
 		}, 3, true);
 
 		t({
-			$in: [2, 3, 5]
+			$in: [2, 3, 5],
 		}, 4, false);
 
 		t({
-			$in: [2, 3, 5]
+			$in: [2, 3, 5],
 		}, 5, true);
 	});
 
-	it("not in", () => {
+	it('not in', () => {
 		t({
-			$nin: [2, 3, 5]
+			$nin: [2, 3, 5],
 		}, 3, false);
 
 		t({
-			$nin: [2, 3, 5]
+			$nin: [2, 3, 5],
 		}, 4, true);
 
 		t({
-			$nin: [2, 3, 5]
+			$nin: [2, 3, 5],
 		}, 5, false);
 	});
 
-	it("exists", () => {
+	it('exists', () => {
 		t({
-			$exists: "a"
+			$exists: 'a',
 		}, {
 				a: 5,
 			}, true);
 
 		t({
-			$exists: "a"
+			$exists: 'a',
 		}, {
 				a: undefined,
 			}, true);
 
 		t({
-			$exists: "a"
+			$exists: 'a',
 		}, {
 				b: 5,
 			}, false);
 	});
 
-	it("type", () => {
+	it('type', () => {
 		t({
-			$type: "number"
+			$type: 'number',
 		}, 5, true);
 
 		t({
-			$type: "object"
+			$type: 'object',
 		}, {}, true);
 
 		t({
-			$type: "string"
+			$type: 'string',
 		}, 5, false);
 	});
 
-	it("mod", () => {
+	it('mod', () => {
 		t({
-			$mod: [3, 2]
+			$mod: [3, 2],
 		}, 5, true);
 
 		t({
-			$mod: [4, 2]
+			$mod: [4, 2],
 		}, 5, false);
 	});
 
-	it("regex", () => {
+	it('regex', () => {
 		t({
-			$regex: "^hel",
-		}, "hello", true);
+			$regex: '^hel',
+		}, 'hello', true);
 
 		t({
-			$regex: "^hel",
-		}, "world", false);
+			$regex: '^hel',
+		}, 'world', false);
 
 		t({
-			$regex: "^hel",
-		}, "HeLLo", false);
+			$regex: '^hel',
+		}, 'HeLLo', false);
 
 		t({
-			$regex: "^hel",
-			$options: "i",
-		}, "HeLLo", true);
+			$regex: '^hel',
+			$options: 'i',
+		}, 'HeLLo', true);
 	});
 
-	it("where", () => {
+	it('where', () => {
 		t({
-			$where: "this.a === this.b",
+			$where: 'this.a === this.b',
 		}, {
 				a: 5,
 				b: 5,
 			}, true, true);
 
 		t({
-			$where: "this.a === this.b",
+			$where: 'this.a === this.b',
 		}, {
 				a: 5,
 				b: 6,
@@ -308,7 +308,7 @@ describe(module.id, () => {
 			}, false);
 	});
 
-	it("elemMatch", () => {
+	it('elemMatch', () => {
 		t({
 			$elemMatch: {
 				$gte: 2,
@@ -324,7 +324,7 @@ describe(module.id, () => {
 		}, [1, 5, 6], false);
 	});
 
-	it("all", () => {
+	it('all', () => {
 		t({
 			$all: [2, 4],
 		}, [1, 2, 3, 4, 5], true);
@@ -335,70 +335,70 @@ describe(module.id, () => {
 
 		t({
 			tags: {
-				$all: ["appliance", "school", "book"]
-			}
+				$all: ['appliance', 'school', 'book'],
+			},
 		}, {
-				tags: ["school", "book", "bag", "headphone", "appliance"],
+				tags: ['school', 'book', 'bag', 'headphone', 'appliance'],
 			}, true);
 
 		t({
 			tags: {
-				$all: ["appliance", "school", "book"]
-			}
+				$all: ['appliance', 'school', 'book'],
+			},
 		}, {
-				tags: ["school", "bag", "headphone", "appliance"],
+				tags: ['school', 'bag', 'headphone', 'appliance'],
 			}, false);
 
 		const cond = {
 			items: {
 				$all: [{
 					$elemMatch: {
-						size: "M",
+						size: 'M',
 						num: {
-							$gt: 50
-						}
-					}
+							$gt: 50,
+						},
+					},
 				}, {
 					$elemMatch: {
 						num: 100,
-						color: "green"
-					}
-				}]
-			}
+						color: 'green',
+					},
+				}],
+			},
 		};
 		t(cond, {
 			items: [{
-				size: "S",
+				size: 'S',
 				num: 10,
-				color: "blue"
+				color: 'blue',
 			}, {
-				size: "M",
+				size: 'M',
 				num: 100,
-				color: "blue"
+				color: 'blue',
 			}, {
-				size: "L",
+				size: 'L',
 				num: 100,
-				color: "green"
-			}]
+				color: 'green',
+			}],
 		}, true);
 		t(cond, {
 			items: [{
-				size: "S",
+				size: 'S',
 				num: 10,
-				color: "blue"
+				color: 'blue',
 			}, {
-				size: "M",
+				size: 'M',
 				num: 100,
-				color: "blue"
+				color: 'blue',
 			}, {
-				size: "L",
+				size: 'L',
 				num: 100,
-				color: "red"
-			}]
+				color: 'red',
+			}],
 		}, false);
 	});
 
-	it("size", () => {
+	it('size', () => {
 		t({
 			$size: 2,
 		}, [1, 2], true);
@@ -408,7 +408,7 @@ describe(module.id, () => {
 		}, [1, 2, 3], false);
 	});
 
-	it("single property", () => {
+	it('single property', () => {
 		t({
 			a: 5,
 		}, {
@@ -424,7 +424,7 @@ describe(module.id, () => {
 			}, false);
 	});
 
-	it("implicit and (multiple properties)", () => {
+	it('implicit and (multiple properties)', () => {
 		t({
 			a: 5,
 			b: 3,
@@ -442,13 +442,13 @@ describe(module.id, () => {
 
 	});
 
-	it("walk", () => {
+	it('walk', () => {
 		t({
 			'a.b': /^hel/,
 		}, {
 				a: {
 					b: 'hello',
-				}
+				},
 			}, true);
 
 		t({
@@ -456,7 +456,7 @@ describe(module.id, () => {
 		}, {
 				a: {
 					c: 'hello',
-				}
+				},
 			}, false);
 
 		t({
@@ -464,7 +464,7 @@ describe(module.id, () => {
 		}, {
 				b: {
 					c: 'hello',
-				}
+				},
 			}, false);
 
 		t({
@@ -473,8 +473,8 @@ describe(module.id, () => {
 				a: {
 					b: {
 						c: 'hello',
-					}
-				}
+					},
+				},
 			}, true);
 
 		t({
@@ -483,8 +483,8 @@ describe(module.id, () => {
 				a: {
 					b: {
 						c: 'world',
-					}
-				}
+					},
+				},
 			}, false);
 
 	});

@@ -1,4 +1,4 @@
-import { Writer } from "../writer";
+import { Writer } from '../writer';
 import * as generic from './generic';
 
 function consoleWriter(fn: (message: string) => void) {

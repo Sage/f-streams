@@ -11,4 +11,4 @@ import * as queue from './queue';
 import * as std from './std';
 import * as string from './string';
 import * as uturn from './uturn';
-export { array, buffer, child_process, console, file, generic, http, net, node, queue, std, string, uturn }
+export { array, buffer, child_process, console, file, generic, http, net, node, queue, std, string, uturn };

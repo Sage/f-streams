@@ -20,15 +20,15 @@
 /// 
 /// For a simple example of this API in action, 
 /// see the [google client example](../../../examples/streams/googleClient._js)
-import { parse as parseUrl } from 'url';
-import * as os from 'os';
-import * as generic from './devices/generic';
-import { Reader } from './reader';
-import { Writer } from './writer';
+import { run, wait, withContext } from 'f-promise';
 import * as http from 'http';
 import * as https from 'https';
 import * as net from 'net';
-import { run, wait, withContext } from 'f-promise';
+import * as os from 'os';
+import { parse as parseUrl } from 'url';
+import * as generic from './devices/generic';
+import { Reader } from './reader';
+import { Writer } from './writer';
 
 /// 
 /// ## Wrapper
@@ -78,19 +78,19 @@ export class Wrapper<EmitterT extends Emitter> {
 		wait(new Promise((resolve, reject) => {
 			if (this._closed) return resolve();
 			const close = this._emitter.end || this._emitter.close || this._emitter.destroySoon;
-			if (typeof close !== "function") return resolve();
+			if (typeof close !== 'function') return resolve();
 			this._onClose = err => {
 				this._closed = true;
 				this._onClose = nop;
-				if (err) reject(err)
+				if (err) reject(err);
 				else resolve();
 				resolve = reject = nop;
 			};
 			if (this._doesNotEmitClose) {
-				this._emitter.emit("close");
+				this._emitter.emit('close');
 			}
 			close.call(this._emitter);
-		}))
+		}));
 	}
 	/// * `closed = wrapper.closed`   
 	///    returns true if the `close` event has been received.
@@ -164,7 +164,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 		});
 
 		this._autoClosed.push(() => {
-			if (!this._done) this._onData(new Error("stream was closed unexpectedly"));
+			if (!this._done) this._onData(new Error('stream was closed unexpectedly'));
 		});
 		this.reader = generic.reader(this._readChunk.bind(this), this.stop.bind(this));
 	}
@@ -202,7 +202,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 		} else if (this._error) { // should we resume if paused?
 			throw this._error;
 		} else {
-			var replied = false;
+			let replied = false;
 			return wait(new Promise((resolve, reject) => {
 				this._onData = (err, chunk) => {
 					if (err) this._error = err;
@@ -220,7 +220,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 
 	_concat(chunks: Data[], total: number) {
 		if (this._encoding) return chunks.join('');
-		if (chunks.length == 1) return chunks[0];
+		if (chunks.length === 1) return chunks[0];
 		const result = new Buffer(total);
 		chunks.reduce((val, chunk) => {
 			if (typeof chunk === 'string') throw new Error('expected Buffer, not string');
@@ -249,12 +249,12 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 		if (this._closed && !this._chunks.length) return undefined;
 		if (len == null) return this.reader.read();
 		if (len < 0) len = Infinity;
-		if (len == 0) return this._encoding ? "" : new Buffer(0);
+		if (len === 0) return this._encoding ? '' : new Buffer(0);
 		const chunks: Data[] = [];
-		var total = 0;
+		let total = 0;
 		while (total < len) {
-			var chunk = this.reader.read();
-			if (!chunk) return chunks.length == 0 ? undefined : this._concat(chunks, total);
+			const chunk = this.reader.read();
+			if (!chunk) return chunks.length === 0 ? undefined : this._concat(chunks, total);
 			if (total + chunk.length <= len) {
 				chunks.push(chunk);
 				total += chunk.length;
@@ -298,7 +298,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 	}
 
 	get events() {
-		return ["error", "data", "end", "close"];
+		return ['error', 'data', 'end', 'close'];
 	}
 }
 
@@ -335,7 +335,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 		});
 
 		this._autoClosed.push(() => {
-			const err = new Error("stream was closed unexpectedly");
+			const err = new Error('stream was closed unexpectedly');
 			if (this._onDrain) this._onDrain(err);
 			else this._error = err;
 		});
@@ -345,7 +345,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 			if (data != null) {
 				// if data is empty do nothing but it's not to be interpreted as end
 				if (!data.length) return this.writer;
-				if (typeof data === "string") data = new Buffer(data, this._encoding || "utf8");
+				if (typeof data === 'string') data = new Buffer(data, this._encoding || 'utf8');
 				//
 				if (!this._emitter.write(data)) this._drain();
 			} else {
@@ -357,7 +357,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 
 	_drain() {
 		wait(new Promise((resolve, reject) => {
-			this._onDrain = (err) => {
+			this._onDrain = err => {
 				this._onDrain = nop;
 				if (err) reject(err);
 				else resolve();
@@ -365,14 +365,14 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 			};
 
 		}));
-	};
+	}
 
 	/// * `stream.write(data[, enc])`  
 	///   Writes the data.  
 	///   This operation is asynchronous because it _drains_ the stream if necessary.  
 	///   Returns `this` for chaining.
 	write(data?: Data, enc?: string) {
-		if (typeof data === "string") data = new Buffer(data, enc || this._encoding || "utf8");
+		if (typeof data === 'string') data = new Buffer(data, enc || this._encoding || 'utf8');
 		else if (data === null) data = undefined;
 		this.writer.write(data);
 		return this;
@@ -383,10 +383,10 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 	///   Returns `this` for chaining.
 	end(data?: Data, enc?: string) {
 		if (this.writer.ended) {
-			if (data != null) throw new Error("invalid attempt to write after end");
+			if (data != null) throw new Error('invalid attempt to write after end');
 			return this;
 		}
-		if (typeof data === "string") data = new Buffer(data, enc || this._encoding || "utf8");
+		if (typeof data === 'string') data = new Buffer(data, enc || this._encoding || 'utf8');
 		else if (data === null) data = undefined;
 		if (data !== undefined) {
 			run(() => this.writer.write(data)).then(() => this.end(), err => { throw err; });
@@ -397,7 +397,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 	}
 
 	get events() {
-		return ["drain", "close"];
+		return ['drain', 'close'];
 	}
 }
 
@@ -406,14 +406,14 @@ export type Headers = { [key: string]: string };
 function _getEncodingDefault(headers: Headers) {
 	const comps = (headers['content-type'] || 'text/plain').split(';');
 	const ctype = comps[0];
-	for (var i = 1; i < comps.length; i++) {
+	for (let i = 1; i < comps.length; i++) {
 		const pair = comps[i].split('=');
-		if (pair.length == 2 && pair[0].trim() == 'charset') {
+		if (pair.length === 2 && pair[0].trim() === 'charset') {
 			const enc = pair[1].trim();
-			return (enc.toLowerCase() === "iso-8859-1") ? "binary" : enc;
+			return (enc.toLowerCase() === 'iso-8859-1') ? 'binary' : enc;
 		}
 	}
-	if (ctype.indexOf('text') >= 0 || ctype.indexOf('json') >= 0) return "utf8";
+	if (ctype.indexOf('text') >= 0 || ctype.indexOf('json') >= 0) return 'utf8';
 	return null;
 }
 
@@ -425,7 +425,7 @@ function _getEncodingStrict(headers: Headers) {
 
 	const comps = headers['content-type'].split(';');
 	const ctype = comps[0];
-	for (var i = 1; i < comps.length; i++) {
+	for (let i = 1; i < comps.length; i++) {
 		const pair = comps[i].split('=');
 		if (pair.length === 2 && pair[0].trim() === 'charset') {
 			// List of charsets: http://www.iana.org/assignments/character-sets/character-sets.xml
@@ -449,12 +449,12 @@ function _getEncodingStrict(headers: Headers) {
 }
 
 export interface EncodingOptions {
-	detectEncoding?: 'strict' | 'disable' | ((Headers: Headers) => string);
+	detectEncoding?: 'strict' | 'disable' | ((headers: Headers) => string);
 }
 function _getEncoding(headers: Headers, options?: EncodingOptions) {
 	if (headers['content-encoding']) return null;
 	if (!options) return _getEncodingDefault(headers);
-	if (typeof options.detectEncoding === "function") return options.detectEncoding(headers);
+	if (typeof options.detectEncoding === 'function') return options.detectEncoding(headers);
 	switch (options.detectEncoding) {
 		case 'strict':
 			return _getEncodingStrict(headers);
@@ -512,8 +512,8 @@ export class HttpServerRequest extends ReadableStream<http.ServerRequest> {
 
 // compat API: hide from typescript
 Object.defineProperty(HttpServerRequest.prototype, '_request', {
-	get(this: HttpServerRequest) { return this._emitter; }
-})
+	get(this: HttpServerRequest) { return this._emitter; },
+});
 /// 
 /// ## HttpServerResponse
 /// 
@@ -572,9 +572,9 @@ export class HttpServerResponse extends WritableStream<http.ServerResponse> {
 }
 
 function _fixHttpServerOptions(options?: HttpServerOptions) {
-	var opts = options || {};
+	const opts = options || {};
 	opts.createServer = function (listener): http.Server | https.Server {
-		if (typeof listener !== 'function') throw new TypeError("bad listener parameter: " + typeof listener);
+		if (typeof listener !== 'function') throw new TypeError('bad listener parameter: ' + typeof listener);
 		return opts.secure ? https.createServer(opts, listener) : http.createServer(listener);
 	};
 	return opts;
@@ -591,18 +591,18 @@ export class Server<EmitterT extends ServerEmitter> extends Wrapper<EmitterT> {
 	}
 	listen(...args: any[]) {
 		return wait(new Promise((resolve, reject) => {
-			if (this._closed) return reject(new Error("cannot listen: server is closed"));
-			var reply = (err: Error | undefined, result?: Server<EmitterT>) => {
+			if (this._closed) return reject(new Error('cannot listen: server is closed'));
+			const reply = (err: Error | undefined, result?: Server<EmitterT>) => {
 				if (err) reject(err);
 				else resolve(result);
 				reject = resolve = nop;
-			}
+			};
 			args.push(() => {
 				reply(undefined, this);
 			});
 
 			this._autoClosed.push(() => {
-				reply(new Error("server was closed unexpectedly"));
+				reply(new Error('server was closed unexpectedly'));
 			});
 			this._emitter.on('error', reply);
 			this._emitter.listen.apply(this._emitter, args);
@@ -638,15 +638,15 @@ export function httpListener(listener: HttpListener, options: HttpServerOptions)
 				if (err) throw err;
 			});
 	};
-};
+}
 
 export function createHttpServer(requestListener: HttpListener, options: HttpServerOptions) {
 	return new HttpServer(requestListener, options);
-};
+}
 
 export class HttpServer extends Server<http.Server | https.Server> {
 	constructor(requestListener: HttpListener, options: HttpServerOptions) {
-		var opts = _fixHttpServerOptions(options);
+		const opts = _fixHttpServerOptions(options);
 		super(opts.createServer!(httpListener(requestListener, options)));
 	}
 	setTimeout(msecs: number, callback: Function) {
@@ -698,9 +698,9 @@ export class HttpClientResponse extends ReadableStream<http.ClientResponse> {
 	///    Returns `this` for chaining.
 	checkStatus(statuses: number | number[]) {
 		if (typeof statuses === 'number') statuses = [statuses];
-		if (this.statusCode == null || statuses.indexOf(this.statusCode) < 0) throw new Error("invalid status: " + this.statusCode);
+		if (this.statusCode == null || statuses.indexOf(this.statusCode) < 0) throw new Error('invalid status: ' + this.statusCode);
 		return this;
-	};
+	}
 }
 
 export interface HttpClientOptions {
@@ -722,23 +722,21 @@ export interface HttpClientOptions {
 }
 
 function _fixHttpClientOptions(options: HttpClientOptions) {
-	if (!options) throw new Error("request error: no options");
-	var opts = options;
-	if (typeof opts === "string") opts = {
-		url: opts
-	};
+	if (!options) throw new Error('request error: no options');
+	let opts = options;
+	if (typeof opts === 'string') opts = { url: opts };
 	if (opts.url) {
 		const parsed = parseUrl(opts.url);
 		opts.protocol = parsed.protocol;
 		opts.host = parsed.hostname;
 		opts.port = parsed.port;
-		opts.path = parsed.pathname + (parsed.query ? "?" + parsed.query : "");
+		opts.path = parsed.pathname + (parsed.query ? '?' + parsed.query : '');
 	}
-	opts.protocol = opts.protocol || "http:";
-	opts.port = opts.port || (opts.protocol === "https:" ? '443' : '80');
-	opts.path = opts.path || "/";
-	if (!opts.host) throw new Error("request error: no host");
-	opts.method = opts.method || "GET";
+	opts.protocol = opts.protocol || 'http:';
+	opts.port = opts.port || (opts.protocol === 'https:' ? '443' : '80');
+	opts.path = opts.path || '/';
+	if (!opts.host) throw new Error('request error: no host');
+	opts.method = opts.method || 'GET';
 	opts.headers = Object.keys(opts.headers || {}).reduce((headers, key) => {
 		if (opts.headers![key] != null) headers[key] = opts.headers![key];
 		return headers;
@@ -746,15 +744,15 @@ function _fixHttpClientOptions(options: HttpClientOptions) {
 	opts.module = require(opts.protocol.substring(0, opts.protocol.length - 1));
 	if (opts.user != null) {
 		// assumes basic auth for now
-		var token = opts.user + ":" + (opts.password || "");
-		token = new Buffer(token, "utf8").toString("base64");
-		opts.headers['Authorization'] = "Basic " + token;
+		let token = opts.user + ':' + (opts.password || '');
+		token = new Buffer(token, 'utf8').toString('base64');
+		opts.headers['Authorization'] = 'Basic ' + token;
 	}
 
 	if (opts.proxy) {
 		// Do not use proxy for local requests
 		if (opts.host !== os.hostname()) {
-			if (typeof opts.proxy === "string") {
+			if (typeof opts.proxy === 'string') {
 				opts.proxy = parseUrl(opts.proxy);
 				opts.proxy.host = opts.proxy.hostname;
 			}
@@ -763,36 +761,36 @@ function _fixHttpClientOptions(options: HttpClientOptions) {
 				// Do nothing
 			} else {
 				opts.proxy.port = opts.proxy.port || opts.port;
-				if (!opts.proxy.host) throw new Error("proxy configuration error: no host");
-				if (!opts.proxy.port) throw new Error("proxy configuration error: no port");
-				opts.proxy.protocol = opts.proxy.protocol || "http:";
+				if (!opts.proxy.host) throw new Error('proxy configuration error: no host');
+				if (!opts.proxy.port) throw new Error('proxy configuration error: no port');
+				opts.proxy.protocol = opts.proxy.protocol || 'http:';
 				// https requests will be handled with CONNECT method
-				opts.isHttps = opts.protocol.substr(0, 5) === "https";
+				opts.isHttps = opts.protocol.substr(0, 5) === 'https';
 				if (opts.isHttps) {
 					opts.proxy.module = require(opts.proxy.protocol.substring(0, opts.proxy.protocol.length - 1));
 					opts.proxy.headers = opts.proxy.headers || {};
 					opts.proxy.headers.host = opts.host;
 				} else {
-					opts.path = opts.protocol + "//" + opts.host + ":" + opts.port + opts.path;
+					opts.path = opts.protocol + '//' + opts.host + ':' + opts.port + opts.path;
 					opts.host = opts.proxy.host;
 					opts.port = opts.proxy.port;
 					if (opts.host) opts.headers['host'] = opts.host;
 				}
 
 				if (opts.proxy.auth) {
-					if (opts.proxy.auth.toLowerCase() === "basic") {
-						if (!opts.proxy.user) throw new Error("request error: no proxy user");
-						var proxyToken = opts.proxy.user + ":" + (opts.proxy.password || "");
-						proxyToken = new Buffer(proxyToken, "utf8").toString("base64");
-						opts.headers["Proxy-Authorization"] = "Basic " + proxyToken;
-					} else if (opts.proxy.auth.toLowerCase() === "ntlm") {
+					if (opts.proxy.auth.toLowerCase() === 'basic') {
+						if (!opts.proxy.user) throw new Error('request error: no proxy user');
+						let proxyToken = opts.proxy.user + ':' + (opts.proxy.password || '');
+						proxyToken = new Buffer(proxyToken, 'utf8').toString('base64');
+						opts.headers['Proxy-Authorization'] = 'Basic ' + proxyToken;
+					} else if (opts.proxy.auth.toLowerCase() === 'ntlm') {
 
 						const proxyAuthenticator = opts.proxy.proxyAuthenticator;
-						if (!proxyAuthenticator) throw new Error("Proxy Authenticator module required");
+						if (!proxyAuthenticator) throw new Error('Proxy Authenticator module required');
 						if (!proxyAuthenticator.authenticate) throw new Error("NTLM Engine module MUST provide 'authenticate' function");
 						opts.proxyAuthenticate = proxyAuthenticator.authenticate;
-					} else if (opts.proxy.auth.toLowerCase() === "digest") {
-						throw new Error("Proxy Digest authentication not yet implemented");
+					} else if (opts.proxy.auth.toLowerCase() === 'digest') {
+						throw new Error('Proxy Digest authentication not yet implemented');
 					}
 				}
 			}
@@ -826,7 +824,7 @@ export class HttpClientRequest extends WritableStream<http.ClientRequest> {
 	_options: HttpClientOptions;
 
 	constructor(options: HttpClientOptions) {
-		var request = options.module.request(options, (response: http.ClientResponse) => {
+		const request = options.module.request(options, (response: http.ClientResponse) => {
 			this._onResponse(undefined, response);
 		});
 		super(request, options);
@@ -838,7 +836,7 @@ export class HttpClientRequest extends WritableStream<http.ClientRequest> {
 		});
 
 		this._autoClosed.push(() => {
-			if (!this._done) this._onResponse(new Error("stream was closed unexpectedly"));
+			if (!this._done) this._onResponse(new Error('stream was closed unexpectedly'));
 		});
 		this._onResponse = this._trackResponse;
 	}
@@ -849,20 +847,22 @@ export class HttpClientRequest extends WritableStream<http.ClientRequest> {
 	}
 
 	_responseCb(callback: (err?: Error, resp?: http.ClientResponse) => void) {
-		var replied = false;
-		if (typeof callback !== 'function') throw new TypeError("bad callback parameter: " + typeof callback);
+		let replied = false;
+		if (typeof callback !== 'function') throw new TypeError('bad callback parameter: ' + typeof callback);
 		if (this._done) return callback(this._error, this._response);
-		else this._onResponse = (err, resp) => {
-			this._done = true;
-			if (!replied) callback(err, resp);
-			replied = true;
-		};
+		else {
+			this._onResponse = (err, resp) => {
+				this._done = true;
+				if (!replied) callback(err, resp);
+				replied = true;
+			};
+		}
 	}
 
 	/// * `response = request.response()`  
 	///    returns the response. 
 	response() {
-		var response = this._response || wait(this._responseCb.bind(this));
+		const response = this._response || wait(this._responseCb.bind(this));
 		return new HttpClientResponse(response, this._options); // options.reader?
 	}
 	setTimeout(ms: number) {
@@ -891,8 +891,8 @@ export class HttpProxyClientRequest {
 					host: options.proxy.host,
 					port: options.proxy.port,
 					method: 'CONNECT',
-					path: options.host + ":" + options.port,
-					headers: options.proxy.headers
+					path: options.host + ':' + options.port,
+					headers: options.proxy.headers,
 				};
 				// open proxy socket
 				options.proxy.module.request(proxyOpt).on('connect', (res: never, socket: net.Socket, head: never) => {
@@ -914,7 +914,7 @@ export class HttpProxyClientRequest {
 		}
 	}
 	response() {
-		throw new Error("proxyConnect() call missing");
+		throw new Error('proxyConnect() call missing');
 	}
 }
 
@@ -1003,14 +1003,14 @@ export class SocketStream extends ReadableStream<net.Socket & NodeJS.ReadableStr
 ///    If you want different options for `read` and `write` operations, you can specify them by creating `options.read` and `options.write` sub-objects inside `options`.
 
 export function tcpClient(port: number, host?: string, options?: SocketOptions) {
-	host = host || "localhost";
+	host = host || 'localhost';
 	options = options || {};
 	return new SocketClient(options, port, host);
-};
+}
 export function socketClient(path: string, options?: SocketOptions) {
 	options = options || {};
 	return new SocketClient(options, path);
-};
+}
 
 export class SocketClient {
 	_options?: SocketOptions;
@@ -1040,10 +1040,10 @@ export class SocketClient {
 	/// * `stream = client.connect()`  
 	///    connects the client and returns a network stream.
 	connect(callback: (err?: Error, stream?: SocketStream) => void) {
-		if (typeof callback !== 'function') throw new TypeError("bad callback parameter: " + typeof callback);
+		if (typeof callback !== 'function') throw new TypeError('bad callback parameter: ' + typeof callback);
 		if (this._done) return callback(this._error, new SocketStream(this._connection, this._options));
 		else {
-			this._onConnect = (err) => {
+			this._onConnect = err => {
 				this._done = true;
 				callback(err, new SocketStream(this._connection, this._options));
 				callback = nop;
@@ -1071,7 +1071,7 @@ export type SocketServerListener = (stream: SocketStream) => void;
 
 export function createNetServer(serverOptions: SocketServerOptions, connectionListener: SocketServerListener, streamOptions: SocketOptions) {
 	return new SocketServer(serverOptions, connectionListener, streamOptions);
-};
+}
 
 export class SocketServer extends Server<net.Server> {
 	constructor(serverOptions: SocketServerOptions, connectionListener: SocketServerListener, streamOptions: SocketOptions) {
@@ -1080,7 +1080,7 @@ export class SocketServer extends Server<net.Server> {
 			connectionListener = serverOptions;
 			serverOptions = {};
 		}
-		var emitter = net.createServer(serverOptions, connection =>
+		const emitter = net.createServer(serverOptions, connection =>
 			run(() =>
 				withContext(() =>
 					connectionListener(new SocketStream(connection, streamOptions || {})), {}))
@@ -1103,7 +1103,7 @@ export class SocketServer extends Server<net.Server> {
 ///    Returns the value returned by `fn`.
 exports.using = function (this: any, constructor: any, emitter: NodeJS.EventEmitter, options?: any, fn?: (stream: any) => any) {
 	if (!fn && typeof options === 'function') fn = options, options = null;
-	if (!fn) throw new Error("using body missing");
+	if (!fn) throw new Error('using body missing');
 	const stream = new constructor(emitter, options);
 	try {
 		return fn.call(this, stream);
@@ -1128,7 +1128,7 @@ exports.usingWritable = function (this: any, emitter: NodeJS.WritableStream, opt
 ///    Pumps from `inStream` to `outStream`.  
 ///    Does not close the streams at the end.
 exports.pump = function (inStream: ReadableStream<any>, outStream: WritableStream<any>) {
-	var data: any;
+	let data: any;
 	while (data = inStream.read()) outStream.write(data);
 };
 /// 

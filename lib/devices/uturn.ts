@@ -1,12 +1,12 @@
-import * as generic from './generic';
-import * as stopException from '../stop-exception';
-import { Reader } from '../reader';
-import { Writer } from '../writer';
-import { nextTick } from '../util';
 import { wait } from 'f-promise';
+import { Reader } from '../reader';
+import * as stopException from '../stop-exception';
+import { nextTick } from '../util';
+import { Writer } from '../writer';
+import * as generic from './generic';
 
-var lastId = 0;
-var tracer: (...args: any[]) => void; // = console.error;
+let lastId = 0;
+const tracer: ((...args: any[]) => void) | undefined = undefined; // = console.error;
 
 /// !doc
 /// ## Special device that transforms a writer into a reader
@@ -24,24 +24,24 @@ export interface Uturn<T> {
 }
 
 export function create<T>(): Uturn<T> {
-	var state = 'idle', pendingData: T | undefined, error: any;
+	let state = 'idle', pendingData: T | undefined, error: any;
 	const id = ++lastId;
 
-	var pendingReaderCb: ((err: Error, value: (T | undefined)) => void) | null;
+	let pendingReaderCb: ((err: Error, value: (T | undefined)) => void) | null;
 	function bounceReader(err?: any, val?: T) {
 		const lcb = pendingReaderCb;
 		pendingReaderCb = null;
 		if (lcb) lcb(err, val);
 	}
 
-	var pendingWriterCb: ((err: Error, value?: Writer<T>) => void) | null;
+	let pendingWriterCb: ((err: Error, value?: Writer<T>) => void) | null;
 	function bounceWriter(err?: any, val?: Writer<T>) {
 		const lcb = pendingWriterCb;
 		pendingWriterCb = null;
 		if (lcb) lcb(err, val);
 	}
 
-	var pendingStopCb: ((err: Error, value?: any) => void) | null;
+	let pendingStopCb: ((err: Error, value?: any) => void) | null;
 	function bounceStop(err?: any, val?: any) {
 		const lcb = pendingStopCb;
 		pendingStopCb = null;
@@ -51,7 +51,7 @@ export function create<T>(): Uturn<T> {
 	const uturn = {
 		reader: new Reader(() => wait<T>(cb => {
 			nextTick();
-			tracer && tracer(id, "READ", state, pendingData);
+			tracer && tracer(id, 'READ', state, pendingData);
 			const st = state;
 			switch (st) {
 				case 'writing':
@@ -87,7 +87,7 @@ export function create<T>(): Uturn<T> {
 		}), arg => wait(cb => {
 			nextTick();
 			error = error || stopException.make(arg);
-			tracer && tracer(id, "STOP READER", state, arg);
+			tracer && tracer(id, 'STOP READER', state, arg);
 			const st = state;
 			switch (st) {
 				case 'reading':
@@ -120,7 +120,7 @@ export function create<T>(): Uturn<T> {
 		})),
 		writer: new Writer<T>(data => wait(cb => {
 			nextTick();
-			tracer && tracer(id, "WRITE", state, data);
+			tracer && tracer(id, 'WRITE', state, data);
 			const st = state;
 			switch (st) {
 				case 'reading':
@@ -153,7 +153,7 @@ export function create<T>(): Uturn<T> {
 			}
 		}), arg => wait(cb => {
 			nextTick();
-			tracer && tracer(id, "STOP WRITER", state, arg);
+			tracer && tracer(id, 'STOP WRITER', state, arg);
 			error = error || stopException.make(arg);
 			const st = state;
 			switch (st) {
@@ -179,13 +179,13 @@ export function create<T>(): Uturn<T> {
 			}
 		})),
 		end(err: Error) {
-			tracer && tracer(id, "END", state, err);
+			tracer && tracer(id, 'END', state, err);
 			err = stopException.unwrap(err);
 			error = error || err;
 			state = 'done';
 			// at most one of the pending callbacks should be active but we can safely bounce to all.
 			bounceReader(error);
-			bounceWriter(error, uturn.writer)
+			bounceWriter(error, uturn.writer);
 			bounceStop(error);
 		},
 	};

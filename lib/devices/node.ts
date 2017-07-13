@@ -23,8 +23,8 @@ export interface NodeReaderOptions {
 }
 
 export function fixOptions(options: NodeReaderOptions | string | undefined) {
-	var opts: NodeReaderOptions;
-	if (typeof options === "string") {
+	let opts: NodeReaderOptions;
+	if (typeof options === 'string') {
 		opts = {
 			encoding: options,
 		};
@@ -35,19 +35,19 @@ export function fixOptions(options: NodeReaderOptions | string | undefined) {
 }
 
 export function reader(emitter: NodeJS.ReadableStream, options?: NodeReaderOptions | string): Reader<any> {
-	var opts = fixOptions(options);
-	const reader = new streams.ReadableStream(emitter, opts);
-	if (opts.encoding) reader.setEncoding(opts.encoding);
-	return reader.reader;
+	const opts = fixOptions(options);
+	const rd = new streams.ReadableStream(emitter, opts);
+	if (opts.encoding) rd.setEncoding(opts.encoding);
+	return rd.reader;
 }
 /// * `writer = ez.devices.node.writer(stream, options)`  
 ///   wraps a node.js stream as an EZ writer.  
 ///   For a full description of the options, see `WritableStream` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 
-export interface NodeWriterOptions { };
+export interface NodeWriterOptions { }
 
 export function writer(emitter: NodeJS.WritableStream, options?: NodeWriterOptions) {
-	const writer = new streams.WritableStream(emitter, fixOptions(options));
-	return writer.writer;
+	const wr = new streams.WritableStream(emitter, fixOptions(options));
+	return wr.writer;
 }

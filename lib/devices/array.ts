@@ -1,6 +1,6 @@
 import { Reader } from '../reader';
-import { Writer } from '../writer';
 import { nextTick } from '../util';
+import { Writer } from '../writer';
 
 export interface Options {
 	sync?: boolean;
@@ -34,7 +34,7 @@ export class ArrayWriter<T> extends Writer<T> {
 ///   `reader.read()` will return its entries asynchronously by default.  
 ///   You can force synchronous delivery by setting `options.sync` to `true`.
 export function reader<T>(array: T[], options?: Options) {
-	var opts = options || {};
+	const opts = options || {};
 	const values = array.slice(0);
 	return new Reader(function () {
 		if (!opts.sync) nextTick();
@@ -49,6 +49,6 @@ export function reader<T>(array: T[], options?: Options) {
 ///   `writer.toArray()` returns the internal array into which the 
 ///   entries have been collected.
 export function writer<T>(options?: Options) {
-	var opts = options || {};
+	const opts = options || {};
 	return new ArrayWriter(opts);
-};
+}
