@@ -1,12 +1,12 @@
-import * as ez from "../..";
 import { assert } from 'chai';
-import { run, wait } from 'f-promise';
 import { setup } from 'f-mocha';
+import { run, wait } from 'f-promise';
+import * as ez from '../..';
 setup();
 
 const { equal } = assert;
 const csv = ez.transforms.csv;
-const string = ez.devices.string;
+const strng = ez.devices.string;
 
 const legends = 'firstName,lastName,gender,dob\n' + //
 	'Jimi,Hendrix,M,27-11-1942\n' + //
@@ -15,14 +15,14 @@ const legends = 'firstName,lastName,gender,dob\n' + //
 	'Kurt,Cobain,M,20-02-1967\n';
 
 describe(module.id, () => {
-	it("roundtrip", () => {
-		const sink = string.writer();
-		string.reader(legends).transform(csv.parser()).transform(csv.formatter()).pipe(sink);
+	it('roundtrip', () => {
+		const sink = strng.writer();
+		strng.reader(legends).transform(csv.parser()).transform(csv.formatter()).pipe(sink);
 		equal(sink.toString(), legends);
 	});
 
-	it("binary input", () => {
-		const sink = string.writer();
+	it('binary input', () => {
+		const sink = strng.writer();
 		ez.devices.buffer.reader(new Buffer(legends, 'utf8')).transform(csv.parser()).transform(csv.formatter()).pipe(sink);
 		equal(sink.toString(), legends);
 	});

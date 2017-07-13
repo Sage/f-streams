@@ -1,6 +1,6 @@
 import { Reader } from '../reader';
-import { Writer } from '../writer';
 import { nextTick } from '../util';
+import { Writer } from '../writer';
 
 export interface Options {
 	sync?: boolean;
@@ -25,7 +25,6 @@ export class BufferWriter extends Writer<Buffer> {
 	}
 }
 
-
 /// !doc
 /// ## In-memory buffer streams
 /// 
@@ -38,19 +37,19 @@ export class BufferWriter extends Writer<Buffer> {
 ///   The default chunk size is 1024. You can override it by passing 
 ///   a `chunkSize` option.
 export function reader(buffer: Buffer, options?: Options | number) {
-	var opts: Options;
-	if (typeof options === "number") {
+	let opts: Options;
+	if (typeof options === 'number') {
 		opts = {
-			chunkSize: options
+			chunkSize: options,
 		};
 	}
 	else opts = options || {};
 	const chunkSize = opts.chunkSize || 1024;
-	var pos = 0;
+	let pos = 0;
 	return new Reader(function read() {
 		if (!opts.sync) nextTick();
 		if (pos >= buffer.length) return;
-		const len = typeof chunkSize === "function" ? chunkSize() : chunkSize;
+		const len = typeof chunkSize === 'function' ? chunkSize() : chunkSize;
 		const s = buffer.slice(pos, pos + len);
 		pos += len;
 		return s;

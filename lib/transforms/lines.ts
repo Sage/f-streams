@@ -1,4 +1,3 @@
-"use strict";
 /// !doc
 /// ## Stream transform for line-oriented text streams
 /// 
@@ -7,8 +6,8 @@
 /// * `transform = ez.transforms.lines.parser(options)`  
 ///   creates a parser transform.
 ///   `options` is reserved for future use.
-import { Reader } from "../reader";
-import { Writer } from "../writer";
+import { Reader } from '../reader';
+import { Writer } from '../writer';
 
 export interface ParserOptions {
 	sep?: string;
@@ -22,17 +21,18 @@ export function parser(options?: ParserOptions): (reader: Reader<string | Buffer
 		return (!opts.sep && line[line.length - 1] === '\r') ? line.substring(0, line.length - 1) : line;
 	}
 	return (reader: Reader<string | Buffer>, writer: Writer<string>) => {
-		var remain = "";
-		reader.forEach((chunk) => {
-			var str: string;
+		let remain = '';
+		reader.forEach(chunk => {
+			let str: string;
 			if (typeof chunk === 'string') str = chunk;
 			else if (Buffer.isBuffer(chunk)) str = chunk.toString(opts.encoding || 'utf8');
 			else if (chunk === undefined) return;
-			else throw new Error("bad input: " + typeof chunk);
+			else throw new Error('bad input: ' + typeof chunk);
 			const lines = str.split(opts.sep || '\n');
 			if (lines.length > 1) {
 				writer.write(clean(remain + lines[0]));
-				for (var i = 1; i < lines.length - 1; i++) writer.write(clean(lines[i]));
+				let i = 1;
+				for (; i < lines.length - 1; i++) writer.write(clean(lines[i]));
 				remain = lines[i];
 			} else {
 				remain += lines[0];
@@ -56,7 +56,7 @@ export function formatter(options?: FormatterOptions) {
 	const eol = opts.eol || '\n';
 	return (reader: Reader<string>, writer: Writer<string>) => {
 		if (opts.extra) {
-			reader.forEach((line) => {
+			reader.forEach(line => {
 				writer.write(line + eol);
 			});
 		} else {
@@ -64,5 +64,5 @@ export function formatter(options?: FormatterOptions) {
 				writer.write(i > 0 ? eol + line : line);
 			});
 		}
-	}
+	};
 }

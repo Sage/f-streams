@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Copyright (c) 2013 Bruno Jouhier <bruno.jouhier@sage.com>
  *
@@ -28,24 +27,24 @@
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { Reader, ParallelOptions } from "./reader";
-import { create as createUturn } from './devices/uturn';
-import * as nodeStream from "stream";
-import * as sys from 'util';
 import { run, wait } from 'f-promise';
+import * as nodeStream from 'stream';
+import * as sys from 'util';
+import { create as createUturn } from './devices/uturn';
+import { ParallelOptions, Reader } from './reader';
 
 export class Writer<T> {
 	write: (this: Writer<T>, value?: T) => this;
 	ended: boolean;
 	constructor(write: (value: T) => void, stop?: (arg?: any) => void) {
-		if (typeof write !== 'function') throw new Error("invalid writer.write: " + (write && typeof write));
+		if (typeof write !== 'function') throw new Error('invalid writer.write: ' + (write && typeof write));
 		this.ended = false;
-		this.write = (data) => {
+		this.write = data => {
 			if (data === undefined) {
 				if (!this.ended) write.call(this);
 				this.ended = true;
 			} else {
-				if (this.ended) throw new Error("invalid attempt to write after end");
+				if (this.ended) throw new Error('invalid attempt to write after end');
 				write.call(this, data);
 			}
 			return this;
@@ -58,7 +57,6 @@ export class Writer<T> {
 		}
 	}
 
-
 	/// 
 	/// * `writer = writer.writeAll(val)`  
 	///   writes `val` and ends the writer
@@ -66,7 +64,7 @@ export class Writer<T> {
 		this.write(val);
 		this.write(undefined);
 		return this;
-	};
+	}
 
 	/// 
 	/// * `writer = writer.stop(err)`  
@@ -75,16 +73,16 @@ export class Writer<T> {
 	stop(arg?: any): Writer<T> {
 		this.write(undefined);
 		return this;
-	};
+	}
 
 	/// 
 	/// * `writer = writer.end()`  
 	///   ends the writer - compatiblity call (errors won't be thrown to caller)
 	end() {
-		if (arguments.length > 0) throw new Error("invalid end call: " + arguments.length + " arg(s)");
+		if (arguments.length > 0) throw new Error('invalid end call: ' + arguments.length + ' arg(s)');
 		run(() => this.write(undefined)).catch(err => console.error(`end call failed: ${err && err.message}`));
 		return this;
-	};
+	}
 
 	/// * `writer = writer.pre.action(fn)`  
 	///   returns another writer which applies `action(fn)` before writing to the original writer.  
@@ -105,22 +103,22 @@ export class Writer<T> {
 		anyStream._write = function (chunk: any, encoding?: string, done?: Function) {
 			if (chunk && encoding && encoding !== 'buffer') chunk = chunk.toString(encoding);
 			run(() => self.write(chunk)).then(() => { if (done) done(); }, err => stream.emit('error', err));
-		}
+		};
 		// override end to emit undefined marker
 		const end = stream.end;
 		anyStream.end = function (chunk: any, encoding?: string, cb?: (err: any, val?: any) => any) {
 			end.call(stream, chunk, encoding, (err: any) => {
 				if (err) return stream.emit('error', err) as never;
-				run(() => self.write(undefined)).then(v => cb && cb(null, v), err => cb && cb(err));
+				run(() => self.write(undefined)).then(v => cb && cb(null, v), e => cb && cb(e));
 			});
 		};
 		return stream;
 	}
 	// optional result getter - only implemneted in some subclasses
 	get result(): any {
-		throw new Error("result not supported");
+		throw new Error('result not supported');
 	}
-};
+}
 
 export function create<T>(write: (value: T) => Writer<T>, stop?: (arg?: any) => Writer<T>) {
 	return new Writer(write, stop);
@@ -137,23 +135,22 @@ exports.decorate = function (proto: any) {
 	const writerProto: any = Writer.prototype;
 	Object.getOwnPropertyNames(Writer.prototype).forEach(k => {
 		// compare with == is important here!
-		if (k == 'constructor' || k == 'result') return;
-		if (k == 'pre') {
+		if (k === 'constructor' || k === 'result') return;
+		if (k === 'pre') {
 			Object.defineProperty(proto, k, {
-				get(this: Writer<any>) { return new PreImpl(this); }
+				get(this: Writer<any>) { return new PreImpl(this); },
 			});
 		} else {
 			if (!proto[k]) proto[k] = writerProto[k];
 		}
 	});
 	return proto;
-}
-
+};
 
 export class PreImpl<T> {
 	writer: Writer<T>;
 	constructor(writer: Writer<T>) {
-		if (typeof writer.write !== 'function') throw new Error("invalid pre writer: " + sys.inspect(writer));
+		if (typeof writer.write !== 'function') throw new Error('invalid pre writer: ' + sys.inspect(writer));
 		this.writer = writer;
 	}
 }
@@ -190,13 +187,13 @@ process.nextTick(() => {
 		'skip',
 		'parallel',
 		'buffer',
-		'nodeTransform'
-	].forEach((name) => {
+		'nodeTransform',
+	].forEach(name => {
 		preProto[name] = function (this: Pre<any>, arg: any) {
 			const uturn = require('./devices/uturn').create();
 			run(() => uturn.reader[name](arg).pipe(this.writer))
 				.then(result => uturn.end(null, result), err => uturn.end(err));
 			return uturn.writer;
-		}
+		};
 	});
-})
+});

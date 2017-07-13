@@ -1,4 +1,3 @@
-"use strict";
 /// !doc
 /// Stream transform for simple JSON streams
 /// 
@@ -11,7 +10,9 @@
 /// 
 /// In other words, the whole stream is just a valid JSON array.
 /// 
-/// There is no special constraint on spaces or line breaks, nor on items. Items are usually objects but they may also be simple values, arrays or even nulls. Items may or may not be separated by lines. Any valid JSON array is a valid _simple JSON stream_.
+/// There is no special constraint on spaces or line breaks, nor on items. 
+/// Items are usually objects but they may also be simple values, arrays or even nulls. 
+/// Items may or may not be separated by lines. Any valid JSON array is a valid _simple JSON stream_.
 /// 
 /// For example the following is a valid simple JSON stream:
 /// 
@@ -28,7 +29,8 @@
 /// 
 /// ## Unbounded streams
 /// 
-/// Sometimes it is preferable to omit the `[` and `]` delimiters and to systematically append a comma after every entry, even after the last one. For example this is a better format for log files as it makes it easy to append entries.
+/// Sometimes it is preferable to omit the `[` and `]` delimiters and to systematically append a comma after every entry, even after the last one. 
+/// For example this is a better format for log files as it makes it easy to append entries.
 /// 
 /// This alternate format can be obtained by passing an `unbounded: true` option when creating the reader or the writer.
 /// 
@@ -52,8 +54,8 @@
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { Reader } from "../reader";
-import { Writer } from "../writer";
+import { Reader } from '../reader';
+import { Writer } from '../writer';
 /// * `transform = ez.transforms.json.parser(options)`  
 ///   creates a parser transform. The following options can be set:  
 ///   - `unbounded`: use _unbounded_ format  
@@ -73,9 +75,9 @@ export function parser(options?: ParserOptions) {
 			const data = reader.read();
 			return Buffer.isBuffer(data) ? data.toString(opts.encoding || 'utf8') : data;
 		}
-		var pos = 0,
+		let pos = 0,
 			chunk = read(),
-			beg: number | undefined, collected = "",
+			beg: number | undefined, collected = '',
 			line = 1,
 			depth = 1,
 			quoted = false,
@@ -83,7 +85,7 @@ export function parser(options?: ParserOptions) {
 			ch: string | undefined;
 
 		function error(msg: string) {
-			throw new Error(line + ": " + msg + " near " + (chunk ? chunk.substring(pos, pos + 20) : "<EOF>"));
+			throw new Error(line + ': ' + msg + ' near ' + (chunk ? chunk.substring(pos, pos + 20) : '<EOF>'));
 		}
 
 		function peekch() {
@@ -101,14 +103,13 @@ export function parser(options?: ParserOptions) {
 		}
 
 		function skipSpaces() {
-			var ch: string | undefined;
-			while ((ch = peekch()) !== undefined && /^\s/.test(ch)) {
-				line += ch === '\n' ? 1 : 0;
+			let c: string | undefined;
+			while ((c = peekch()) !== undefined && /^\s/.test(c)) {
+				line += c === '\n' ? 1 : 0;
 				pos++;
 			}
-			return ch;
+			return c;
 		}
-
 
 		function flush() {
 			if (chunk === undefined || beg === undefined) return;
@@ -116,12 +117,12 @@ export function parser(options?: ParserOptions) {
 			const val = JSON.parse(collected, opts.reviver);
 			writer.write(val);
 			beg = undefined;
-			collected = "";
+			collected = '';
 		}
 
 		ch = skipSpaces();
 		if (!opts.unbounded) {
-			if (ch !== '[') throw error("expected [, got " + ch);
+			if (ch !== '[') throw error('expected [, got ' + ch);
 			pos++;
 		} else {
 			if (ch === undefined) return;
@@ -140,7 +141,7 @@ export function parser(options?: ParserOptions) {
 				switch (ch) {
 					case undefined:
 						if (depth === 1 && opts.unbounded && beg === undefined) return;
-						else throw error("unexpected EOF");
+						else throw error('unexpected EOF');
 					case '"':
 						if (depth === 1 && beg === undefined) beg = pos;
 						quoted = true;
@@ -152,19 +153,19 @@ export function parser(options?: ParserOptions) {
 						break;
 					case '}':
 						depth--;
-						if (depth === 0) throw error("unexpected }");
+						if (depth === 0) throw error('unexpected }');
 						break;
 					case ']':
 						depth--;
 						if (depth === 0) {
-							if (opts.unbounded) throw error("unexpected ]");
+							if (opts.unbounded) throw error('unexpected ]');
 							if (beg !== undefined) flush();
 							return;
 						}
 						break;
 					case ',':
 						if (depth === 1) {
-							if (beg === undefined) throw error("unexpected comma");
+							if (beg === undefined) throw error('unexpected comma');
 							flush();
 						}
 						break;
@@ -175,7 +176,7 @@ export function parser(options?: ParserOptions) {
 			}
 			pos++;
 		}
-	}
+	};
 }
 
 /// * `transform = ez.transforms.json.formatter(options)`  
@@ -199,5 +200,5 @@ export function formatter(options?: FormatterOptions) {
 		});
 		writer.write(opts.unbounded ? ',' : ']');
 		writer.write(undefined);
-	}
+	};
 }

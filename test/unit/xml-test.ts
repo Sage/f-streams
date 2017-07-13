@@ -1,7 +1,7 @@
-import * as ez from "../..";
 import { assert } from 'chai';
-import { run, wait } from 'f-promise';
 import { setup } from 'f-mocha';
+import { run, wait } from 'f-promise';
+import * as ez from '../..';
 setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
@@ -13,40 +13,40 @@ function short(s: string) {
 }
 
 function parseTest(xml: string, js: any, skipRT?: boolean) {
-	const full = '<?xml version="1.0"?><root>' + xml + "</root>\n";
+	const full = '<?xml version="1.0"?><root>' + xml + '</root>\n';
 	const parsed = ez.devices.string.reader(full).transform(ez.transforms.cut.transform(2)) //
 		.transform(ez.transforms.xml.parser('root')).toArray();
-	deepEqual(parsed[0].root, js, "parse " + short(xml));
+	deepEqual(parsed[0].root, js, 'parse ' + short(xml));
 	if (!skipRT) {
 		const rt = ez.devices.string.reader(full).transform(ez.transforms.cut.transform(2)) //
 			.transform(ez.transforms.xml.parser('root')) //
 			.transform(ez.transforms.xml.formatter('root')).toArray().join('');
-		strictEqual(rt, full, "roundtrip " + short(full));
+		strictEqual(rt, full, 'roundtrip ' + short(full));
 	}
 }
 
 function rtTest(name: string, xml: string, indent: string | undefined, result: any) {
-	const full = '<?xml version="1.0"?><root>' + xml + "</root>\n";
-	result = '<?xml version="1.0"?>' + (indent ? '\n' : '') + '<root>' + (result || xml) + "</root>\n";
+	const full = '<?xml version="1.0"?><root>' + xml + '</root>\n';
+	result = '<?xml version="1.0"?>' + (indent ? '\n' : '') + '<root>' + (result || xml) + '</root>\n';
 	const rt = ez.devices.string.reader(full).transform(ez.transforms.cut.transform(2)) //
 		.transform(ez.transforms.xml.parser('root')) //
 		.transform(ez.transforms.xml.formatter({
 			tags: 'root',
-			indent: indent
+			indent: indent,
 		})).toArray().join('');
-	strictEqual(rt, result, "roundtrip " + full);
+	strictEqual(rt, result, 'roundtrip ' + full);
 }
 
 describe(module.id, () => {
 	it('simple tag without attributes', () => {
 		parseTest('<a/>', {
-			a: {}
+			a: {},
 		});
 		parseTest('<a></a>', {
-			a: ""
+			a: '',
 		});
 		parseTest('<a>5</a>', {
-			a: "5"
+			a: '5',
 		});
 	});
 
@@ -54,26 +54,26 @@ describe(module.id, () => {
 		parseTest('<a x="3" y="4">5</a>', {
 			a: {
 				$: {
-					x: "3",
-					y: "4"
+					x: '3',
+					y: '4',
 				},
-				$value: "5"
-			}
+				$value: '5',
+			},
 		});
 		parseTest('<a x="3"></a>', {
 			a: {
 				$: {
-					x: "3"
+					x: '3',
 				},
-				$value: ""
-			}
+				$value: '',
+			},
 		});
 		parseTest('<a x="3"/>', {
 			a: {
 				$: {
-					x: "3"
+					x: '3',
 				},
-			}
+			},
 		});
 	});
 
@@ -81,57 +81,57 @@ describe(module.id, () => {
 		parseTest('<a x="a&gt;b&amp;c&lt;"/>', {
 			a: {
 				$: {
-					x: "a>b&c<"
+					x: 'a>b&c<',
 				},
-			}
+			},
 		});
 		parseTest('<a>a&gt;b&amp;c&lt;</a>', {
-			a: "a>b&c<"
+			a: 'a>b&c<',
 		});
 	});
 
 	it('children', () => {
 		parseTest('<a><b>3</b><c>4</c></a>', {
 			a: {
-				b: "3",
-				c: "4"
-			}
+				b: '3',
+				c: '4',
+			},
 		});
 		parseTest('<a><b x="2">3</b><c>4</c></a>', {
 			a: {
 				b: {
 					$: {
-						x: "2"
+						x: '2',
 					},
-					$value: "3"
+					$value: '3',
 				},
-				c: "4"
-			}
+				c: '4',
+			},
 		});
 		parseTest('<a><b>3</b><b>4</b><c>5</c></a>', {
 			a: {
-				b: ["3", "4"],
-				c: "5"
-			}
+				b: ['3', '4'],
+				c: '5',
+			},
 		});
 	});
 
 	it('cdata', () => {
 		parseTest('<a><![CDATA[<abc>]]></a>', {
 			a: {
-				$cdata: "<abc>"
-			}
+				$cdata: '<abc>',
+			},
 		});
 		parseTest('<a><![CDATA[]]></a>', {
 			a: {
-				$cdata: ""
-			}
+				$cdata: '',
+			},
 		});
 	});
 
 	it('comments in text', () => {
 		parseTest('<a>abc <!-- <b>def</b> --> ghi</a>', {
-			a: "abc  ghi"
+			a: 'abc  ghi',
 		}, true);
 	});
 
@@ -148,42 +148,41 @@ describe(module.id, () => {
 	it('empty element in list', () => {
 		parseTest('<a><b></b><b>x</b><b></b></a>', {
 			a: {
-				b: ["", "x", ""]
-			}
+				b: ['', 'x', ''],
+			},
 		}, true);
 	});
 
-
-	it("rss feed", () => {
+	it('rss feed', () => {
 		const entries = ez.devices.file.text.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
 			.transform(ez.transforms.cut.transform(2)) //
-			.transform(ez.transforms.xml.parser("rss/channel/item")).toArray();
+			.transform(ez.transforms.xml.parser('rss/channel/item')).toArray();
 		strictEqual(entries.length, 10);
-		strictEqual(entries[0].rss.channel.title, "Yahoo! Finance: Top Stories");
-		strictEqual(entries[0].rss.channel.item.title, "Wall Street ends down on first trading day of 2014");
-		strictEqual(entries[9].rss.channel.title, "Yahoo! Finance: Top Stories");
+		strictEqual(entries[0].rss.channel.title, 'Yahoo! Finance: Top Stories');
+		strictEqual(entries[0].rss.channel.item.title, 'Wall Street ends down on first trading day of 2014');
+		strictEqual(entries[9].rss.channel.title, 'Yahoo! Finance: Top Stories');
 		strictEqual(entries[9].rss.channel.item.title, "2013's big winners abandoned 'safety' and bet on central bankers");
 	});
 
-	it("binary input", () => {
+	it('binary input', () => {
 		const entries = ez.devices.file.binary.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
 			.transform(ez.transforms.cut.transform(2)) //
-			.transform(ez.transforms.xml.parser("rss/channel/item")).toArray();
+			.transform(ez.transforms.xml.parser('rss/channel/item')).toArray();
 		strictEqual(entries.length, 10);
-		strictEqual(entries[0].rss.channel.title, "Yahoo! Finance: Top Stories");
-		strictEqual(entries[0].rss.channel.item.title, "Wall Street ends down on first trading day of 2014");
-		strictEqual(entries[9].rss.channel.title, "Yahoo! Finance: Top Stories");
+		strictEqual(entries[0].rss.channel.title, 'Yahoo! Finance: Top Stories');
+		strictEqual(entries[0].rss.channel.item.title, 'Wall Street ends down on first trading day of 2014');
+		strictEqual(entries[9].rss.channel.title, 'Yahoo! Finance: Top Stories');
 		strictEqual(entries[9].rss.channel.item.title, "2013's big winners abandoned 'safety' and bet on central bankers");
 	});
 
-	it("rss roundtrip", () => {
-		var expected = wait(fs.readFile(__dirname + '/../../../test/fixtures/rss-sample.xml', 'utf8'));
-		var result = ez.devices.file.text.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
+	it('rss roundtrip', () => {
+		let expected = wait(fs.readFile(__dirname + '/../../../test/fixtures/rss-sample.xml', 'utf8'));
+		let result = ez.devices.file.text.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
 			.transform(ez.transforms.cut.transform(5)) //
-			.transform(ez.transforms.xml.parser("rss/channel/item")) //
+			.transform(ez.transforms.xml.parser('rss/channel/item')) //
 			.transform(ez.transforms.xml.formatter({
-				tags: "rss/channel/item",
-				indent: "  "
+				tags: 'rss/channel/item',
+				indent: '  ',
 			})) //
 			.toArray().join('');
 		expected = expected.replace(/\r?\n */g, '').replace(/<\!--.*-->/g, '');
@@ -192,31 +191,31 @@ describe(module.id, () => {
 	});
 
 	it('escaping', () => {
-		var xml = '<a>';
-		var js = '';
-		for (var i = 0; i < 0x10000; i++) {
+		let xml = '<a>';
+		let js = '';
+		for (let i = 0; i < 0x10000; i++) {
 			if (i > 300 && i % 100) continue;
 			// tab, cr, lf, ' and " could be formatted verbatim but we escape them
 			if ((i >= 0x20 && i <= 0x7e) || (i >= 0xa1 && i <= 0xd7ff) || (i >= 0xe000 && i <= 0xfffd)) {
 				if (i >= 0x2000 && i < 0xd000) continue; // skip to speed up test
-				var ch = String.fromCharCode(i);
-				if (ch === '<') xml += '&lt;'
-				else if (ch === '>') xml += '&gt;'
-				else if (ch === '&') xml += '&amp;'
-				else if (ch === '"') xml += '&quot;'
-				else if (ch === "'") xml += '&apos;'
+				const ch = String.fromCharCode(i);
+				if (ch === '<') xml += '&lt;';
+				else if (ch === '>') xml += '&gt;';
+				else if (ch === '&') xml += '&amp;';
+				else if (ch === '"') xml += '&quot;';
+				else if (ch === "'") xml += '&apos;';
 				else xml += ch;
 			} else {
-				var hex = i.toString(16);
+				let hex = i.toString(16);
 				while (hex.length < 2) hex = '0' + hex;
 				while (hex.length > 2 && hex.length < 4) hex = '0' + hex;
-				xml += '&#x' + hex + ';'
+				xml += '&#x' + hex + ';';
 			}
 			js += String.fromCharCode(i);
 		}
 		xml += '</a>';
 		parseTest(xml, {
-			a: js
+			a: js,
 		});
 	});
 });

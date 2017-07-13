@@ -1,7 +1,7 @@
-import * as ez from "../..";
 import { assert } from 'chai';
-import { run, wait } from 'f-promise';
 import { setup } from 'f-mocha';
+import { run, wait } from 'f-promise';
+import * as ez from '../..';
 setup();
 
 const { equal } = assert;
@@ -14,11 +14,11 @@ function eqbuf(b1: Buffer | undefined, b2: Buffer, msg: string) {
 }
 
 describe(module.id, () => {
-	it("roundtrip", () => {
+	it('roundtrip', () => {
 		[1, 4, 11, 1000].forEach(function (size) {
 			const dst = ez.devices.buffer.writer();
 			const writer = ez.helpers.binary.writer(dst, {
-				bufSize: size
+				bufSize: size,
 			});
 			writer.write(TESTBUF);
 			writer.writeInt8(1);
@@ -49,6 +49,6 @@ describe(module.id, () => {
 			equal(reader.readDouble(), 0.125, 'double roundtrip (after unread)');
 			equal(reader.readInt8(), 5, 'int8 roundtrip again');
 			equal(reader.read(), undefined, 'EOF roundtrip');
-		})
+		});
 	});
 });

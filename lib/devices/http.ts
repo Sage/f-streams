@@ -1,21 +1,20 @@
-import { fixOptions } from './node';
-import { Reader } from '../reader';
-import { Writer } from '../writer';
 import * as http from 'http';
-
 import {
-	HttpProxyClientRequest,
+	createHttpServer,
+	HttpClientOptions,
 	HttpClientRequest,
 	HttpClientResponse,
-	HttpClientOptions,
+	httpListener,
+	HttpProxyClientRequest,
+	httpRequest,
 	HttpServer,
+	HttpServerOptions,
 	HttpServerRequest,
 	HttpServerResponse,
-	HttpServerOptions,
-	createHttpServer,
-	httpRequest,
-	httpListener,
 } from '../node-wrappers';
+import { Reader } from '../reader';
+import { Writer } from '../writer';
+import { fixOptions } from './node';
 
 export {
 	HttpProxyClientRequest,
@@ -26,26 +25,26 @@ export {
 	HttpServerRequest,
 	HttpServerResponse,
 	HttpServerOptions,
-}
+};
 
 function endWrite(cli: HttpClientRequest) {
 	const resp = cli.end().response();
-	if (resp.statusCode != 201) throw new Error("Request return status code: " + resp.statusCode); // TODO: better manage errors
+	if (resp.statusCode !== 201) throw new Error('Request return status code: ' + resp.statusCode); // TODO: better manage errors
 	const data = resp.readAll();
 	return (typeof data === 'string' && /^application\/json/.test(resp.headers['content-type'])) ? JSON.parse(data) : data;
 }
 
 function guessType(data: any) {
 	if (!data) return null;
-	if (Buffer.isBuffer(data)) return "application/octet-stream";
-	if (typeof data === "object") return "application/json";
-	if (typeof data !== "string") throw new TypeError("invalid data type: " + typeof data);
+	if (Buffer.isBuffer(data)) return 'application/octet-stream';
+	if (typeof data === 'object') return 'application/json';
+	if (typeof data !== 'string') throw new TypeError('invalid data type: ' + typeof data);
 	const text = data;
-	if (text[0] === "<") {
-		if (text.slice(0, 9).toLowerCase() === "<!doctype") return "text/html";
-		else return "application/xml";
+	if (text[0] === '<') {
+		if (text.slice(0, 9).toLowerCase() === '<!doctype') return 'text/html';
+		else return 'application/xml';
 	}
-	return "text/plain";
+	return 'text/plain';
 }
 
 /// !doc
@@ -60,8 +59,8 @@ function guessType(data: any) {
 ///   For a full description of this API, see `HttpServerRequest/Response` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 
-export function server(listener: (request: HttpServerRequest, response: HttpServerResponse) => void, options?: HttpServerOptions) {
-	return createHttpServer(listener, fixOptions(options));
+export function server(listenr: (request: HttpServerRequest, response: HttpServerResponse) => void, options?: HttpServerOptions) {
+	return createHttpServer(listenr, fixOptions(options));
 }
 /// * `client = ez.devices.http.client(options)`  
 ///   Creates an EZ HTTP client.  
@@ -78,8 +77,8 @@ export function client(options?: HttpClientOptions) {
 export interface HttpListenerOption {
 
 }
-export function listener(listener: (request: HttpServerRequest, response: HttpServerResponse) => void, options?: HttpListenerOption) {
-	return httpListener(listener, fixOptions(options));
+export function listener(listenr: (request: HttpServerRequest, response: HttpServerResponse) => void, options?: HttpListenerOption) {
+	return httpListener(listenr, fixOptions(options));
 }
 /// * `factory = ez.factory("http://user:pass@host:port/...")` 
 ///    Use reader for a GET request, writer for POST request
@@ -89,37 +88,37 @@ export function factory(url: string) {
 	return {
 		/// * `reader = factory.reader()`  
 		reader() {
-			var response = module.exports.client({
+			const response = module.exports.client({
 				url: url,
-				method: "GET"
+				method: 'GET',
 			}).end().response();
 			if (response.statusCode !== 200) {
-				var payload = response.readAll();
-				throw new Error("Error reading '" + url + "'; Status " + response.statusCode + ": " + payload);
+				const payload = response.readAll();
+				throw new Error("Error reading '" + url + "'; Status " + response.statusCode + ': ' + payload);
 			}
 			return response;
 		},
 		/// * `writer = factory.writer()`  
 		writer() {
-			var cli: HttpClientRequest;
-			var type: string | null;
+			let cli: HttpClientRequest;
+			let type: string | null;
 			return {
 				write(this: FactoryWriter, data: any) {
 					const opt: HttpClientOptions = {
 						url: url,
-						method: "POST",
-						headers: {}
+						method: 'POST',
+						headers: {},
 					};
 					if (!cli) {
 						type = guessType(data);
-						if (type) opt.headers!["content-type"] = type;
+						if (type) opt.headers!['content-type'] = type;
 						cli = client(opt).proxyConnect();
 					}
 					if (data === undefined) return this._result = endWrite(cli);
-					else return cli.write(type === "application/json" ? JSON.stringify(data) : data);
+					else return cli.write(type === 'application/json' ? JSON.stringify(data) : data);
 				},
-				get result(this: FactoryWriter) { return this._result }
+				get result(this: FactoryWriter) { return this._result; },
 			};
-		}
+		},
 	};
 }

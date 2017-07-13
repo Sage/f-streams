@@ -1,6 +1,6 @@
+import * as streams from '../node-wrappers';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
-import * as streams from '../node-wrappers';
 
 /// !doc
 /// ## EZ wrappers for standard I/O streams
@@ -15,19 +15,19 @@ export const input: Input = function (encoding?: string) {
 	st.setEncoding(encoding || null);
 	process.stdin.resume();
 	return st.reader;
-}
+};
 
 export const output: Output = function (encoding?: string) {
 	return new streams.WritableStream(process.stdout, {
 		encoding: encoding,
 	}).writer;
-}
+};
 
 export const error: Output = function (encoding?: string) {
 	return new streams.WritableStream(process.stderr, {
 		encoding: encoding,
 	}).writer;
-}
+};
 
 export interface Input {
 	(encoding: string): Reader<string>;

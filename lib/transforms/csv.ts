@@ -1,11 +1,10 @@
-"use strict";
 /// !doc
 /// ## Stream transform for CSV files
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { Reader } from "../reader";
-import { Writer } from "../writer";
+import { Reader } from '../reader';
+import { Writer } from '../writer';
 import * as lines from './lines';
 
 /// * `transform = ez.transforms.csv.parser(options)`  
@@ -22,7 +21,7 @@ export function parser(options?: ParserOptions) {
 	return (reader: Reader<string | Buffer>, writer: Writer<any>) => {
 		const rd = reader.transform(lines.parser());
 		const keys = (rd.read() || '').split(sep);
-		rd.forEach((line) => {
+		rd.forEach(line => {
 			// ignore empty line (we get one at the end if file is terminated by newline)
 			if (line.length === 0) return;
 			const values = line.split(sep);
@@ -48,12 +47,12 @@ export function formatter(options?: FormatterOptions) {
 	const sep = opts.sep || ',';
 	const eol = opts.eol || '\n';
 	return (reader: Reader<any>, writer: Writer<string>) => {
-		var obj = reader.read();
+		let obj = reader.read();
 		if (!obj) return;
 		const keys = Object.keys(obj);
 		writer.write(keys.join(sep) + eol);
 		do {
-			var values = keys.map((key) => obj[key]);
+			const values = keys.map(key => obj[key]);
 			writer.write(values.join(sep) + eol);
 		} while ((obj = reader.read()) !== undefined);
 	};

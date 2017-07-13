@@ -1,17 +1,17 @@
 import * as devices from './devices/index';
 import * as helpers from './helpers/index';
 import * as mappers from './mappers/index';
-import * as transforms from './transforms/index';
 import * as predicate from './predicate';
 import * as stopException from './stop-exception';
+import * as transforms from './transforms/index';
 
+import EzFactory from './factory';
 import * as EzReader from './reader';
 import * as EzWriter from './writer';
-import EzFactory from './factory';
 
 export {
 	devices, helpers, mappers, transforms,
-	predicate, stopException
+	predicate, stopException,
 };
 
 export const factory = EzFactory;
@@ -25,14 +25,14 @@ export type Writer<T> = EzWriter.Writer<T>;
 export function reader(arg: string | any[] | Buffer): Reader<any> {
 	if (typeof arg === 'string') {
 		const f = factory(arg);
-		let reader: Reader<any>;
+		let rd: Reader<any>;
 		return devices.generic.reader(function read() {
-			if (!reader) reader = f.reader();
-			return reader.read();
-		}, function stop(arg) {
-			if (!reader) reader = f.reader();
-			return reader.stop(arg);
-		})
+			if (!rd) rd = f.reader();
+			return rd.read();
+		}, function stop(aarg) {
+			if (!rd) rd = f.reader();
+			return rd.stop(aarg);
+		});
 	} else if (Array.isArray(arg)) {
 		return devices.array.reader(arg);
 	} else if (Buffer.isBuffer(arg)) {
@@ -45,19 +45,19 @@ export function reader(arg: string | any[] | Buffer): Reader<any> {
 export function writer(arg: string | any[] | Buffer): Writer<any> {
 	if (typeof arg === 'string') {
 		const f = factory(arg);
-		let writer: Writer<any>;
+		let wr: Writer<any>;
 		const wrapper = devices.generic.writer(function write(val) {
-			if (!writer) writer = f.writer();
-			return writer.write(val);
-		}, function stop(arg) {
-			if (!writer) writer = f.writer();
-			return writer.stop(arg);
+			if (!wr) wr = f.writer();
+			return wr.write(val);
+		}, function stop(aarg) {
+			if (!wr) wr = f.writer();
+			return wr.stop(aarg);
 		});
 		Object.defineProperty(wrapper, 'result', {
 			get: () => {
-				const anyWriter: any = writer;
+				const anyWriter: any = wr;
 				return anyWriter.result;
-			}
+			},
 		});
 		return wrapper;
 	} else if (Array.isArray(arg)) {
@@ -71,19 +71,19 @@ export function writer(arg: string | any[] | Buffer): Writer<any> {
 
 // compatibility hacks
 function anyfy(x: any) { return x; }
-var readerHack: any = reader;
+const readerHack: any = reader;
 readerHack.create = EzReader.create;
 readerHack.decorate = anyfy(EzReader).decorate;
 
-var writerHack: any = writer;
+const writerHack: any = writer;
 writerHack.create = EzWriter.create;
 writerHack.decorate = anyfy(EzWriter).decorate;
 
-var transformHack: any = transforms.cut.transform;
+const transformHack: any = transforms.cut.transform;
 (transforms as any).cut = transformHack;
 transforms.cut.transform = transformHack;
 
-var queueHack: any = devices.queue.create;
+const queueHack: any = devices.queue.create;
 (devices as any).queue = queueHack;
 devices.queue.create = queueHack;
 

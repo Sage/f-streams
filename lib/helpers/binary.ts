@@ -2,8 +2,8 @@
 /// ## helpers for binary streams
 /// 
 /// `import * as f from 'f-streams'`  
-import { Reader as BaseReader } from "../reader";
-import { Writer as BaseWriter } from "../writer";
+import { Reader as BaseReader } from '../reader';
+import { Writer as BaseWriter } from '../writer';
 
 const NUMBERS: [string, number][] = [//
 	['Int8', 1], ['UInt8', 1], //
@@ -26,7 +26,7 @@ export class Reader extends BaseReader<Buffer> {
 	options: ReaderOptions;
 	pos: number;
 	buf: Buffer | undefined;
-	constructor(reader: BaseReader<Buffer>, options: ReaderOptions) {
+	constructor(rd: BaseReader<Buffer>, options: ReaderOptions) {
 		/// 
 		/// * `buf = reader.read(len)`  
 		///   returns the `len` next bytes of the stream.  
@@ -35,8 +35,8 @@ export class Reader extends BaseReader<Buffer> {
 		///   returns `undefined`.  
 		///   If the `len` parameter is omitted, the call returns the next available chunk of data.
 		// peekOnly is internal and not documented
-		super(() => { return this.readData(); });
-		this.reader = reader;
+		super(() => this.readData());
+		this.reader = rd;
 		this.options = options;
 		this.pos = 0;
 		this.buf = new Buffer(0);
@@ -64,11 +64,11 @@ export class Reader extends BaseReader<Buffer> {
 	ensure(len: number) {
 		if (this.buf === undefined) return 0;
 		if (this.pos + len <= this.buf.length) return len;
-		var got = this.buf.length - this.pos;
+		let got = this.buf.length - this.pos;
 		const bufs = got ? [this.buf.slice(this.pos)] : [];
 		this.pos = 0;
 		while (got < len) {
-			var buf = this.reader.read();
+			const buf = this.reader.read();
 			if (buf === undefined) {
 				if (bufs.length === 0) return 0;
 				else break;
@@ -93,7 +93,7 @@ export class Reader extends BaseReader<Buffer> {
 	///   Unread the last `len` bytes read.  
 	///   `len` cannot exceed the size of the last read.
 	unread(len: number) {
-		if (!(len <= this.pos)) throw new Error("invalid unread: expected <= " + this.pos + ", got " + len);
+		if (!(len <= this.pos)) throw new Error('invalid unread: expected <= ' + this.pos + ', got ' + len);
 		this.pos -= len;
 	}
 }
@@ -121,7 +121,7 @@ function numberReader(name: string, len: number, peekOnly?: boolean) {
 	return function (this: Reader) {
 		const got = this.ensure(len);
 		if (got === 0) return undefined;
-		if (got < len) throw new Error("unexpected EOF: expected " + len + ", got " + got);
+		if (got < len) throw new Error('unexpected EOF: expected ' + len + ', got ' + got);
 		const result = (this.buf as any)[name](this.pos);
 		if (!peekOnly) this.pos += len;
 		return result;
@@ -161,18 +161,17 @@ export class Writer extends BaseWriter<Buffer> {
 	options: WriterOptions;
 	pos: number;
 	buf: Buffer;
-	constructor(writer: BaseWriter<Buffer>, options?: WriterOptions) {
+	constructor(wr: BaseWriter<Buffer>, options?: WriterOptions) {
 		super((buf: Buffer) => {
 			this.writeDate(buf);
 			return this;
 		});
 		options = options || {};
-		this.writer = writer;
+		this.writer = wr;
 		this.options = options;
 		this.pos = 0;
 		this.buf = new Buffer(options.bufSize && options.bufSize > 0 ? options.bufSize : 16384);
 	}
-
 
 	/// 
 	/// * `writer.flush()`  
@@ -242,8 +241,8 @@ NUMBERS.forEach(function (pair) {
 
 function endianReader(verbs: string[], suffix: string) {
 	class EndianReader extends Reader {
-		constructor(reader: BaseReader<Buffer>, options: ReaderOptions) {
-			super(reader, options);
+		constructor(rd: BaseReader<Buffer>, options: ReaderOptions) {
+			super(rd, options);
 		}
 	}
 	NUMBERS.slice(2).forEach(function (pair) {
@@ -256,8 +255,8 @@ function endianReader(verbs: string[], suffix: string) {
 
 function endianWriter(verbs: string[], suffix: string) {
 	class EndianWriter extends Writer {
-		constructor(writer: BaseWriter<Buffer>, options: WriterOptions) {
-			super(writer, options);
+		constructor(wr: BaseWriter<Buffer>, options: WriterOptions) {
+			super(wr, options);
 		}
 	}
 	NUMBERS.slice(2).forEach(function (pair) {
@@ -271,10 +270,10 @@ function endianWriter(verbs: string[], suffix: string) {
 // TODO: add ambient definitions for all generated methods
 require('../reader').decorate(Reader.prototype);
 require('../writer').decorate(Writer.prototype);
-const ReaderLE = endianReader(['read', 'peek', 'unread'], 'LE');
-const ReaderBE = endianReader(['read', 'peek', 'unread'], 'BE');
-const WriterLE = endianWriter(['write'], 'LE');
-const WriterBE = endianWriter(['write'], 'BE');
+const readerLE = endianReader(['read', 'peek', 'unread'], 'LE');
+const readerBE = endianReader(['read', 'peek', 'unread'], 'BE');
+const writerLE = endianWriter(['write'], 'LE');
+const writerBE = endianWriter(['write'], 'BE');
 
 // Interfaces to get the specialized methods in TypeScript
 export interface BinaryReader extends Reader {
@@ -317,14 +316,14 @@ export interface BinaryWriter extends Writer {
 }
 
 // Documentation above, next to the constructor
-export function reader(reader: BaseReader<Buffer>, options?: ReaderOptions): BinaryReader {
+export function reader(rd: BaseReader<Buffer>, options?: ReaderOptions): BinaryReader {
 	options = options || {};
-	const constr: any = options.endian === 'little' ? ReaderLE : ReaderBE;
-	return new constr(reader, options);
+	const constr: any = options.endian === 'little' ? readerLE : readerBE;
+	return new constr(rd, options);
 }
 
-export function writer(writer: BaseWriter<Buffer>, options?: WriterOptions): BinaryWriter {
+export function writer(wr: BaseWriter<Buffer>, options?: WriterOptions): BinaryWriter {
 	options = options || {};
-	const constr: any = options.endian === 'little' ? WriterLE : WriterBE;
-	return new constr(writer, options);
+	const constr: any = options.endian === 'little' ? writerLE : writerBE;
+	return new constr(wr, options);
 }
