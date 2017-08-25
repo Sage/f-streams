@@ -27,7 +27,7 @@
 /// 
 /// `import * as f from 'f-streams'`  
 /// 
-import { funnel, run, wait } from 'f-promise';
+import { Callback, funnel, run, wait } from 'f-promise';
 import * as nodeStream from 'stream';
 import { convert as predicate } from './predicate';
 import * as stopException from './stop-exception';
@@ -413,7 +413,7 @@ export class Reader<T> {
 
 		const parent = this;
 		const streams: Reader<T>[] = [];
-		const fun = funnel<T | undefined>(1);
+		const fun = funnel(1);
 		let inside = 0;
 		let stopArg: any;
 		for (let i = 0; i < (opts.count || 1); i++) {
@@ -485,7 +485,7 @@ export class Reader<T> {
 		};
 		fill();
 
-		return new Reader(() => wait(cb => {
+		return new Reader(() => wait((cb: Callback<T>) => {
 			if (buffered.length > 0) {
 				const val = buffered.shift();
 				fill();
@@ -675,7 +675,7 @@ export class StreamGroup<T> implements Stoppable {
 			};
 			next();
 		});
-		return new Reader(() => wait(cb => {
+		return new Reader(() => wait((cb: Callback<T>) => {
 			if (alive <= 0) return cb(null), void 0;
 			const res = results.shift();
 			if (res) {
