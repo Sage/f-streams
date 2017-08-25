@@ -1,6 +1,6 @@
 # Easy Streams for node.js
 
-f-streams is a simple but powerful streaming library for node.js. 
+f-streams is a simple but powerful streaming library for node.js.
 
 F-streams come in two flavors: _readers_ and _writers_. You pull data from _readers_ and you push data into _writers_.
 
