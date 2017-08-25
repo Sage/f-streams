@@ -353,7 +353,7 @@ This returns 3 streams which operate on the same input but perform different cha
 You can then pipe these 3 streams to different outputs. 
 
 Note that you have to use futures (or callbacks) when piping these streams so that they are piped in parallel. 
-See the examples in the [`api-test._js`](https://github.com/Sage/f-streams/blob/master/test/server/api-test._js) test file for some examples.
+See the examples in the [`api-test.ts`](https://github.com/Sage/f-streams/blob/master/test/server/api-test.ts) test file for some examples.
 
 You can also `join` the group of streams created by a fork, with a joiner function that defines how entries are dequeued from the group.
 
@@ -369,7 +369,8 @@ This part of the API is still fairly experimental and may change a bit.
 
 ## Exception handling
 
-Exceptions are propagated through the chains and you can trap them in the reducer which pulls the items from the chain. If you write your code with streamline.js, you will naturally use try/catch:
+Exceptions are propagated through the chains and you can trap them in the reducer which pulls the items from the chain. 
+You can naturally use try/catch:
 
 ``` javascript
 try {
