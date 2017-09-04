@@ -11,13 +11,12 @@ function consoleWriter(fn: (message: string) => void) {
 /// !doc
 /// ## Console EZ streams
 /// 
-/// `import * as f from 'f-streams'`
-/// 
-/// * `ez.devices.console.log`  
-/// * `ez.devices.console.info`  
-/// * `ez.devices.console.warn`  
-/// * `ez.devices.console.errors`  
-///   EZ writers for console 
+/// `import { consoleLog, consoleInfo, consoleWarn, consoleError } from 'f-streams'`
+/// * `consoleLog`  
+/// * `consoleInfo`  
+/// * `consoleWarn`  
+/// * `consoleError`  
+///   Console writers 
 export const log: Writer<string> = consoleWriter(console.log);
 export const info: Writer<string> = consoleWriter(console.info);
 export const warn: Writer<string> = consoleWriter(console.warn);

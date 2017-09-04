@@ -52,11 +52,11 @@
 /// 
 /// ## API
 /// 
-/// `import * as f from 'f-streams'`  
+/// `import { jsonParser, jsonFormatter }from 'f-streams'`  
 /// 
 import { Reader } from '../reader';
 import { Writer } from '../writer';
-/// * `transform = ez.transforms.json.parser(options)`  
+/// * `transform = jsonParser(options)`  
 ///   creates a parser transform. The following options can be set:  
 ///   - `unbounded`: use _unbounded_ format  
 ///   - `reviver`: reviver function which is passed to [JSON.parse](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse)
@@ -179,7 +179,7 @@ export function parser(options?: ParserOptions) {
 	};
 }
 
-/// * `transform = ez.transforms.json.formatter(options)`  
+/// * `transform = jsonFormatter(options)`  
 ///   creates a formatter transform. The following options can be set:  
 ///   - `unbounded`: use _unbounded_ format  
 ///   - `replacer`: replacer function which is passed to [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse)

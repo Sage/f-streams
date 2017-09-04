@@ -1,13 +1,13 @@
 /// !doc
 /// ## Stream transform for CSV files
 /// 
-/// `import * as f from 'f-streams'`  
+/// `import { csvParser, csvFormatter } from 'f-streams'`  
 /// 
 import { Reader } from '../reader';
 import { Writer } from '../writer';
 import * as lines from './lines';
 
-/// * `transform = ez.transforms.csv.parser(options)`  
+/// * `transform = csvParser(options)`  
 ///   creates a parser transform. The following options can be set:  
 ///   - `sep`: the field separator, comma by default 
 export interface ParserOptions {
@@ -33,7 +33,7 @@ export function parser(options?: ParserOptions) {
 		});
 	};
 }
-/// * `transform = ez.transforms.csv.formatter(options)`  
+/// * `transform = csvFormatter(options)`  
 ///   creates a formatter transform. The following options can be set:  
 ///   - `sep`: the field separator, comma by default 
 ///   - `eol`: the end of line marker (`\n`  or `\r\n`)  

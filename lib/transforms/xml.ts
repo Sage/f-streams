@@ -29,7 +29,7 @@
 /// 
 /// ## API
 /// 
-/// `import * as f from 'f-streams'`  
+/// `import { xmlParser, xmlFormatter }from 'f-streams'`  
 /// 
 import { Reader } from '../reader';
 import { Writer } from '../writer';
@@ -77,7 +77,7 @@ function assert(cond: boolean, msg: string) {
 
 const MARKER = '689c93f7-0147-40e9-a172-5c6c1c12ba11';
 
-/// * `transform = ez.transforms.xml.parser(options)`  
+/// * `transform = xmlParser(options)`  
 ///   creates a parser transform. The following options can be set:  
 ///   - `tags`: the list of tags that enclose each item returned by the reader
 export interface ParserOptions {
@@ -356,7 +356,7 @@ export function parser(options?: ParserOptions | string) {
 		if (pos !== str.length) throw error('unexpected trailing text: ' + str.substring(pos));
 	};
 }
-/// * `transform = ez.transforms.xml.formatter(options)`  
+/// * `transform = xmlFormatter(options)`  
 ///   creates a formatter transform. The following options can be set:  
 ///   - `tags`: the list of tags that enclose each item returned by the reader
 ///   - `indent`: optional indentation string, should only contain spaces.

@@ -116,6 +116,16 @@ export {
 	warn as consoleWarn,
 } from './devices/console';
 
+export const textFileReader = devices.file.text.reader;
+export const textFileWriter = devices.file.text.writer;
+export const binaryFileReader = devices.file.binary.reader;
+export const binaryFileWriter = devices.file.binary.writer;
+export {
+	ListOptions as DirectoryReaderOptions,
+	ListEntry as DirectoryEntry,
+	list as directoryReader,
+} from './devices/file';
+
 export {
 	reader as genericReader,
 	writer as genericWriter,
@@ -176,10 +186,10 @@ export {
 } from './mappers/convert';
 
 export {
-	ParserOptions as JsonParserOptions,
-	FormatterOptions as jsonFormatterOptions,
-	parse as jsonParser,
-	stringify as jsonFormatter,
+	ParserOptions as SimpleJsonParserOptions,
+	FormatterOptions as SimpleJsonFormatterOptions,
+	parse as simpleJsonParser,
+	stringify as simpleJsonFormatter,
 } from './mappers/json';
 
 export {
@@ -190,10 +200,10 @@ export {
 } from './transforms/csv';
 
 export {
-	ParserOptions as JsonTransformParserOptions,
-	FormatterOptions as JsonTransformFormatterOptions,
-	parser as jsonTransformParser,
-	formatter as jsonTransformFormatter,
+	ParserOptions as JsonParserOptions,
+	FormatterOptions as JsonFormatterOptions,
+	parser as jsonParser,
+	formatter as jsonFormatter,
 } from './transforms/json';
 
 export {

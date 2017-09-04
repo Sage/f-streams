@@ -1,7 +1,7 @@
 /// !doc
 /// ## Stream transform for MIME multipart
 /// 
-/// `import * as f from 'f-streams'`  
+/// `import { multipartParser, multipartFormatter }from 'f-streams'`  
 /// 
 import { handshake, wait } from 'f-promise';
 import * as generic from '../devices/generic';
@@ -25,7 +25,7 @@ function parseContentType(contentType?: string) {
 	};
 }
 
-/// * `transform = ez.transforms.multipart.parser(options)`  
+/// * `transform = multipartParser(options)`  
 ///   Creates a parser transform.
 ///   The content type, which includes the boundary,
 ///   is passed via `options['content-type']`.
@@ -91,7 +91,7 @@ export function parser(options: ParserOptions) {
 	};
 }
 
-/// * `transform = ez.transforms.multipart.formatter(options)`  
+/// * `transform = multipartFormatter(options)`  
 ///   Creates a formatter transform.
 ///   The content type, which includes the boundary,
 ///   is passed via `options['content-type']`.

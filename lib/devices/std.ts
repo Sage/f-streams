@@ -3,13 +3,13 @@ import { Reader } from '../reader';
 import { Writer } from '../writer';
 
 /// !doc
-/// ## EZ wrappers for standard I/O streams
+/// ## Wrappers for standard I/O streams
 /// 
-/// `import * as f from 'f-streams'`
+/// `import { stdInput, stdOutput, stdError } from 'f-streams'`
 /// 
-/// * `reader = ez.devices.std.in(encoding)`  
-/// * `writer = ez.devices.std.out(encoding)`  
-/// * `writer = ez.devices.std.err(encoding)`  
+/// * `reader = stdInput(encoding)`  
+/// * `writer = stdOutput(encoding)`  
+/// * `writer = stdError(encoding)`  
 export const input: Input = function (encoding?: string) {
 	const st = new streams.ReadableStream(process.stdin, {});
 	st.setEncoding(encoding || null);
