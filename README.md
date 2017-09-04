@@ -137,6 +137,16 @@ reader =  numberReader(1000).filter({
 });
 ```
 
+## Iterator interface
+
+Readers implement the `Iterator` interface. You can iterate over them with a `for ... of ...` loop:
+
+``` javascript
+for (const val of numberReader(1000)) {
+	console.log(val);
+}
+```
+
 ## Pipe
 
 Readers have a `pipe` method that lets you pipe them into a writer:
