@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
-import * as ez from '../..';
+import { childProcessReader, childProcessWriter } from '../..';
 setup();
 
 const { equal, ok, deepEqual } = assert;
@@ -17,7 +17,7 @@ describe(module.id, () => {
 			ok('Ignore on Windows');
 		} else {
 			const proc = cp.spawn('echo', ['hello\nworld']);
-			const got = ez.devices.child_process.reader(proc).toArray();
+			const got = childProcessReader(proc).toArray();
 			deepEqual(got, ['hello', 'world']);
 		}
 	});
@@ -25,7 +25,7 @@ describe(module.id, () => {
 	it('bad command', () => {
 		const proc = cp.spawn(fsp.join(__dirname, 'foobar.zoo'), ['2']);
 		try {
-			const got = ez.devices.child_process.reader(proc).toArray();
+			const got = childProcessReader(proc).toArray();
 			ok(false);
 		} catch (ex) {
 			ok(ex.code < 0); // -1 on node 0.10 but -2 on 0.12
@@ -36,7 +36,7 @@ describe(module.id, () => {
 		const cmd = 'exit2' + (os.type() === 'Windows_NT' ? '.cmd' : '.sh');
 		const proc = cp.spawn(fsp.join(__dirname, '../../../test/fixtures', cmd), ['2']);
 		try {
-			const got = ez.devices.child_process.reader(proc).toArray();
+			const got = childProcessReader(proc).toArray();
 			ok(false);
 		} catch (ex) {
 			equal(ex.code, 2);
