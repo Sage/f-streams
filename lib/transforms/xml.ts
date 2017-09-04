@@ -97,10 +97,10 @@ interface Element {
 	[name: string]: any;
 }
 
-export function parser(options?: ParserOptions) {
-	const opts = options || {};
-	const ttags: any = typeof opts === 'string' ? opts : opts.tags;
-	const tags = typeof ttags === 'string' ? ttags.split('/') : ttags;
+export function parser(options?: ParserOptions | string) {
+	const opts = typeof options === 'string' ? { tags: options } : (options || {});
+	const ttags = opts.tags;
+	const tags = typeof ttags === 'string' ? ttags.split('/') : (ttags || []);
 	if (!tags) throw new Error("cannot transform XML: 'tags' option missing");
 
 	function builder(error: (message: string) => Error) {
@@ -374,10 +374,10 @@ export interface Builder {
 	getResult: (extraIndent?: boolean) => string;
 }
 
-export function formatter(options?: FormatterOptions) {
-	const opts = options || {};
-	const ttags: any = typeof opts === 'string' ? opts : opts.tags;
-	const tags = typeof ttags === 'string' ? ttags.split('/') : ttags;
+export function formatter(options?: FormatterOptions | string) {
+	const opts = typeof options === 'string' ? { tags: options } : (options || {});
+	const ttags = opts.tags;
+	const tags = typeof ttags === 'string' ? ttags.split('/') : (ttags || []);
 	if (!tags) throw new Error("cannot transform XML: 'tags' option missing");
 	const ident = opts && opts.indent;
 

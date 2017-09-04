@@ -28,7 +28,7 @@
     "chai": "^3.5.0",
     "f-mocha": "^1.0.1",
     "mocha": "^3.2.0",
-    "typescript": "2.3.4"
+    "typescript": "^2.3.4"
   },
   "scripts": {
     "prepublish": "rm -rf build; node_modules/typescript/bin/tsc",

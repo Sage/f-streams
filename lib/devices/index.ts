@@ -1,6 +1,6 @@
 import * as array from './array';
 import * as buffer from './buffer';
-import * as child_process from './child_process';
+import * as child_process from './child-process';
 import * as console from './console';
 import * as file from './file';
 import * as generic from './generic';

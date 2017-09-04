@@ -61,9 +61,11 @@ export function writer(arg: string | any[] | Buffer): Writer<any> {
 		});
 		return wrapper;
 	} else if (Array.isArray(arg)) {
-		return devices.array.writer(arg);
+		// warning: arg is ignored here
+		return devices.array.writer();
 	} else if (Buffer.isBuffer(arg)) {
-		return devices.buffer.writer(arg);
+		// warning: arg is ignored here
+		return devices.buffer.writer();
 	} else {
 		throw new Error(`invalid argument ${arg && typeof arg}`);
 	}
@@ -87,6 +89,38 @@ const queueHack: any = devices.queue.create;
 (devices as any).queue = queueHack;
 devices.queue.create = queueHack;
 
+// more practical imports for devices
+export {
+	Options as ArrayOptions,
+	reader as arrayReader,
+	writer as arrayWriter,
+} from './devices/array';
+
+export {
+	Options as BufferOptions,
+	reader as bufferReader,
+	writer as bufferWriter,
+} from './devices/buffer';
+
+export {
+	reader as childProcessReader,
+	ReaderOptions as ChildProcessReaderOptions,
+	writer as childProcessWriter,
+	WriterOptions as ChildProcessWriterOptions,
+} from './devices/child-process';
+
+export {
+	error as consoleError,
+	info as consoleInfo,
+	log as consoleLog,
+	warn as consoleWarn,
+} from './devices/console';
+
+export {
+	reader as genericReader,
+	writer as genericWriter,
+} from './devices/generic';
+
 export {
 	HttpProxyClientRequest,
 	HttpClientRequest,
@@ -96,4 +130,93 @@ export {
 	HttpServerRequest,
 	HttpServerResponse,
 	HttpServerOptions,
+	server as httpServer,
+	client as httpClient,
+	listener as httpListener,
 } from './devices/http';
+
+export {
+	SocketOptions,
+	SocketClient,
+	SocketServerOptions,
+	SocketServerListener,
+	SocketServer,
+	server as socketServer,
+	socketClient,
+	tcpClient,
+} from './devices/net';
+
+export {
+	reader as nodeReader,
+	writer as nodeWriter,
+} from './devices/node';
+
+export {
+	input as stdInput,
+	output as stdOutput,
+	error as stdError,
+} from './devices/std';
+
+export {
+	Options as StringOptions,
+	reader as stringReader,
+	writer as stringWriter,
+} from './devices/string';
+
+export {
+	ReaderOptions as BinaryReaderOptions,
+	WriterOptions as BinaryWriterOptions,
+	reader as binaryReader,
+	writer as binaryWriter,
+} from './helpers/binary';
+
+export {
+	stringify as stringConverter,
+	bufferify as bufferConverter,
+} from './mappers/convert';
+
+export {
+	ParserOptions as JsonParserOptions,
+	FormatterOptions as jsonFormatterOptions,
+	parse as jsonParser,
+	stringify as jsonFormatter,
+} from './mappers/json';
+
+export {
+	ParserOptions as CsvParserOptions,
+	FormatterOptions as CsvFormatterOptions,
+	parser as csvParser,
+	formatter as csvFormatter,
+} from './transforms/csv';
+
+export {
+	ParserOptions as JsonTransformParserOptions,
+	FormatterOptions as JsonTransformFormatterOptions,
+	parser as jsonTransformParser,
+	formatter as jsonTransformFormatter,
+} from './transforms/json';
+
+export {
+	ParserOptions as LinesParserOptions,
+	FormatterOptions as LinesFormatterOptions,
+	parser as linesParser,
+	formatter as linesFormatter,
+} from './transforms/csv';
+
+export {
+	transform as cutter,
+} from './transforms/cut';
+
+export {
+	ParserOptions as MultipartParserOptions,
+	FormatterOptions as MultipartFormatterOptions,
+	parser as multipartParser,
+	formatter as multipartFormatter,
+} from './transforms/multipart';
+
+export {
+	ParserOptions as XmlParserOptions,
+	FormatterOptions as XmlFormatterOptions,
+	parser as xmlParser,
+	formatter as xmlFormatter,
+} from './transforms/xml';

@@ -11,7 +11,7 @@ export interface Options {
 	size?: number;
 }
 
-export function transform<T>(options?: Options) {
+export function transform<T>(options?: Options | number) {
 	options = options || {};
 	const size = typeof options === 'number' ? options : options.size;
 	return (reader: Reader<T>, writer: Writer<T>) => {

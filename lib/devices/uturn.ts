@@ -118,7 +118,7 @@ export function create<T>(): Uturn<T> {
 					break;
 			}
 		})),
-		writer: new Writer<T>(data => wait(cb => {
+		writer: new Writer<T>(data => wait<Writer<T>>(cb => {
 			nextTick();
 			tracer && tracer(id, 'WRITE', state, data);
 			const st = state;

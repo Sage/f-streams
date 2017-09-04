@@ -14,11 +14,11 @@ import { fixOptions } from './node';
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 export type SocketServer = streams.SocketServer;
 export type SocketServerOptions = streams.SocketServerOptions;
-export type SocketStream = streams.SocketStream;
+export type SocketServerListener = streams.SocketServerListener;
 export type SocketOptions = streams.SocketOptions;
 export type SocketClient = streams.SocketClient;
 
-export function server(listener: (stream: SocketStream) => void, streamOptions?: SocketOptions, serverOptions?: SocketServerOptions) {
+export function server(listener: SocketServerListener, streamOptions?: SocketOptions, serverOptions?: SocketServerOptions) {
 	// compat hack 
 	if (typeof streamOptions === 'function') {
 		return streams.createNetServer(arguments[0], arguments[1], fixOptions(arguments[2]));

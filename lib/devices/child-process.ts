@@ -92,6 +92,8 @@ export function reader(proc: ChildProcess, options?: ReaderOptions) {
 ///   For a full description of the options, see `WritableStream` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 
-export function writer(proc: ChildProcess, options: node.NodeWriterOptions) {
+export interface WriterOptions extends node.NodeWriterOptions { }
+
+export function writer(proc: ChildProcess, options: WriterOptions) {
 	return node.writer(proc.stdin, options);
 }

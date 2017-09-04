@@ -173,7 +173,7 @@ describe(module.id, () => {
 
 	it('pre', () => {
 		const source = numbers(10);
-		const target = ez.devices.array.writer();
+		const target = ez.devices.array.writer<number>();
 		source.pipe(target.pre.limit(5));
 		strictEqual(target.toArray().join(), '0,1,2,3,4');
 		ok(source.stoppedReason, 'source stopped');

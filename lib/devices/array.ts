@@ -36,7 +36,7 @@ export class ArrayWriter<T> extends Writer<T> {
 export function reader<T>(array: T[], options?: Options) {
 	const opts = options || {};
 	const values = array.slice(0);
-	return new Reader(function () {
+	return new Reader<T>(function () {
 		if (!opts.sync) nextTick();
 		return values.shift();
 	});
@@ -50,5 +50,5 @@ export function reader<T>(array: T[], options?: Options) {
 ///   entries have been collected.
 export function writer<T>(options?: Options) {
 	const opts = options || {};
-	return new ArrayWriter(opts);
+	return new ArrayWriter<T>(opts);
 }

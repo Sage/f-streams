@@ -36,6 +36,6 @@ export class StreamedQueue<T> extends Queue<T> {
 }
 
 // any and type intersection to the rescuse because queue is not an ES2015 class
-export function create<T>(options?: QueueOptions) {
+export function create<T>(options?: QueueOptions | number) {
 	return new StreamedQueue(options);
 }

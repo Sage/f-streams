@@ -322,7 +322,7 @@ export class Reader<T> {
 		const f = resolvePredicate(fn);
 		const parent = this;
 		let i = 0, done = false;
-		return new Reader(function() {
+		return new Reader(function () {
 			while (!done) {
 				const val = parent.read();
 				done = val === undefined;
@@ -341,7 +341,7 @@ export class Reader<T> {
 		const f = resolvePredicate(fn);
 		const parent = this;
 		let i = 0;
-		return new Reader(function() {
+		return new Reader(function () {
 			const val = parent.read();
 			if (val === undefined) return undefined;
 			if (!f.call(null, val, i++)) return val;
@@ -624,7 +624,7 @@ export class PeekableReader<T> extends Reader<T> {
 ///   You do not need to call this function if you create your readers with
 ///   the `ez.devices` modules.   
 ///   Returns `proto` for convenience.
-exports.decorate = function(proto: any) {
+exports.decorate = function (proto: any) {
 	const readerProto: any = Reader.prototype;
 	Object.getOwnPropertyNames(Reader.prototype).forEach(k => {
 		if (k !== 'constructor' && !proto[k]) proto[k] = readerProto[k];
@@ -714,7 +714,7 @@ export class StreamGroup<T> implements Stoppable {
 			read: () => run(() => stream.read()),
 		});
 		const q = this.readers.map(entry);
-		return new Reader(function() {
+		return new Reader(function () {
 			let elt: Entry | undefined;
 			while (elt = q.shift()) {
 				const val = wait(elt.read());
@@ -792,7 +792,7 @@ export class StreamGroup<T> implements Stoppable {
 			});
 			if (count === 0) throw new Error('bad joiner: must pick and reset at least one value');
 		};
-		return new Reader(() => wait(cb => {
+		return new Reader<T>(() => wait(cb => {
 			if (done) {
 				cb(undefined);
 				return;

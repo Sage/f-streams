@@ -8,12 +8,12 @@
 ///   returns a mapper that parses JSON string.  
 ///   It assumes that the stream has already been split on boundaries that delimit valid JSON strings,
 ///   with an optional separator at the end.
-export interface ParseOptions {
+export interface ParserOptions {
 	sep?: string;
 	encoding?: string;
 }
 
-export function parse(options?: ParseOptions) {
+export function parse<T>(options?: ParserOptions) {
 	const opts = options || {};
 	const sep = opts.sep == null ? ',' : opts.sep;
 	return (data: string | Buffer) => {
@@ -23,7 +23,7 @@ export function parse(options?: ParseOptions) {
 		if (str === '') return;
 		// remove trailing separator, if any
 		if (sep && str.substring(str.length - sep.length) === sep) str = str.substring(0, str.length - sep.length);
-		return JSON.parse(str);
+		return JSON.parse(str) as T;
 	};
 }
 /// * `mapper = ez.mappers.json.stringify()`  
@@ -36,10 +36,10 @@ export interface FormatterOptions {
 	space?: string;
 }
 
-export function stringify(options?: FormatterOptions) {
+export function stringify<T>(options?: FormatterOptions) {
 	const opts = options || {};
 	const sep = opts.sep == null ? ',\n' : opts.sep;
-	return (data: any) => {
+	return (data: T) => {
 		return JSON.stringify(data, opts.replacer, opts.space) + sep;
 	};
 }
