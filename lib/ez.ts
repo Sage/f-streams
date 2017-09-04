@@ -211,7 +211,7 @@ export {
 	FormatterOptions as LinesFormatterOptions,
 	parser as linesParser,
 	formatter as linesFormatter,
-} from './transforms/csv';
+} from './transforms/lines';
 
 export {
 	transform as cutter,

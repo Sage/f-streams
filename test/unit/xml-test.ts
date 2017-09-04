@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
-import * as ez from '../..';
+import { binaryFileReader, cutter, stringReader, textFileReader, textFileWriter, xmlFormatter, xmlParser } from '../..';
 setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
@@ -14,13 +14,13 @@ function short(s: string) {
 
 function parseTest(xml: string, js: any, skipRT?: boolean) {
 	const full = '<?xml version="1.0"?><root>' + xml + '</root>\n';
-	const parsed = ez.devices.string.reader(full).transform(ez.transforms.cut.transform(2)) //
-		.transform(ez.transforms.xml.parser('root')).toArray();
+	const parsed = stringReader(full).transform(cutter(2)) //
+		.transform(xmlParser('root')).toArray();
 	deepEqual(parsed[0].root, js, 'parse ' + short(xml));
 	if (!skipRT) {
-		const rt = ez.devices.string.reader(full).transform(ez.transforms.cut.transform(2)) //
-			.transform(ez.transforms.xml.parser('root')) //
-			.transform(ez.transforms.xml.formatter('root')).toArray().join('');
+		const rt = stringReader(full).transform(cutter(2)) //
+			.transform(xmlParser('root')) //
+			.transform(xmlFormatter('root')).toArray().join('');
 		strictEqual(rt, full, 'roundtrip ' + short(full));
 	}
 }
@@ -28,9 +28,9 @@ function parseTest(xml: string, js: any, skipRT?: boolean) {
 function rtTest(name: string, xml: string, indent: string | undefined, result: any) {
 	const full = '<?xml version="1.0"?><root>' + xml + '</root>\n';
 	result = '<?xml version="1.0"?>' + (indent ? '\n' : '') + '<root>' + (result || xml) + '</root>\n';
-	const rt = ez.devices.string.reader(full).transform(ez.transforms.cut.transform(2)) //
-		.transform(ez.transforms.xml.parser('root')) //
-		.transform(ez.transforms.xml.formatter({
+	const rt = stringReader(full).transform(cutter(2)) //
+		.transform(xmlParser('root')) //
+		.transform(xmlFormatter({
 			tags: 'root',
 			indent: indent,
 		})).toArray().join('');
@@ -154,9 +154,9 @@ describe(module.id, () => {
 	});
 
 	it('rss feed', () => {
-		const entries = ez.devices.file.text.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
-			.transform(ez.transforms.cut.transform(2)) //
-			.transform(ez.transforms.xml.parser('rss/channel/item')).toArray();
+		const entries = textFileReader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
+			.transform(cutter(2)) //
+			.transform(xmlParser('rss/channel/item')).toArray();
 		strictEqual(entries.length, 10);
 		strictEqual(entries[0].rss.channel.title, 'Yahoo! Finance: Top Stories');
 		strictEqual(entries[0].rss.channel.item.title, 'Wall Street ends down on first trading day of 2014');
@@ -165,9 +165,9 @@ describe(module.id, () => {
 	});
 
 	it('binary input', () => {
-		const entries = ez.devices.file.binary.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
-			.transform(ez.transforms.cut.transform(2)) //
-			.transform(ez.transforms.xml.parser('rss/channel/item')).toArray();
+		const entries = binaryFileReader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
+			.transform(cutter(2)) //
+			.transform(xmlParser('rss/channel/item')).toArray();
 		strictEqual(entries.length, 10);
 		strictEqual(entries[0].rss.channel.title, 'Yahoo! Finance: Top Stories');
 		strictEqual(entries[0].rss.channel.item.title, 'Wall Street ends down on first trading day of 2014');
@@ -177,10 +177,10 @@ describe(module.id, () => {
 
 	it('rss roundtrip', () => {
 		let expected = wait(fs.readFile(__dirname + '/../../../test/fixtures/rss-sample.xml', 'utf8'));
-		let result = ez.devices.file.text.reader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
-			.transform(ez.transforms.cut.transform(5)) //
-			.transform(ez.transforms.xml.parser('rss/channel/item')) //
-			.transform(ez.transforms.xml.formatter({
+		let result = textFileReader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
+			.transform(cutter(5)) //
+			.transform(xmlParser('rss/channel/item')) //
+			.transform(xmlFormatter({
 				tags: 'rss/channel/item',
 				indent: '  ',
 			})) //

@@ -1,44 +1,40 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
-import * as ez from '../..';
+import { bufferReader, linesFormatter, linesParser, stringReader, stringWriter, textFileReader } from '../..';
 setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
 
-const lines = ez.transforms.lines;
-const file = ez.devices.file;
-
 const inputFile = require('os').tmpdir() + '/jsonInput.json';
 const outputFile = require('os').tmpdir() + '/jsonOutput.json';
 const fs = require('mz/fs');
-const strng = ez.devices.string;
 
 function nodeStream(text: string) {
 	wait(fs.writeFile(inputFile, text, 'utf8'));
-	return file.text.reader(inputFile);
+	return textFileReader(inputFile);
 }
 
 describe(module.id, () => {
 	it('empty', () => {
-		const stream = nodeStream('').transform(lines.parser());
+		const stream = nodeStream('').transform(linesParser());
 		strictEqual(stream.read(), undefined, 'undefined');
 	});
 
 	it('non empty line', () => {
-		const stream = nodeStream('a').transform(lines.parser());
+		const stream = nodeStream('a').transform(linesParser());
 		strictEqual(stream.read(), 'a', 'a');
 		strictEqual(stream.read(), undefined, 'undefined');
 	});
 
 	it('only newline', () => {
-		const stream = nodeStream('\n').transform(lines.parser());
+		const stream = nodeStream('\n').transform(linesParser());
 		strictEqual(stream.read(), '', 'empty line');
 		strictEqual(stream.read(), undefined, 'undefined');
 	});
 
 	it('mixed', () => {
-		const stream = nodeStream('abc\n\ndef\nghi').transform(lines.parser());
+		const stream = nodeStream('abc\n\ndef\nghi').transform(linesParser());
 		strictEqual(stream.read(), 'abc', 'abc');
 		strictEqual(stream.read(), '', 'empty line');
 		strictEqual(stream.read(), 'def', 'def');
@@ -47,16 +43,16 @@ describe(module.id, () => {
 	});
 
 	it('roundtrip', () => {
-		const writer = strng.writer();
+		const writer = stringWriter();
 		const text = 'abc\n\ndef\nghi';
-		strng.reader(text, 2).transform(lines.parser()).transform(lines.formatter()).pipe(writer);
+		stringReader(text, 2).transform(linesParser()).transform(linesFormatter()).pipe(writer);
 		strictEqual(writer.toString(), text, text);
 	});
 
 	it('binary input', () => {
-		const writer = strng.writer();
+		const writer = stringWriter();
 		const text = 'abc\n\ndef\nghi';
-		ez.devices.buffer.reader(new Buffer(text, 'utf8')).transform(lines.parser()).transform(lines.formatter()).pipe(writer);
+		bufferReader(new Buffer(text, 'utf8')).transform(linesParser()).transform(linesFormatter()).pipe(writer);
 		strictEqual(writer.toString(), text, text);
 	});
 });
