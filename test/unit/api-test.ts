@@ -542,4 +542,11 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
+	it('iterator', () => {
+		const results: number[] = [];
+		const source = numbers(5);
+		for (const num of source) results.push(num);
+		strictEqual(results.join(','), '0,1,2,3,4');
+		source.finalCheck();
+	});
 });

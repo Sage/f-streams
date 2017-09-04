@@ -322,7 +322,7 @@ export class Reader<T> {
 		const f = resolvePredicate(fn);
 		const parent = this;
 		let i = 0, done = false;
-		return new Reader(function () {
+		return new Reader(function() {
 			while (!done) {
 				const val = parent.read();
 				done = val === undefined;
@@ -341,7 +341,7 @@ export class Reader<T> {
 		const f = resolvePredicate(fn);
 		const parent = this;
 		let i = 0;
-		return new Reader(function () {
+		return new Reader(function() {
 			const val = parent.read();
 			if (val === undefined) return undefined;
 			if (!f.call(null, val, i++)) return val;
@@ -583,6 +583,19 @@ export class Reader<T> {
 		if (this._stop) this._stop(arg);
 		else if (this.parent) this.parent.stop(arg);
 	}
+
+	// Iterable interface
+	[Symbol.iterator](): Iterator<T> {
+		return {
+			next: () => {
+				const val = this.read();
+				return {
+					value: val!,
+					done: val === undefined,
+				};
+			},
+		};
+	}
 }
 
 export class PeekableReader<T> extends Reader<T> {
@@ -611,7 +624,7 @@ export class PeekableReader<T> extends Reader<T> {
 ///   You do not need to call this function if you create your readers with
 ///   the `ez.devices` modules.   
 ///   Returns `proto` for convenience.
-exports.decorate = function (proto: any) {
+exports.decorate = function(proto: any) {
 	const readerProto: any = Reader.prototype;
 	Object.getOwnPropertyNames(Reader.prototype).forEach(k => {
 		if (k !== 'constructor' && !proto[k]) proto[k] = readerProto[k];
@@ -701,7 +714,7 @@ export class StreamGroup<T> implements Stoppable {
 			read: () => run(() => stream.read()),
 		});
 		const q = this.readers.map(entry);
-		return new Reader(function () {
+		return new Reader(function() {
 			let elt: Entry | undefined;
 			while (elt = q.shift()) {
 				const val = wait(elt.read());
