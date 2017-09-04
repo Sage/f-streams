@@ -137,9 +137,9 @@ reader =  numberReader(1000).filter({
 });
 ```
 
-## Iterator interface
+## Iterable interface
 
-Readers implement the `Iterator` interface. You can iterate over them with a `for ... of ...` loop:
+Readers implement the `Iterable` interface. You can iterate over a reader with a `for ... of ...` loop:
 
 ``` javascript
 for (const val of numberReader(1000)) {
