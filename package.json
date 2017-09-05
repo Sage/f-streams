@@ -1,7 +1,7 @@
 {
   "name": "f-streams",
   "description": "node.js streams with promises and coroutines",
-  "version": "1.0.15",
+  "version": "2.0.0",
   "license": "MIT",
   "author": {
     "name": "Bruno Jouhier",
@@ -14,7 +14,7 @@
     "url": "git://github.com/Sage/f-streams.git"
   },
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=6.0.0"
   },
   "dependencies": {
     "@types/mz": "0.0.30",
@@ -23,13 +23,12 @@
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
-    "@types/es6-promise": "0.0.32",
     "@types/mocha": "^2.2.33",
     "@types/node": "^6.0.51",
     "chai": "^3.5.0",
     "f-mocha": "^1.0.1",
     "mocha": "^3.2.0",
-    "typescript": "2.3.4"
+    "typescript": "^2.3.4"
   },
   "scripts": {
     "prepublish": "rm -rf build; node_modules/typescript/bin/tsc",

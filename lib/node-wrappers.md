@@ -29,6 +29,8 @@ All stream wrappers derive from this wrapper.
 * `emitter = wrapper.unwrap()`  
    unwraps and returns the underlying emitter.  
    The wrapper should not be used after this call.
+* `emitter = wrapper.emitter`  
+   returns the underlying emitter. The emitter stream can be used to attach additional observers.
 
 ## ReadableStream
 
@@ -36,10 +38,12 @@ All readable stream wrappers derive from this wrapper.
 
 * `stream = new streams.ReadableStream(stream[, options])`  
   creates a readable stream wrapper.
+* `reader = stream.reader`  
+  returns a clean f reader.
 * `stream.setEncoding(enc)`  
   sets the encoding.
   returns `this` for chaining.
-* `data = stream.read(_[, len])`  
+* `data = stream.read([len])`  
   reads asynchronously from the stream and returns a `string` or a `Buffer` depending on the encoding.  
   If a `len` argument is passed, the `read` call returns when `len` characters or bytes 
   (depending on encoding) have been read, or when the underlying stream has emitted its `end` event 
@@ -55,8 +59,6 @@ All readable stream wrappers derive from this wrapper.
   returns `this` for chaining.
 * `len = stream.available()`  
   returns the number of bytes/chars that have been received and not read yet.
-* `reader = stream.reader`  
-  returns a clean f reader.
 
 ## WritableStream
 
@@ -64,6 +66,8 @@ All writable stream wrappers derive from this wrapper.
 
 * `stream = new streams.WritableStream(stream[, options])`  
   creates a writable stream wrapper.
+* `writer = stream.writer`  
+  returns a clean f writer.
 * `stream.write(data[, enc])`  
   Writes the data.  
   This operation is asynchronous because it _drains_ the stream if necessary.  
@@ -71,8 +75,6 @@ All writable stream wrappers derive from this wrapper.
 * `stream.end()`  
   signals the end of the send operation.  
   Returns `this` for chaining.
-* `writer = stream.writer`  
-  returns a clean f writer.
 
 ## HttpServerRequest
 
@@ -83,14 +85,6 @@ This stream is readable (see `ReadableStream` above).
    returns a wrapper around `req`, an `http.ServerRequest` object.   
    The `options` parameter can be used to pass `lowMark` and `highMark` values, or
    to control encoding detection (see section below).
-* `method = request.method` 
-* `url = request.url` 
-* `headers = request.headers` 
-* `trailers = request.trailers` 
-* `httpVersion = request.httpVersion` 
-* `connection = request.connection` 
-* `socket = request.socket`  
-  (same as `http.ServerRequest`)
 
 ## HttpServerResponse
 
@@ -100,13 +94,16 @@ This stream is writable (see `WritableStream` above).
 * `response = new streams.HttpServerResponse(resp[, options])`  
   returns a wrapper around `resp`, an `http.ServerResponse` object.
 * `response.writeContinue()` 
-* `response.writeHead(head)` 
+* `response.writeHead(statusCode, headers)` 
 * `response.setHeader(name, value)` 
 * `value = response.getHeader(head)` 
 * `response.removeHeader(name)` 
 * `response.addTrailers(trailers)` 
 * `response.statusCode = value`  
+* `response.statusMessage = value`  
   (same as `http.ServerResponse`)
+* `locals = response.locals`  
+  (same as `express.Reponse`)
 
 ## HttpServer
 
@@ -114,7 +111,7 @@ This is a wrapper around node's `http.Server` object:
 
 * `server = streams.createHttpServer(requestListener[, options])`    
   creates the wrapper.  
-  `requestListener` is called as `requestListener(request, response, _)` 
+  `requestListener` is called as `requestListener(request, response)` 
   where `request` and `response` are wrappers around `http.ServerRequest` and `http.ServerResponse`.  
   A fresh empty global context is set before every call to `requestListener`. See [Global context API](https://github.com/Sage/streamline-runtime/blob/master/index.md).
 * `server.listen(port[, host])`
@@ -163,8 +160,6 @@ This stream is writable (see `WritableStream` above).
      Note that these values are only hints as the data is received in chunks.
 * `response = request.response()`  
    returns the response. 
-* `request.abort()`  
-   aborts the request. 
 
 ## NetStream
 
@@ -194,13 +189,12 @@ This is a wrapper around node's `net.Server` object:
 
 * `server = streams.createNetServer([serverOptions,] connectionListener [, streamOptions])`    
   creates the wrapper.  
-  `connectionListener` is called as `connectionListener(stream, _)` 
+  `connectionListener` is called as `connectionListener(stream)` 
   where `stream` is a `NetStream` wrapper around the native connection.  
   A fresh empty global context is set before every call to `connectionListener`. See [Global context API](https://github.com/Sage/streamline-runtime/blob/master/index.md).
 * `server.listen(port[, host])`  
 * `server.listen(path)`  
   (same as `net.Server`)
-
 ## try/finally wrappers and pump
 
 * `result = streams.using(constructor, stream[, options], fn)`  

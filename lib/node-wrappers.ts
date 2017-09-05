@@ -320,7 +320,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 	_encoding?: string;
 	/// * `writer = stream.writer`  
 	///   returns a clean f writer.
-	writer: Writer<Data>;
+	writer: Writer<any>;
 	constructor(emitter: EmitterT, options?: WritableOptions) {
 		super(emitter);
 		options = options || {};
@@ -480,7 +480,7 @@ function _getEncoding(headers: Headers, options?: EncodingOptions) {
 ///    The `options` parameter can be used to pass `lowMark` and `highMark` values, or
 ///    to control encoding detection (see section below).
 
-export interface HttpServerOptions {
+export interface HttpServerOptions extends ReadableOptions, WritableOptions, EncodingOptions, https.ServerOptions {
 	createServer?: (listener: (request: http.ServerRequest, response: http.ServerResponse) => void) => http.Server | https.Server;
 	secure?: boolean;
 }
@@ -673,7 +673,7 @@ export class HttpServer extends Server<http.Server | https.Server> {
 /// * `response = request.response()`  
 ///    returns the response stream.
 
-export interface HttpClientResponseOptions extends ReadableOptions { }
+export interface HttpClientResponseOptions extends ReadableOptions, WritableOptions, EncodingOptions { }
 
 export class HttpClientResponse extends ReadableStream<http.ClientResponse> {
 	constructor(resp: http.ClientResponse, options?: HttpClientResponseOptions) {
@@ -707,7 +707,7 @@ export class HttpClientResponse extends ReadableStream<http.ClientResponse> {
 	}
 }
 
-export interface HttpClientOptions {
+export interface HttpClientOptions extends HttpClientResponseOptions {
 	url?: string;
 	protocol?: string;
 	host?: string;
@@ -1080,7 +1080,7 @@ export function createNetServer(serverOptions: SocketServerOptions, connectionLi
 export class SocketServer extends Server<net.Server> {
 	constructor(serverOptions: SocketServerOptions, connectionListener: SocketServerListener, streamOptions: SocketOptions) {
 		if (typeof (serverOptions) === 'function') {
-			streamOptions = connectionListener;
+			streamOptions = connectionListener as any;
 			connectionListener = serverOptions;
 			serverOptions = {};
 		}

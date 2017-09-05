@@ -124,12 +124,10 @@ export function create<T>(write: (value: T) => Writer<T>, stop?: (arg?: any) => 
 	return new Writer(write, stop);
 }
 
-/// * `ez.writer.decorate(proto)`  
-///   Adds the EZ streams writer API to an object. 
-///   Usually the object is a prototype but it may be any object with a `write(data)` method.  
-///   You do not need to call this function if you create your readers with
-///   the `ez.devices` modules.   
-///   Returns `proto` for convenience.
+// * `fwriter.decorate(proto)`  
+//   Adds the streams writer API to an object. 
+//   Usually the object is a prototype but it may be any object with a `write(data)` method.  
+//   Returns `proto` for convenience.
 // compat API - don't export in TS
 exports.decorate = function (proto: any) {
 	const writerProto: any = Writer.prototype;

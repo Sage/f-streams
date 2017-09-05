@@ -1,22 +1,21 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
-import * as ez from '../..';
+import { arrayWriter, genericReader, Reader } from '../..';
 setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
 
-interface TestReader extends ez.Reader<number> {
+interface TestReader extends Reader<number> {
 	stoppedReason?: {
 		at: number;
 		arg: any;
 	};
 }
 
-//interface TestReader extends ez.reader.Reader<number> 
 function numbers(limit: number): TestReader {
 	let i = 0;
-	return ez.devices.generic.reader(function read(this: TestReader) {
+	return genericReader(function read(this: TestReader) {
 		if (this.stoppedReason) throw new Error('attempt to read after stop: ' + i);
 		return i >= limit ? undefined : i++;
 	}, function stop(this: TestReader, arg: any) {
@@ -173,7 +172,7 @@ describe(module.id, () => {
 
 	it('pre', () => {
 		const source = numbers(10);
-		const target = ez.devices.array.writer();
+		const target = arrayWriter<number>();
 		source.pipe(target.pre.limit(5));
 		strictEqual(target.toArray().join(), '0,1,2,3,4');
 		ok(source.stoppedReason, 'source stopped');

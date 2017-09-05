@@ -1,8 +1,8 @@
 ## Encoding mappers
 
-`import * as f from 'f-streams'`  
+`import { stringConverter, bufferConverter } from 'f-streams'`  
 
-* `mapper = ez.mappers.convert.stringify(encoding)`  
+* `mapper = stringConverter(encoding)`  
   returns a mapper that converts to string
-* `mapper = ez.mappers.convert.bufferify(encoding)`  
+* `mapper = bufferConverter(encoding)`  
   returns a mapper that converts to buffer

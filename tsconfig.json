@@ -2,10 +2,11 @@
     "compilerOptions": {
         "module": "commonjs",
         "moduleResolution": "node",
-        "target": "es5",
+        "target": "es2015",
         "sourceMap": true,
         "declaration": true,
         "outDir": "build",
+        "rootDir": ".",
         "noImplicitAny": true,
         "noImplicitThis": true,
         "noImplicitReturns": true,

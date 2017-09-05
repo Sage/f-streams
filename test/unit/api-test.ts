@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
+import { arrayWriter, genericReader } from '../..';
 import * as ez from '../..';
 setup();
 
@@ -13,12 +14,13 @@ interface TestReader extends Reader<number> {
 	finalCheck: () => void;
 }
 
-const generic = ez.devices.generic;
-const arraySink = ez.devices.array.writer;
+function arraySink() {
+	return arrayWriter<number>();
+}
 
 function numbers(limit?: number): TestReader {
 	let i = 0;
-	const source: any = generic.reader(function read() {
+	const source: any = genericReader(function read() {
 		return (limit && i >= limit) ? undefined : i++;
 	}, function stop(this: TestReader, arg: number) {
 		this.stopInfo = {
@@ -542,4 +544,11 @@ describe(module.id, () => {
 		source.finalCheck();
 	});
 
+	it('iterator', () => {
+		const results: number[] = [];
+		const source = numbers(5);
+		for (const num of source) results.push(num);
+		strictEqual(results.join(','), '0,1,2,3,4');
+		source.finalCheck();
+	});
 });

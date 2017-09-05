@@ -18,57 +18,69 @@ npm install f-streams
 
 ## Creating a stream
 
-The `devices` modules let you get or create various kinds of f-streams. For example:
+`f-streams` bundles streams for node APIs:
 
-``` javascript
-var fst = require('f-streams');
-var log = fst.devices.console.log; // console writer
-var stdin = fst.devices.std.in('utf8'); // stdin in text mode
-var textRd = fst.devices.file.text.reader(path); // text file reader
-var binWr = fst.devices.file.binary.writer(path); // binary file writer
-var stringRd = fst.devices.string.reader(text); // in memory text reader
+``` typescript
+import { consoleLog, stdInput, textFileReader, binaryFileWriter, stringReader } from 'f-streams';
+
+const log = consoleLog; // console writer
+const stdin = stdInput('utf8'); // stdin in text mode
+const textRd = textFileReader(path); // text file reader
+const binWr = binaryFileWriter(path); // binary file writer
+const stringRd = stringReader(text); // in memory text reader
 ```
 
 You can also wrap any node.js stream into an f-stream, with the `node` device. For example:
 
-``` javascript
-var reader = fst.devices.node.reader(fs.createReadStream(path)); // same as fst.file.binary.reader
-var writer = fst.devices.node.writer(fs.createWriteStream(path)); // same as fst.file.binary.writer
+``` typescript
+import { nodeReader, nodeWriter } from 'f-streams';
+
+const reader = nodeReader(fs.createReadStream(path)); // same as binaryFileReader
+const writer = nodeWriter(fs.createWriteStream(path)); // same as binaryFileWriter
 ```
 
-The `fst.devices.http` and `fst.devices.net` modules give you wrappers for servers and clients in which the request
-and response objects are f readers and writers.
+`f-streams` also provides wrappers for HTTP and socket clients and servers:
 
-The `fst.devices.generic` module lets you create your own f-streams. For example here is how you would implement a reader that returns numbers from 0 to n
+``` typescript
+import { httpClient, httpServer } from 'f-streams';
+import { socketClient, socketServer } from 'f-streams';
+```
 
-``` javascript
-var numberReader = function(n) {
+Request and response objects for these clients and servers are readers and writers.
+
+The `genericReader` and `genericWriter` functions lets you create your own f-streams. For example here is how you would implement a reader that returns numbers from 0 to n
+
+``` typescript
+import { genericReader } from 'f-streams';
+
+const numberReader = function(n) {
 	var i = 0;
-	return fst.devices.generic.reader(function read() {
+	return genericReader(function read() {
 		if (i < n) return i++;
 		else return undefined;
 	});
 };
 ```
 
-To define your own reader you just need to pass an asynchronous `read() {...}` function to `fst.devices.generic.reader`.
+To define your own reader you just need to pass an asynchronous `read() {...}` function to `genericReader`.
 
-To define your own writer you just need to pass an asynchronous `write(val) {...}` function to `fst.devices.generic.writer`.
+To define your own writer you just need to pass an asynchronous `write(val) {...}` function to `genericWriter`.
 
 So, for example, here is how you can wrap mongodb APIs into f-streams:
 
-``` javascript
+``` typescript
 import { wait } from 'f-promise';
+import { genericReader, genericWriter } from 'f-streams';
 
-var reader = function(cursor) {
-	return fst.devices.generic.reader(function() {
+const reader = function(cursor) {
+	return genericReader(function() {
 		var obj = wait(cursor.nextObject());
 		return obj == null ? undefined : obj;
 	});
 }
-var writer = function(collection) {
+const writer = function(collection) {
 	var done;
-	return fst.devices.generic.writer(function(val) {
+	return genericWriter(function(val) {
 		if (val === undefined) done = true;
 		if (!done) wait(collection.insert(val));
 	});
@@ -81,7 +93,7 @@ But you don't have to do it. There are already f-streams _devices_ for MongoDB a
 
 You can read from a reader by calling its `read` method and you can write to a writer by calling its `write` method:
 
-``` javascript
+``` typescript
 var val = reader.read();
 writer.write(val);
 ```
@@ -95,7 +107,7 @@ The `read` and `write` methods may be asynchronous. If they are, they should be 
 
 You can treat an f-reader very much like a JavaScript array: you can filter it, map it, reduce it, etc. For example you can write:
 
-``` javascript
+``` typescript
 console.log("pi~=" + 4 * numberReader(10000).filter(function(n) {
 	return n % 2; // keep only odd numbers
 }).map(function(n) {
@@ -124,7 +136,7 @@ The `forEach`, `every` and `some` functions are reducers and return when the str
 Note: the `filter`, `every` and `some` methods can also be controlled by a mongodb filter condition rather than a function. 
 The following are equivalent:
 
-``` javascript
+``` typescript
 // filter expressed as a function
 reader =  numberReader(1000).filter(function(n) {
 	return n >= 10 && n < 20;
@@ -137,20 +149,32 @@ reader =  numberReader(1000).filter({
 });
 ```
 
+## Iterable interface
+
+Readers implement the `Iterable` interface. You can iterate over a reader with a `for ... of ...` loop:
+
+``` typescript
+for (const val of numberReader(1000)) {
+	console.log(val);
+}
+```
+
 ## Pipe
 
 Readers have a `pipe` method that lets you pipe them into a writer:
 
-``` javascript
+``` typescript
 reader.pipe(writer)
 ```
 
 For example we can output the odd numbers up to 100 to the console by piping the number reader to the console device:
 
-``` javascript
+``` typescript
+import { consoleLog } from 'f-streams';
+
 numberReader(100).filter(n => {
 	return n % 2; // keep only odd numbers
-}).pipe(fst.devices.console.log);
+}).pipe(consoleLog);
 ```
 
 Note that `pipe` is also a reducer. So you can schedule operations which will be executed after the pipe has been fully processed.
@@ -160,10 +184,12 @@ The f-streams `pipe` does not return a reader.
 Instead it returns its writer argument, so that you can chain other operations on the writer itself. 
 Here is a typical use:
 
-``` javascript
+``` typescript
+import { stringWriter } from 'f-streams';
+
 var result = numberReader(100).map(function(n) {
 	return n + ' ';
-}).pipe(fst.devices.string.writer()).toString();
+}).pipe(stringWriter()).toString();
 ```
 
 In this example, the integers are mapped to strings which are written to an in-memory string writer. The string writer is returned by the `pipe` call and we obtain its contents by applying `toString()`.
@@ -172,10 +198,12 @@ In this example, the integers are mapped to strings which are written to an in-m
 
 You can easily create an infinite stream. For example, here is a reader stream that will return all numbers (*) in sequence:
 
-``` javascript
+``` typescript
+import { genericReader } from 'f-streams';
+
 var infiniteReader = function() {
 	var i = 0;
-	return fst.devices.generic.reader(function read() {
+	return genericReader(function read() {
 		return i++;
 	});
 };
@@ -184,14 +212,16 @@ var infiniteReader = function() {
 
 F-streams have methods like `skip`, `limit`, `until` and `while` that let you control how many entries you will read, even if the stream is potentially infinite. Here are two examples:
 
-``` javascript
+``` typescript
+import { consoleLog } from 'f-streams';
+
 // output 100 numbers after skipping the first 20
-infiniteReader().skip(20).limit(100).pipe(fst.devices.console.log);
+infiniteReader().skip(20).limit(100).pipe(consoleLog);
 
 // output numbers until their square exceeds 1000 
 infiniteReader().until(function(n) {
 	return n * n > 1000;
-}).pipe(fst.devices.console.log);
+}).pipe(consoleLog);
 ```
 
 Note: `while` and `until` conditions can also be expressed as mongodb conditions.
@@ -206,7 +236,7 @@ Usually, there is not a one to one correspondance between the chunks that we rec
 The `transform` function is designed to handle these more complex operations. 
 Typical code looks like:
 
-``` javascript
+``` typescript
 stream.transform(function(reader, writer) {
 	// read items with reader.read()
 	// transform them (combine them, split them)
@@ -219,7 +249,7 @@ You have complete freedom to organize your read and write calls: you can read se
 
 Also, you are not limited to reading with the `read()` call, you can use any API available on a reader, even another transform. For example, here is how you can implement a simple CSV parser:
 
-``` javascript
+``` typescript
 var csvParser = function(reader, writer) {
 	// get a lines parser from our transforms library
 	var linesParser = fst.transforms.lines.parser();
@@ -246,9 +276,11 @@ var csvParser = function(reader, writer) {
 
 You can then use this transform as:
 
-``` javascript
-fst.devices.file.text.reader('mydata.csv').transform(csvParser)
-	.pipe(fst.devices.console.log);
+``` typescript
+import { consoleLog, textFileReader } from 'f-streams';
+
+textFileReader('mydata.csv').transform(csvParser)
+	.pipe(consoleLog);
 ```
 
 Note that the transform is written with a `forEach` call which loops through all the items read from the input chain. This may seem incompatible with streaming but it is not. 
@@ -261,19 +293,21 @@ It gets processed one piece at a time, interleaved with other steps in the chain
 
 The `lib/transforms` directory contains standard transforms:
 
-* [`fst.transforms.lines`](lib/transforms/lines.md): simple lines parser and formatter.
-* [`fst.transforms.csv`](lib/transforms/csv.md): CSV parser and formatter.
-* [`fst.transforms.json`](lib/transforms/json.md): JSON parser and formatter.
-* [`fst.transforms.multipart`](lib/transforms/multipart.md): MIME multipart parser and formatter.
+* [`linesParser`, `linesFormatter`](lib/transforms/lines.md): simple lines parser and formatter.
+* [`csvParser`, `csvFormatter`](lib/transforms/csv.md): CSV parser and formatter.
+* [`jsonParser`, `jsonFormatter`](lib/transforms/json.md): JSON parser and formatter.
+* [`xmlParser`, `xmlFormatter`](lib/transforms/xml.md): XML parser and formatter.
+* [`multipartParser`, `multipartFormatter`](lib/transforms/multipart.md): MIME multipart parser and formatter.
 
 For example, you can read from a CSV file, filter its entries and write the output to a JSON file with:
 
-``` javascript
-fst.devices.file.text.reader('users.csv').transform(fst.transforms.csv.parser())
-	.filter(function(item) {
-	return item.gender === 'F';
-}).transform(fst.transforms.json.formatter({ space: '\t' }))
-	.pipe(fst.devices.file.text.writer('females.json'));
+``` typescript
+import { csvParser, jsonFormatter, textFileReader, textFileWriter }
+
+textFileReader('users.csv').transform(csvParser())
+	.filter(item => item.gender === 'F')
+	.transform(jsonFormatter({ space: '\t' }))
+	.pipe(textFileWriter('women.json'));
 ```
 
 The transforms library is rather embryonic at this stage but you can expect it to grow.
@@ -284,16 +318,18 @@ The transforms library is rather embryonic at this stage but you can expect it t
 
 You can convert a node.js stream to an _f_ stream:
 
-``` javascript
+``` typescript
+imoprt { nodeReader, nodeWriter } from 'f-streams';
+
 // converting a node.js readable stream to an f reader
-var reader = fst.devices.node.reader(stream);
+var reader = nodeReader(stream);
 // converting a node.js writable stream to an f writer
-var writer = fst.devices.node.writer(stream);
+var writer = nodeWriter(stream);
 ```
 
 You can also convert in the reverse direction, from an _f_ stream to a node.js stream:
 
-``` javascript
+``` typescript
 // converting an f reader to a node readable stream
 var stream = reader.nodify();
 // converting an f writer to a node writable stream
@@ -302,7 +338,7 @@ var stream = writer.nodify();
 
 And you can transform an _f_ stream with a node duplex stream:
 
-``` javascript
+``` typescript
 // transforms an f reader into another f reader
 reader = reader.nodeTransform(duplexStream)
 ```
@@ -324,7 +360,7 @@ peekableReader.unread(val); // pushes back val so that it can be read again.
 
 You can parallelize operations on a stream with the `parallel` call:
 
-``` javascript
+``` typescript
 reader.parallel(4, function(source) {
 	return source.map(fn1).transform(trans1);
 }).map(fn2).pipe(writer);
@@ -341,7 +377,7 @@ By default it is false and the order is preserved but you can get better thoughp
 
 You can also fork a reader into a set of identical readers that you pass through different chains:
 
-``` javascript
+``` typescript
 var readers = reader.fork([
 	function(source) { return source.map(fn1).transform(trans1); },
 	function(source) { return source.map(fn2); },
@@ -357,7 +393,7 @@ See the examples in the [`api-test.ts`](https://github.com/Sage/f-streams/blob/m
 
 You can also `join` the group of streams created by a fork, with a joiner function that defines how entries are dequeued from the group.
 
-``` javascript
+``` typescript
 var streams = reader.fork([
 	function(source) { return source.map(fn1).transform(trans1); },
 	function(source) { return source.map(fn2); },
@@ -372,13 +408,12 @@ This part of the API is still fairly experimental and may change a bit.
 Exceptions are propagated through the chains and you can trap them in the reducer which pulls the items from the chain. 
 You can naturally use try/catch:
 
-``` javascript
+``` typescript
 try {
-	fst.devices.file.text.reader('users.csv').transform(fst.transforms.csv.parser())
-		.filter(function(item) {
-		return item.gender === 'F';
-	}).transform(fst.transforms.json.formatter({ space: '\t' }))
-		.pipe(fst.devices.file.text.writer('females.json'));
+	textFileReader('users.csv').transform(csvParser())
+		.filter(item => item.gender === 'F')
+		.transform(jsonFormatter({ space: '\t' }))
+		.pipe(textFileWriter('women.json'));
 } catch (ex) {
 	logger.write(ex);
 }
@@ -393,7 +428,7 @@ Streams that wrap node stream will release their event listeners when they recei
 
 The stop API is a simple `stop` method on readers:
 
-``` javascript
+``` typescript
 reader.stop(arg); // arg is optional - see below
 ```
 
@@ -426,9 +461,9 @@ Note: writers also have a `stop` method but this method is only used internally 
 You can also chain operations on writers via a special `pre` property. 
 For example:
 
-``` javascript
+``` typescript
 // create a binary file writer
-var rawWriter = fst.devices.file.binary.writer("data.gzip");
+var rawWriter = binaryFileWriter("data.gzip");
 // create another writer that applies a gzip transform before the file writer
 var zipWriter = rawWriter.pre.nodeTransform(zlib.createGzip());
 ```
@@ -446,12 +481,12 @@ The event loop takes care of the rest.
 So you don't have to worry about backpressure when writing f-streams code.
 
 Instead of worrying about backpressure, you should worry about buffering. 
-You can control buffering on the source side by passing special options to `fst.devices.node.reader(nodeStream, options)`. 
+You can control buffering on the source side by passing special options to `nodeReader(nodeStream, options)`. 
 See the [`node-wrappers`](https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md) documentation (`ReadableStream`) for details. 
 You can also control buffering by injecting `buffer(max)` calls into your chains. 
 The typical pattern is:
 
-``` javascript
+``` typescript
 reader.transform(T1).buffer(N).transform(T2).pipe(writer);
 ```
 

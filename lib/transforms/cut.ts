@@ -1,17 +1,17 @@
 /// !doc
 /// ## Transform to cut string and binary streams
 /// 
-/// `import * as f from 'f-streams'`  
+/// `import { cutter } from 'f-streams'`  
 import { Reader } from '../reader';
 import { Writer } from '../writer';
 /// 
-/// * `transform = ez.transforms.cut(options)`  
+/// * `transform = cutter(options)`  
 ///   cuts a string or binary stream in chunks of equal size  
 export interface Options {
 	size?: number;
 }
 
-export function transform<T>(options?: Options) {
+export function transform<T>(options?: Options | number) {
 	options = options || {};
 	const size = typeof options === 'number' ? options : options.size;
 	return (reader: Reader<T>, writer: Writer<T>) => {

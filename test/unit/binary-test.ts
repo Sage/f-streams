@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
-import * as ez from '../..';
+import { binaryReader, binaryWriter, bufferReader, bufferWriter, cutter } from '../..';
 setup();
 
 const { equal } = assert;
@@ -16,8 +16,8 @@ function eqbuf(b1: Buffer | undefined, b2: Buffer, msg: string) {
 describe(module.id, () => {
 	it('roundtrip', () => {
 		[1, 4, 11, 1000].forEach(function (size) {
-			const dst = ez.devices.buffer.writer();
-			const writer = ez.helpers.binary.writer(dst, {
+			const dst = bufferWriter();
+			const writer = binaryWriter(dst, {
 				bufSize: size,
 			});
 			writer.write(TESTBUF);
@@ -31,8 +31,8 @@ describe(module.id, () => {
 			writer.write();
 			const result = dst.toBuffer();
 
-			const src = ez.devices.buffer.reader(result).transform<Buffer>(ez.transforms.cut.transform(5));
-			const reader = ez.helpers.binary.reader(src);
+			const src = bufferReader(result).transform<Buffer>(cutter(5));
+			const reader = binaryReader(src);
 			eqbuf(reader.read(7), TESTBUF.slice(0, 7), 'read 7 (size=' + size + ')');
 			reader.unread(3);
 			eqbuf(reader.peek(5), TESTBUF.slice(4, 9), 'unread 3 then peek 5');

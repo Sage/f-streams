@@ -1,15 +1,15 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
-import * as ez from '../..';
+import { predicate, predicateBuilder } from '../..';
 setup();
 
 const { equal, ok } = assert;
 
 describe(module.id, () => {
 
-	const safeConverter = ez.predicate.convert;
-	const unsafeConverter = ez.predicate.converter({
+	const safeConverter = predicate;
+	const unsafeConverter = predicateBuilder({
 		allowEval: true,
 	});
 

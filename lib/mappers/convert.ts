@@ -1,10 +1,10 @@
 /// !doc
 /// ## Encoding mappers
 /// 
-/// `import * as f from 'f-streams'`  
+/// `import { stringConverter, bufferConverter } from 'f-streams'`  
 /// 
 
-/// * `mapper = ez.mappers.convert.stringify(encoding)`  
+/// * `mapper = stringConverter(encoding)`  
 ///   returns a mapper that converts to string
 export function stringify(encoding?: string) {
 	encoding = encoding || 'utf8';
@@ -12,7 +12,7 @@ export function stringify(encoding?: string) {
 		return data.toString(encoding);
 	};
 }
-/// * `mapper = ez.mappers.convert.bufferify(encoding)`  
+/// * `mapper = bufferConverter(encoding)`  
 ///   returns a mapper that converts to buffer
 export function bufferify(encoding?: string) {
 	encoding = encoding || 'utf8';

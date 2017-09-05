@@ -23,8 +23,8 @@ function scanDirs(dir: string) {
 		try {
 			// add factories from package.json
 			const pk = require(pkgPath);
-			if (pk && pk.f && pk.ez.factories) {
-				pk.ez.factories.forEach((crt: PackageFactory) => {
+			if (pk && pk.f && pk.f.factories) {
+				pk.f.factories.forEach((crt: PackageFactory) => {
 					if (crt.protocol && crt.module) {
 						factories[crt.protocol] = fromDir ? crt.module.replace(/^.*([\\\/])/, fromDir + '$1') : crt.module;
 					}

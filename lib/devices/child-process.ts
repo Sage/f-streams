@@ -1,7 +1,7 @@
 /// !doc
 /// ## EZ Stream wrappers for node child processes
 /// 
-/// `import * as f from 'f-streams'`
+/// `import { childProcessReader, childProcessWriter} from 'f-streams'`
 /// 
 import { ChildProcess } from 'child_process';
 import { wait } from 'f-promise';
@@ -12,8 +12,8 @@ import { Writer } from '../writer';
 import * as generic from './generic';
 import * as node from './node';
 
-/// * `reader = ez.devices.child_process.reader(proc, options)`  
-///   wraps a node.js child process as an EZ reader.  
+/// * `reader = childProcessReader(proc, options)`  
+///   wraps a node.js child process as a reader.  
 ///   For a full description of the options, see `ReadableStream` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 export interface ReaderOptions {
@@ -87,11 +87,13 @@ export function reader(proc: ChildProcess, options?: ReaderOptions) {
 		return undefined;
 	}, stopStreams);
 }
-/// * `writer = ez.devices.child_process.writer(proc, options)`  
-///   wraps a node.js child process as an EZ writer.  
+/// * `writer = childProcessWriter(proc, options)`  
+///   wraps a node.js child process as a writer.  
 ///   For a full description of the options, see `WritableStream` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 
-export function writer(proc: ChildProcess, options: node.NodeWriterOptions) {
+export interface WriterOptions extends node.NodeWriterOptions { }
+
+export function writer(proc: ChildProcess, options: WriterOptions) {
 	return node.writer(proc.stdin, options);
 }

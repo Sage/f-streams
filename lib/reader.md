@@ -2,12 +2,6 @@
 
 `import * as f from 'f-streams'`  
 
-* `ez.reader.decorate(proto)`  
-  Adds the EZ streams reader API to an object. 
-  Usually the object is a prototype but it may be any object with a `read()` method.  
-  You do not need to call this function if you create your readers with
-  the `ez.devices` modules.   
-  Returns `proto` for convenience.
 * `count = reader.forEach(fn)`  
   Similar to `forEach` on arrays.  
   The `fn` function is called as `fn(elt, i)`.  

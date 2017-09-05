@@ -8,42 +8,42 @@ import * as node from './node';
 /// !doc
 /// ## File based EZ streams
 /// 
-/// `import * as f from 'f-streams'`
+/// `import { textFileReader, textFileWriter, binaryFileReader, binaryFileWriter, directoryReader} from 'f-streams'`
 /// 
 export const text = {
-	/// * `reader = ez.devices.file.text.reader(path, encoding)`  
-	///   creates an EZ reader that reads from a text file.    
+	/// * `reader = textFileReader(path, encoding)`  
+	///   creates a reader that reads from a text file.    
 	///   `encoding` is optional. It defaults to `'utf8'`.  
-	reader(path: string, encoding?: string): Reader<string> {
-		return node.reader(fs.createReadStream(path, {
+	reader(path: string, encoding?: string) {
+		return node.reader<string>(fs.createReadStream(path, {
 			encoding: encoding || 'utf8',
 		}));
 	},
-	/// * `writer = ez.devices.file.text.writer(path, encoding)`  
-	///   creates an EZ writer that writes to a text file.    
+	/// * `writer = textFileWriter(path, encoding)`  
+	///   creates a writer that writes to a text file.    
 	///   `encoding` is optional. It defaults to `'utf8'`.  
-	writer(path: string, encoding?: string): Writer<string> {
-		return node.writer(fs.createWriteStream(path, {
+	writer(path: string, encoding?: string) {
+		return node.writer<string>(fs.createWriteStream(path, {
 			encoding: encoding || 'utf8',
 		}));
 	},
 };
 
 export const binary = {
-	/// * `reader = ez.devices.file.binary.reader(path)`  
-	///   creates an EZ reader that reads from a binary file.    
-	reader(path: string): Reader<Buffer> {
-		return node.reader(fs.createReadStream(path));
+	/// * `reader = binaryFileReader(path)`  
+	///   creates a reader that reads from a binary file.    
+	reader(path: string) {
+		return node.reader<Buffer>(fs.createReadStream(path));
 	},
-	/// * `writer = ez.devices.file.binary.writer(path)`  
-	///   creates an EZ writer that writes to a binary file.    
-	writer(path: string): Writer<Buffer> {
-		return node.writer(fs.createWriteStream(path));
+	/// * `writer = binaryFileWriter(path)`  
+	///   creates a writer that writes to a binary file.    
+	writer(path: string) {
+		return node.writer<Buffer>(fs.createWriteStream(path));
 	},
 };
 
-/// * `reader = ez.devices.file.list(path, options)`  
-///   `reader = ez.devices.file.list(path, recurse, accept)`  
+/// * `reader = directoryReader(path, options)`  
+///   `reader = directoryReader(path, recurse, accept)`  
 ///   creates a reader that enumerates (recursively) directories and files.  
 ///   Returns the entries as `{ path: path, name: name, depth: depth, stat: stat }` objects.  
 ///   Two `options` may be specified: `recurse` and `accept`.  
@@ -74,7 +74,7 @@ export function list(path: string, options?: ListOptions) {
 		accept = arguments[2];
 	}
 	const postorder = recurse === 'postorder';
-	return generic.empty.reader.transform((reader, writer) => {
+	return generic.empty.reader.transform<ListEntry>((reader, writer) => {
 		function process(p: string, name: string, depth: number) {
 			const stat = wait(fs.stat(p));
 			const entry = {

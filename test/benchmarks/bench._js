@@ -25,7 +25,7 @@ function dummy(i) {
 
 function myReader(max) {
 	var i = 0;
-	return ez.devices.generic.reader(function read() {
+	return f.genericReader(function read() {
 		return i++ < max ? dummy(i - 1) : undefined;
 	});
 }

@@ -2,41 +2,41 @@ import * as streams from '../node-wrappers';
 import { fixOptions } from './node';
 
 /// !doc
-/// ## TCP and socket EZ Streams
+/// ## TCP and socket Streams
 /// 
-/// `import * as f from 'f-streams'`
+/// `import { sockerServer, socketClient, tcpClient} from 'f-streams'`
 /// 
-/// * `server = ez.devices.net.server(serverOptions, listener, streamOptions)`  
-///   Creates an EZ HTTP server.  
+/// * `server = socketServer(serverOptions, listener, streamOptions)`  
+///   Creates a socket server.  
 ///   The `listener` is called as `listener(stream)`  
-///   where `stream` is an EZ reader and writer.  
+///   where `stream` is a reader and writer.  
 ///   For a full description of this API, see `NetServer` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 export type SocketServer = streams.SocketServer;
 export type SocketServerOptions = streams.SocketServerOptions;
-export type SocketStream = streams.SocketStream;
+export type SocketServerListener = streams.SocketServerListener;
 export type SocketOptions = streams.SocketOptions;
 export type SocketClient = streams.SocketClient;
 
-export function server(listener: (stream: SocketStream) => void, streamOptions?: SocketOptions, serverOptions?: SocketServerOptions) {
+export function server(listener: SocketServerListener, streamOptions?: SocketOptions, serverOptions?: SocketServerOptions) {
 	// compat hack 
 	if (typeof streamOptions === 'function') {
 		return streams.createNetServer(arguments[0], arguments[1], fixOptions(arguments[2]));
 	}
 	return streams.createNetServer(serverOptions!, listener, fixOptions(streamOptions));
 }
-/// * `client = ez.devices.net.tcpClient(port, host, options)`  
-///   Creates an EZ TCP client.  
-///   The stream returned by `client.connect()`  is an EZ reader and writer.  
+/// * `client = tcpClient(port, host, options)`  
+///   Creates a TCP client.  
+///   The stream returned by `client.connect()`  is a reader and writer.  
 ///   For a full description of this API, see `tcpClient` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 
 export function tcpClient(port: number, host?: string, options?: SocketOptions) {
 	return streams.tcpClient(port, host, fixOptions(options));
 }
-/// * `client = ez.devices.net.socketClient(path, options)`  
-///   Creates an EZ socket client.  
-///   The stream returned by `client.connect()`  is an EZ reader and writer.  
+/// * `client = socketClient(path, options)`  
+///   Creates a socket client.  
+///   The stream returned by `client.connect()`  is a reader and writer.  
 ///   For a full description of this API, see `tcpClient` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 

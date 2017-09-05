@@ -9,16 +9,16 @@ require('../reader').decorate(streams.ReadableStream.prototype);
 require('../writer').decorate(streams.WritableStream.prototype);
 
 /// !doc
-/// ## EZ Stream wrappers for native node streams
+/// ## Stream wrappers for native node streams
 /// 
-/// `import * as f from 'f-streams'`
+/// `import { nodeReader, nodeWriter } from 'f-streams'`
 /// 
-/// * `reader = ez.devices.node.reader(stream, options)`  
-///   wraps a node.js stream as an EZ reader.  
+/// * `reader = nodeReader(stream, options)`  
+///   wraps a node.js stream as a reader.  
 ///   For a full description of the options, see `ReadableStream` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 
-export interface NodeReaderOptions {
+export interface NodeReaderOptions extends streams.ReadableOptions {
 	encoding?: string;
 }
 
@@ -34,20 +34,20 @@ export function fixOptions(options: NodeReaderOptions | string | undefined) {
 	return opts;
 }
 
-export function reader(emitter: NodeJS.ReadableStream, options?: NodeReaderOptions | string): Reader<any> {
+export function reader<T>(emitter: NodeJS.ReadableStream, options?: NodeReaderOptions | string) {
 	const opts = fixOptions(options);
 	const rd = new streams.ReadableStream(emitter, opts);
 	if (opts.encoding) rd.setEncoding(opts.encoding);
-	return rd.reader;
+	return rd.reader as Reader<T>;
 }
-/// * `writer = ez.devices.node.writer(stream, options)`  
-///   wraps a node.js stream as an EZ writer.  
+/// * `writer = nodeWriter(stream, options)`  
+///   wraps a node.js stream as a writer.  
 ///   For a full description of the options, see `WritableStream` in
 ///   https://github.com/Sage/f-streams/blob/master/lib/node-wrappers.md 
 
 export interface NodeWriterOptions { }
 
-export function writer(emitter: NodeJS.WritableStream, options?: NodeWriterOptions) {
+export function writer<T>(emitter: NodeJS.WritableStream, options?: NodeWriterOptions) {
 	const wr = new streams.WritableStream(emitter, fixOptions(options));
-	return wr.writer;
+	return wr.writer as Writer<T>;
 }

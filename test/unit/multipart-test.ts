@@ -1,13 +1,10 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
-import * as ez from '../..';
+import { bufferReader, bufferWriter, multipartFormatter, multipartParser } from '../..';
 setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
-
-const buffer = ez.devices.buffer;
-const multipart = ez.transforms.multipart;
 
 const boundary = '-- my boundary --';
 
@@ -44,13 +41,13 @@ function testStream() {
 			return name + ': ' + part.headers[name];
 		}).join('\n') + '\n\n' + boundary + '\n' + part.body + '\n' + boundary + '\n';
 	}
-	return buffer.reader(new Buffer(parts.map(formatPart).join(''), 'binary'));
+	return bufferReader(new Buffer(parts.map(formatPart).join(''), 'binary'));
 }
 
 describe(module.id, () => {
 	it('basic multipart/mixed', () => {
 		const source = testStream();
-		const stream = source.transform(multipart.parser(headers('mixed')));
+		const stream = source.transform(multipartParser(headers('mixed')));
 		let part = stream.read();
 		ok(part != null, 'part != null');
 		strictEqual(part.headers.a, 'VA1', 'header A');
@@ -78,12 +75,12 @@ describe(module.id, () => {
 	it('multipart/mixed roundtrip', () => {
 		const heads = headers('mixed');
 		const source = testStream();
-		const writer = buffer.writer();
-		source.transform(multipart.parser(heads)).transform(multipart.formatter(heads)).pipe(writer);
+		const writer = bufferWriter();
+		source.transform(multipartParser(heads)).transform(multipartFormatter(heads)).pipe(writer);
 		const result = writer.toBuffer();
 		strictEqual(result.length, 158);
-		const writer2 = buffer.writer();
-		buffer.reader(result).transform(multipart.parser(heads)).transform(multipart.formatter(heads)).pipe(writer2);
+		const writer2 = bufferWriter();
+		bufferReader(result).transform(multipartParser(heads)).transform(multipartFormatter(heads)).pipe(writer2);
 		strictEqual(result.toString('binary'), writer2.toBuffer().toString('binary'));
 	});
 });
