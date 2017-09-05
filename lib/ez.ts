@@ -125,6 +125,8 @@ export {
 	list as directoryReader,
 } from './devices/file';
 
+export const emptyReader = devices.generic.empty.reader;
+export const emptyWriter = devices.generic.empty.writer;
 export {
 	reader as genericReader,
 	writer as genericWriter,
