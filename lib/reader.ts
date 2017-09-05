@@ -618,12 +618,10 @@ export class PeekableReader<T> extends Reader<T> {
 	}
 }
 
-/// * `ez.reader.decorate(proto)`  
-///   Adds the EZ streams reader API to an object. 
-///   Usually the object is a prototype but it may be any object with a `read()` method.  
-///   You do not need to call this function if you create your readers with
-///   the `ez.devices` modules.   
-///   Returns `proto` for convenience.
+// * `freader.decorate(proto)`  
+//   Adds the EZ streams reader API to an object. 
+//   Usually the object is a prototype but it may be any object with a `read()` method.  
+//   Returns `proto` for convenience.
 exports.decorate = function (proto: any) {
 	const readerProto: any = Reader.prototype;
 	Object.getOwnPropertyNames(Reader.prototype).forEach(k => {

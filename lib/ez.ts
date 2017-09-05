@@ -1,7 +1,6 @@
 import * as devices from './devices/index';
 import * as helpers from './helpers/index';
 import * as mappers from './mappers/index';
-import * as predicate from './predicate';
 import * as stopException from './stop-exception';
 import * as transforms from './transforms/index';
 
@@ -11,7 +10,7 @@ import * as EzWriter from './writer';
 
 export {
 	devices, helpers, mappers, transforms,
-	predicate, stopException,
+	stopException,
 };
 
 export const factory = EzFactory;
@@ -162,6 +161,11 @@ export {
 } from './devices/node';
 
 export {
+	QueueOptions,
+	create as queue,
+} from './devices/queue';
+
+export {
 	input as stdInput,
 	output as stdOutput,
 	error as stdError,
@@ -172,6 +176,10 @@ export {
 	reader as stringReader,
 	writer as stringWriter,
 } from './devices/string';
+
+export {
+	create as uturn,
+} from './devices/uturn';
 
 export {
 	ReaderOptions as BinaryReaderOptions,
@@ -230,3 +238,9 @@ export {
 	parser as xmlParser,
 	formatter as xmlFormatter,
 } from './transforms/xml';
+
+export {
+	Options as FilterOptions,
+	convert as predicate,
+	converter as predicateBuilder,
+} from './predicate';

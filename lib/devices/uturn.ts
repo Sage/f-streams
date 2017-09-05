@@ -11,12 +11,12 @@ const tracer: ((...args: any[]) => void) | undefined = undefined; // = console.e
 /// !doc
 /// ## Special device that transforms a writer into a reader
 /// 
-/// `import * as f from 'f-streams'`
+/// `import { uturn } from 'f-streams'`
 /// 
-/// * `uturn = ez.devices.uturn.create()`  
+/// * `ut = uturn()`  
 ///   creates a uturn device.  
-///   The device has two properties: a `uturn.writer` to which you can write,   
-///   and a `uturn.reader` from which you can read. 
+///   The device has two properties: a `ut.writer` to which you can write,   
+///   and a `ut.reader` from which you can read. 
 export interface Uturn<T> {
 	reader: Reader<T>;
 	writer: Writer<T>;

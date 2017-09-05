@@ -13,7 +13,6 @@ interface TestReader extends Reader<number> {
 	};
 }
 
-//interface TestReader extends ez.reader.Reader<number> 
 function numbers(limit: number): TestReader {
 	let i = 0;
 	return genericReader(function read(this: TestReader) {

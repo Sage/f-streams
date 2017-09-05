@@ -48,7 +48,7 @@ function guessType(data: any) {
 }
 
 /// !doc
-/// ## HTTP EZ Streams
+/// ## HTTP Streams
 /// 
 /// `import { httpServer, httpClient, httpListener } from 'f-streams'`
 /// 
@@ -80,7 +80,7 @@ export interface HttpListenerOption {
 export function listener(listenr: (request: HttpServerRequest, response: HttpServerResponse) => void, options?: HttpListenerOption) {
 	return httpListener(listenr, fixOptions(options));
 }
-/// * `factory = ez.factory("http://user:pass@host:port/...")` 
+/// * `factory = factory("http://user:pass@host:port/...")` 
 ///    Use reader for a GET request, writer for POST request
 export type FactoryWriter = Writer<any> & { _result: any };
 
