@@ -2,19 +2,13 @@
 
 `import * as f from 'f-streams'`  
 
-* `ez.writer.decorate(proto)`  
-  Adds the EZ streams writer API to an object. 
-  Usually the object is a prototype but it may be any object with a `write(data)` method.  
-  You do not need to call this function if you create your readers with
-  the `ez.devices` modules.   
-  Returns `proto` for convenience.
 
 * `writer = writer.writeAll(val)`  
   writes `val` and ends the writer
 
 * `writer = writer.stop(err)`  
   stops the writer.  
-  by default err is silently ignored
+  by default arg is silently ignored
 
 * `writer = writer.end()`  
   ends the writer - compatiblity call (errors won't be thrown to caller)

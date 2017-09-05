@@ -28,12 +28,12 @@ See the `test/server/xml-test._js` unit test for more examples.
 
 ## API
 
-`import * as f from 'f-streams'`  
+`import { xmlParser, xmlFormatter }from 'f-streams'`  
 
-* `transform = ez.transforms.xml.parser(options)`  
+* `transform = xmlParser(options)`  
   creates a parser transform. The following options can be set:  
   - `tags`: the list of tags that enclose each item returned by the reader
-* `transform = ez.transforms.xml.formatter(options)`  
+* `transform = xmlFormatter(options)`  
   creates a formatter transform. The following options can be set:  
   - `tags`: the list of tags that enclose each item returned by the reader
   - `indent`: optional indentation string, should only contain spaces.

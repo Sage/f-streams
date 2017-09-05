@@ -1,11 +1,11 @@
 ## helpers for binary streams
 
-`import * as f from 'f-streams'`  
+`import { binaryReader, binaryWriter } from 'f-streams'`  
 
 ----
 
-* `reader = ez.helpers.binary.reader(reader, options)`  
-  Wraps a raw buffer reader and returns a reader with additional API to handle binary streams.  
+* `reader = binaryReader(reader, options)`  
+  Wraps a raw Buffer reader and returns a reader with additional API to handle binary streams.  
   By default the reader is configured as big endian.  
   You can configure it as little endian by setting the `endian` option to `"little"`.
 
@@ -55,7 +55,7 @@
 
 ----
 
-* `writer = ez.helpers.binary.writer(writer, options)`  
+* `writer = binaryWriter(writer, options)`  
   Wraps a raw buffer writer and returns a writer with additional API to handle binary streams.
   By default the writer is configured as big endian.  
   You can configure it as little endian by setting the `endian` option to `"little"`.  
