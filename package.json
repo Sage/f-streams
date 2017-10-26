@@ -19,16 +19,16 @@
   "dependencies": {
     "@types/mz": "0.0.30",
     "f-promise": "^1.0.0",
-    "mz": "^2.6.0"
+    "mz": "^2.7.0"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
-    "@types/mocha": "^2.2.33",
-    "@types/node": "^6.0.51",
+    "@types/mocha": "^2.2.43",
+    "@types/node": "^6.0.90",
     "chai": "^3.5.0",
     "f-mocha": "^1.0.1",
-    "mocha": "^3.2.0",
-    "typescript": "^2.3.4"
+    "mocha": "^3.5.3",
+    "typescript": "^2.5.3"
   },
   "scripts": {
     "prepublish": "rm -rf build; node_modules/typescript/bin/tsc",

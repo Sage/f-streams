@@ -15,16 +15,13 @@ export {
 
 export const factory = EzFactory;
 
-export type Reader<T> = EzReader.Reader<T>;
-export type CompareOptions<T> = EzReader.CompareOptions<T>;
-export type ParallelOptions = EzReader.ParallelOptions;
+export { Reader, CompareOptions, ParallelOptions } from './reader';
+export { Writer } from './writer';
 
-export type Writer<T> = EzWriter.Writer<T>;
-
-export function reader(arg: string | any[] | Buffer): Reader<any> {
+export function reader(arg: string | any[] | Buffer): EzReader.Reader<any> {
 	if (typeof arg === 'string') {
 		const f = factory(arg);
-		let rd: Reader<any>;
+		let rd: EzReader.Reader<any>;
 		return devices.generic.reader(function read() {
 			if (!rd) rd = f.reader();
 			return rd.read();
@@ -41,10 +38,10 @@ export function reader(arg: string | any[] | Buffer): Reader<any> {
 	}
 }
 
-export function writer(arg: string | any[] | Buffer): Writer<any> {
+export function writer(arg: string | any[] | Buffer): EzWriter.Writer<any> {
 	if (typeof arg === 'string') {
 		const f = factory(arg);
-		let wr: Writer<any>;
+		let wr: EzWriter.Writer<any>;
 		const wrapper = devices.generic.writer(function write(val) {
 			if (!wr) wr = f.writer();
 			return wr.write(val);
