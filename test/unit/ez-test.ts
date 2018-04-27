@@ -86,14 +86,14 @@ describe(module.id, () => {
 	});
 
 	it('buffer test', () => {
-		const buf = new Buffer('hello world', 'utf8');
+		const buf = Buffer.from('hello world', 'utf8');
 		const reply = fReader(buf).transform(cutter(2)).readAll() as Buffer;
 		deepEqual(reply.toString('utf8'), buf.toString('utf8'));
 	});
 
 	it('buffer reader and writer', () => {
-		const buf = new Buffer('hello world', 'utf8');
-		const writer = fWriter(new Buffer(0));
+		const buf = Buffer.from('hello world', 'utf8');
+		const writer = fWriter(Buffer.alloc(0));
 		const reply = fReader(buf).pipe(writer);
 		deepEqual(writer.result.toString('utf8'), buf.toString('utf8'));
 	});

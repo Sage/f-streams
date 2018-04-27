@@ -110,6 +110,7 @@ export class Writer<T> {
 			end.call(stream, chunk, encoding, (err: any) => {
 				if (err) return stream.emit('error', err) as never;
 				run(() => self.write(undefined)).then(v => cb && cb(null, v), e => cb && cb(e));
+				return undefined;
 			});
 		};
 		return stream;

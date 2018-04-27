@@ -221,7 +221,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 	_concat(chunks: Data[], total: number) {
 		if (this._encoding) return chunks.join('');
 		if (chunks.length === 1) return chunks[0];
-		const result = new Buffer(total);
+		const result = Buffer.alloc(total);
 		chunks.reduce((val, chunk) => {
 			if (typeof chunk === 'string') throw new Error('expected Buffer, not string');
 			chunk.copy(result, val);
@@ -249,7 +249,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 		if (this._closed && !this._chunks.length) return undefined;
 		if (len == null) return this.reader.read();
 		if (len < 0) len = Infinity;
-		if (len === 0) return this._encoding ? '' : new Buffer(0);
+		if (len === 0) return this._encoding ? '' : Buffer.alloc(0);
 		const chunks: Data[] = [];
 		let total = 0;
 		while (total < len) {
@@ -345,7 +345,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 			if (data != null) {
 				// if data is empty do nothing but it's not to be interpreted as end
 				if (!data.length) return this.writer;
-				if (typeof data === 'string') data = new Buffer(data, this._encoding || 'utf8');
+				if (typeof data === 'string') data = Buffer.from(data, this._encoding || 'utf8');
 				//
 				if (!this._emitter.write(data)) this._drain();
 			} else {
@@ -372,7 +372,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 	///   This operation is asynchronous because it _drains_ the stream if necessary.  
 	///   Returns `this` for chaining.
 	write(data?: Data, enc?: string) {
-		if (typeof data === 'string') data = new Buffer(data, enc || this._encoding || 'utf8');
+		if (typeof data === 'string') data = Buffer.from(data, enc || this._encoding || 'utf8');
 		else if (data === null) data = undefined;
 		this.writer.write(data);
 		return this;
@@ -386,7 +386,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 			if (data != null) throw new Error('invalid attempt to write after end');
 			return this;
 		}
-		if (typeof data === 'string') data = new Buffer(data, enc || this._encoding || 'utf8');
+		if (typeof data === 'string') data = Buffer.from(data, enc || this._encoding || 'utf8');
 		else if (data === null) data = undefined;
 		if (data !== undefined) {
 			run(() => this.writer.write(data)).then(() => this.end(), err => { throw err; });
@@ -400,8 +400,6 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 		return ['drain', 'close'];
 	}
 }
-
-export type Headers = { [key: string]: string };
 
 function _getSupportedEncoding(enc: string) {
 	// List of charsets: http://www.iana.org/assignments/character-sets/character-sets.xml
@@ -422,7 +420,7 @@ function _getSupportedEncoding(enc: string) {
 	return null; // we do not understand this charset - do *not* encode
 }
 
-function _getEncodingDefault(headers: Headers) {
+function _getEncodingDefault(headers: http.IncomingHttpHeaders) {
 	const comps = (headers['content-type'] || 'text/plain').split(';');
 	const ctype = comps[0];
 	for (let i = 1; i < comps.length; i++) {
@@ -435,13 +433,13 @@ function _getEncodingDefault(headers: Headers) {
 	return null;
 }
 
-function _getEncodingStrict(headers: Headers) {
+function _getEncodingStrict(headers: http.IncomingHttpHeaders) {
 	// As per RFC-2616-7.2.1, if media type is unknown we should treat it
 	// as "application/octet-stream" (may optionally try to determine it by
 	// looking into content body - we don't)
 	if (!headers['content-type'] || headers['content-encoding']) return null;
 
-	const comps = headers['content-type'].split(';');
+	const comps = headers['content-type']!.split(';');
 	const ctype = comps[0];
 	for (let i = 1; i < comps.length; i++) {
 		const pair = comps[i].split('=');
@@ -453,9 +451,9 @@ function _getEncodingStrict(headers: Headers) {
 }
 
 export interface EncodingOptions {
-	detectEncoding?: 'strict' | 'disable' | ((headers: Headers) => string);
+	detectEncoding?: 'strict' | 'disable' | ((headers: http.IncomingHttpHeaders) => string);
 }
-function _getEncoding(headers: Headers, options?: EncodingOptions) {
+function _getEncoding(headers: http.IncomingHttpHeaders, options?: EncodingOptions) {
 	if (headers['content-encoding']) return null;
 	if (!options) return _getEncodingDefault(headers);
 	if (typeof options.detectEncoding === 'function') return options.detectEncoding(headers);
@@ -714,7 +712,7 @@ export interface HttpClientOptions extends HttpClientResponseOptions {
 	port?: string;
 	path?: string;
 	method?: string;
-	headers?: Headers;
+	headers?: http.IncomingHttpHeaders;
 	module?: any;
 	user?: string;
 	password?: string;
@@ -744,12 +742,12 @@ function _fixHttpClientOptions(options: HttpClientOptions) {
 	opts.headers = Object.keys(opts.headers || {}).reduce((headers, key) => {
 		if (opts.headers![key] != null) headers[key] = opts.headers![key];
 		return headers;
-	}, {} as Headers);
+	}, {} as http.IncomingHttpHeaders);
 	opts.module = require(opts.protocol.substring(0, opts.protocol.length - 1));
 	if (opts.user != null) {
 		// assumes basic auth for now
 		let token = opts.user + ':' + (opts.password || '');
-		token = new Buffer(token, 'utf8').toString('base64');
+		token = Buffer.from(token, 'utf8').toString('base64');
 		opts.headers['Authorization'] = 'Basic ' + token;
 	}
 
@@ -785,7 +783,7 @@ function _fixHttpClientOptions(options: HttpClientOptions) {
 					if (opts.proxy.auth.toLowerCase() === 'basic') {
 						if (!opts.proxy.user) throw new Error('request error: no proxy user');
 						let proxyToken = opts.proxy.user + ':' + (opts.proxy.password || '');
-						proxyToken = new Buffer(proxyToken, 'utf8').toString('base64');
+						proxyToken = Buffer.from(proxyToken, 'utf8').toString('base64');
 						opts.headers['Proxy-Authorization'] = 'Basic ' + proxyToken;
 					} else if (opts.proxy.auth.toLowerCase() === 'ntlm') {
 

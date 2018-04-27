@@ -110,14 +110,14 @@ export function formatter(options?: FormatterOptions) {
 			const headers = part.headers;
 			if (!headers) throw new Error('part does not have headers');
 			Object.keys(part.headers).forEach(key => {
-				writer.write(new Buffer(key + ': ' + headers[key] + '\n', 'binary'));
+				writer.write(Buffer.from(key + ': ' + headers[key] + '\n', 'binary'));
 			});
-			writer.write(new Buffer('\n' + boundary + '\n'));
+			writer.write(Buffer.from('\n' + boundary + '\n'));
 			// cannot use pipe because pipe writes undefined at end.
 			part.forEach(data => {
 				writer.write(data);
 			});
-			writer.write(new Buffer('\n' + boundary + '\n'));
+			writer.write(Buffer.from('\n' + boundary + '\n'));
 		}
 	};
 }

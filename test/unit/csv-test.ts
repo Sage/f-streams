@@ -21,7 +21,7 @@ describe(module.id, () => {
 
 	it('binary input', () => {
 		const sink = stringWriter();
-		bufferReader(new Buffer(legends, 'utf8')).transform(csvParser()).transform(csvFormatter()).pipe(sink);
+		bufferReader(Buffer.from(legends, 'utf8')).transform(csvParser()).transform(csvFormatter()).pipe(sink);
 		equal(sink.toString(), legends);
 	});
 });

@@ -31,7 +31,7 @@ function endWrite(cli: HttpClientRequest) {
 	const resp = cli.end().response();
 	if (resp.statusCode !== 201) throw new Error('Request return status code: ' + resp.statusCode); // TODO: better manage errors
 	const data = resp.readAll();
-	return (typeof data === 'string' && /^application\/json/.test(resp.headers['content-type'])) ? JSON.parse(data) : data;
+	return (typeof data === 'string' && /^application\/json/.test(resp.headers['content-type']!)) ? JSON.parse(data) : data;
 }
 
 function guessType(data: any) {

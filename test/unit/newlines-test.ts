@@ -52,7 +52,7 @@ describe(module.id, () => {
 	it('binary input', () => {
 		const writer = stringWriter();
 		const text = 'abc\n\ndef\nghi';
-		bufferReader(new Buffer(text, 'utf8')).transform(linesParser()).transform(linesFormatter()).pipe(writer);
+		bufferReader(Buffer.from(text, 'utf8')).transform(linesParser()).transform(linesFormatter()).pipe(writer);
 		strictEqual(writer.toString(), text, text);
 	});
 });

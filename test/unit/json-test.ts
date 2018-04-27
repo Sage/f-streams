@@ -49,7 +49,7 @@ describe(module.id, () => {
 	});
 
 	it('binary input', () => {
-		const stream = bufferReader(new Buffer(mixedData, 'utf8')).transform(jsonParser());
+		const stream = bufferReader(Buffer.from(mixedData, 'utf8')).transform(jsonParser());
 		const expected = JSON.parse(mixedData);
 		stream.forEach(function (elt, i) {
 			deepEqual(elt, expected[i], expected[i]);

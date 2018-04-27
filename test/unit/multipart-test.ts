@@ -2,6 +2,7 @@ import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
 import { bufferReader, bufferWriter, multipartFormatter, multipartParser } from '../..';
+import { IncomingHttpHeaders } from 'http';
 setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
@@ -34,14 +35,14 @@ function testStream() {
 			B: 'VB2',
 		},
 		body: 'C2',
-	}];
+	}] as { headers: IncomingHttpHeaders; body: string; }[];
 
 	function formatPart(part: Part) {
 		return Object.keys(part.headers).map(function (name) {
 			return name + ': ' + part.headers[name];
 		}).join('\n') + '\n\n' + boundary + '\n' + part.body + '\n' + boundary + '\n';
 	}
-	return bufferReader(new Buffer(parts.map(formatPart).join(''), 'binary'));
+	return bufferReader(Buffer.from(parts.map(formatPart).join(''), 'binary'));
 }
 
 describe(module.id, () => {
