@@ -31,8 +31,8 @@
     "typescript": "^2.5.3"
   },
   "scripts": {
-    "prepublish": "rm -rf build; node_modules/typescript/bin/tsc",
-    "test": "node_modules/mocha/bin/mocha build/test/unit --timeout 5000",
+    "prepare": "rm -rf build; tsc",
+    "test": "mocha build/test/unit --timeout 5000",
     "lint": "tslint -e 'node_modules/**' {lib,test}/**/*.ts"
   },
   "readmeFilename": "README.md",
