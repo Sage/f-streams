@@ -18,17 +18,17 @@
   },
   "dependencies": {
     "@types/mz": "0.0.30",
-    "f-promise": "^1.0.0",
+    "f-promise": "^1.3.6",
     "mz": "^2.7.0"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.43",
-    "@types/node": "^6.0.90",
+    "@types/node": "^6.0.114",
     "chai": "^3.5.0",
-    "f-mocha": "^1.0.1",
+    "f-mocha": "^1.1.4",
     "mocha": "^3.5.3",
-    "typescript": "^2.5.3"
+    "typescript": "^2.9.2"
   },
   "scripts": {
     "prepare": "rm -rf build; tsc",
