@@ -479,12 +479,12 @@ function _getEncoding(headers: http.IncomingHttpHeaders, options?: EncodingOptio
 ///    to control encoding detection (see section below).
 
 export interface HttpServerOptions extends ReadableOptions, WritableOptions, EncodingOptions, https.ServerOptions {
-	createServer?: (listener: (request: http.ServerRequest, response: http.ServerResponse) => void) => http.Server | https.Server;
+	createServer?: (listener: (request: http.IncomingMessage, response: http.ServerResponse) => void) => http.Server | https.Server;
 	secure?: boolean;
 }
 
-export class HttpServerRequest extends ReadableStream<http.ServerRequest> {
-	constructor(req: http.ServerRequest, options?: HttpServerOptions) {
+export class HttpServerRequest extends ReadableStream<http.IncomingMessage> {
+	constructor(req: http.IncomingMessage, options?: HttpServerOptions) {
 		super(req, options);
 		this.setEncoding(_getEncoding(req.headers, options));
 		// special sage hack - clean up later
@@ -630,7 +630,7 @@ export type HttpListener = (request: HttpServerRequest, response: HttpServerResp
 
 export function httpListener(listener: HttpListener, options: HttpServerOptions) {
 	options = options || {};
-	return (request: http.ServerRequest, response: http.ServerResponse) => {
+	return (request: http.IncomingMessage, response: http.ServerResponse) => {
 		return run(() =>
 			withContext(() =>
 				listener(new HttpServerRequest(request, options), new HttpServerResponse(response, options)), {}))
@@ -651,7 +651,7 @@ export class HttpServer extends Server<http.Server | https.Server> {
 		const opts = _fixHttpServerOptions(options);
 		super(opts.createServer!(httpListener(requestListener, options)));
 	}
-	setTimeout(msecs: number, callback: Function) {
+	setTimeout(msecs: number, callback: () => void) {
 		// node.js version lower than 0.11.2 do not inmplement a https.Server.setTimeout method.
 		if ((this._emitter as any).setTimeout) (this._emitter as http.Server).setTimeout(msecs, callback);
 		return this;
@@ -673,8 +673,8 @@ export class HttpServer extends Server<http.Server | https.Server> {
 
 export interface HttpClientResponseOptions extends ReadableOptions, WritableOptions, EncodingOptions { }
 
-export class HttpClientResponse extends ReadableStream<http.ClientResponse> {
-	constructor(resp: http.ClientResponse, options?: HttpClientResponseOptions) {
+export class HttpClientResponse extends ReadableStream<http.IncomingMessage> {
+	constructor(resp: http.IncomingMessage, options?: HttpClientResponseOptions) {
 		super(resp, options);
 		this.setEncoding(_getEncoding(resp.headers, options));
 	}
@@ -820,13 +820,13 @@ function _fixHttpClientOptions(options: HttpClientOptions) {
 ///      Note that these values are only hints as the data is received in chunks.
 
 export class HttpClientRequest extends WritableStream<http.ClientRequest> {
-	_response: http.ClientResponse;
+	_response: http.IncomingMessage;
 	_done: boolean;
-	_onResponse: (err: Error | undefined, response?: http.ClientResponse) => void;
+	_onResponse: (err: Error | undefined, response?: http.IncomingMessage) => void;
 	_options: HttpClientOptions;
 
 	constructor(options: HttpClientOptions) {
-		const request = options.module.request(options, (response: http.ClientResponse) => {
+		const request = options.module.request(options, (response: http.IncomingMessage) => {
 			this._onResponse(undefined, response);
 		});
 		super(request, options);
@@ -842,13 +842,13 @@ export class HttpClientRequest extends WritableStream<http.ClientRequest> {
 		});
 		this._onResponse = this._trackResponse;
 	}
-	_trackResponse(err: Error | undefined, resp?: http.ClientResponse) {
+	_trackResponse(err: Error | undefined, resp?: http.IncomingMessage) {
 		this._done = true;
 		if (err) this._error = err;
 		if (resp) this._response = resp;
 	}
 
-	_responseCb(callback: (err?: Error, resp?: http.ClientResponse) => void) {
+	_responseCb(callback: (err?: Error, resp?: http.IncomingMessage) => void) {
 		let replied = false;
 		if (typeof callback !== 'function') throw new TypeError('bad callback parameter: ' + typeof callback);
 		if (this._done) return callback(this._error, this._response);
@@ -1077,9 +1077,9 @@ export function createNetServer(serverOptions: SocketServerOptions, connectionLi
 
 export class SocketServer extends Server<net.Server> {
 	constructor(serverOptions: SocketServerOptions, connectionListener: SocketServerListener, streamOptions: SocketOptions) {
-		if (typeof (serverOptions) === 'function') {
+		if (typeof serverOptions === 'function') {
 			streamOptions = connectionListener as any;
-			connectionListener = serverOptions;
+			connectionListener = serverOptions as (stream: SocketStream) => void;
 			serverOptions = {};
 		}
 		const emitter = net.createServer(serverOptions, connection =>
