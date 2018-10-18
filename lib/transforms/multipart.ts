@@ -11,12 +11,12 @@ import { Writer } from '../writer';
 
 type MultipartSubType = 'mixed' | 'form-data';
 
-interface IMultipartContentType {
+interface MultipartContentType {
     subType: MultipartSubType;
     boundary: string;
 }
 
-function parseContentType(contentType?: string): IMultipartContentType | null {
+function parseContentType(contentType?: string): MultipartContentType | null {
 	if (!contentType) throw new Error('content-type missing');
 	const match = /^multipart\/([\w\-]*)/.exec(contentType);
 	if (!match) return null;
@@ -32,7 +32,7 @@ function parseContentType(contentType?: string): IMultipartContentType | null {
 	};
 }
 
-function mixedParser(ct: IMultipartContentType): (reader: Reader<Buffer>, writer: Writer<any>) => void {
+function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer: Writer<any>) => void {
     const boundary = ct.boundary;
     return (reader: Reader<Buffer>, writer: Writer<any>) => {
         const binReader = binary.reader(reader);
@@ -87,7 +87,7 @@ function mixedParser(ct: IMultipartContentType): (reader: Reader<Buffer>, writer
     };
 }
 
-function mixedFormatter(ct: IMultipartContentType) {
+function mixedFormatter(ct: MultipartContentType) {
     const boundary = ct.boundary;
     return (reader: Reader<Reader<Buffer>>, writer: Writer<Buffer>) => {
         let part: Reader<Buffer> | undefined;
@@ -107,7 +107,7 @@ function mixedFormatter(ct: IMultipartContentType) {
     };
 }
 
-function formDataParser(ct: IMultipartContentType): (reader: Reader<Buffer>, writer: Writer<any>) => void {
+function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer: Writer<any>) => void {
     const boundary = '--' + ct.boundary;
     return (reader: Reader<Buffer>, writer: Writer<any>) => {
         const binReader = binary.reader(reader);
@@ -191,7 +191,7 @@ function formDataParser(ct: IMultipartContentType): (reader: Reader<Buffer>, wri
     };
 }
 
-function formDataFormatter(ct: IMultipartContentType): (reader: Reader<Reader<Buffer>>, writer: Writer<Buffer>) => void {
+function formDataFormatter(ct: MultipartContentType): (reader: Reader<Reader<Buffer>>, writer: Writer<Buffer>) => void {
     const boundary = '--' + ct.boundary;
     if (!boundary) throw new Error('multipart boundary missing');
     const CR_LF = '\r\n';
