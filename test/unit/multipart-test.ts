@@ -99,7 +99,7 @@ describe(module.id, () => {
 		strictEqual(r, undefined, 'end of part 2');
 
 		part = stream.read();
-		equal(part, undefined, 'read next part returns undefined');
+		assert.isUndefined(part);
 	});
 
 	it('multipart/mixed roundtrip', () => {
@@ -140,7 +140,7 @@ describe(module.id, () => {
         strictEqual(r, undefined, 'end of part 2');
 
         part = stream.read();
-        equal(part, undefined, 'read next part returns undefined');
+        assert.isUndefined(part);
     });
 
     it('multipart/form-data roundtrip', () => {
