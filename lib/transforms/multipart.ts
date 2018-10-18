@@ -118,13 +118,14 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
             const str = buf.toString('binary');
 
             let endBoundaryIndex = str.indexOf(boundary) + boundary.length;
+            if (endBoundaryIndex < 0) throw new Error('boundary not found');
+
             if (str.charAt(endBoundaryIndex) === '\r') {
                 endBoundaryIndex++;
             }
             if (str.charAt(endBoundaryIndex) === '\n') {
                 endBoundaryIndex++;
             }
-            if (endBoundaryIndex < 0) throw new Error('boundary not found');
 
             if (str.indexOf(boundary + '--') === 0) {
                 return;
