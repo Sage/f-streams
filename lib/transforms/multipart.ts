@@ -160,7 +160,7 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
                 const bbuf = binReader.readData(32 * len);
                 if (!bbuf || !bbuf.length) {
                     hk.notify();
-                    return;
+                    return undefined;
                 }
                 // would be nice if Buffer had an indexOf. Would avoid a conversion to string.
                 // I could use node-buffertools but it introduces a dependency on a binary module.
