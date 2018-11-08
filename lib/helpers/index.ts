@@ -1,2 +1,3 @@
 import * as binary from './binary';
-export { binary }; 
+import * as multipart from './multipart';
+export { binary, multipart };
