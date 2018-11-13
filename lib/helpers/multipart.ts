@@ -7,8 +7,8 @@ import { Reader } from '../reader';
 ///
 /// ----
 ///
-/// * `reader = multiplexReader(reader, fields)`
-///   Wraps raw Buffer readers and returns a reader of multiple reader.
+/// * `reader = multiplexReader(reader)`
+///   Wraps raw Buffer readers and returns a reader of these multiple readers.
 export function reader(readers: Reader<Buffer>[]): Reader<Reader<Buffer>> {
     let readerIndex = 0;
     return new Reader<Reader<Buffer>>(() => {
