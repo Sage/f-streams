@@ -189,7 +189,7 @@ export {
 
 export {
 	reader as multiplexReader
-} from './helpers/multipart';
+} from './helpers/multiplex';
 
 export {
 	stringify as stringConverter,
