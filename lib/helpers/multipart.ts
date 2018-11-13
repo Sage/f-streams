@@ -9,7 +9,7 @@ import { Reader } from '../reader';
 ///
 /// * `reader = multiplexReader(reader, fields)`
 ///   Wraps raw Buffer readers and returns a reader of multiple reader.
-export function multiplexReader(readers: Reader<Buffer>[]): Reader<Reader<Buffer>> {
+export function reader(readers: Reader<Buffer>[]): Reader<Reader<Buffer>> {
     let readerIndex = 0;
     return new Reader<Reader<Buffer>>(() => {
         if (readerIndex >= readers.length) {
