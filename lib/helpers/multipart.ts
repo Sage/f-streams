@@ -1,26 +1,26 @@
 /// !doc
-/// ## helpers for multipart streams
+/// ## helpers for multiplex readers
 ///
-/// `import { multipartReader } from 'f-streams'`
+/// `import { multiplexReader } from 'f-streams'`
 import { Reader } from '../reader';
 
 ///
 /// ----
 ///
-/// * `reader = multipartReader(reader, fields)`
-///   Wraps a raw Buffer reader and returns a reader of multipart element reader.
-///   Headers like content-disposition should be passed through headers arguments.
-export function reader(reader: Reader<Buffer>, headers: { [key: string]: string }): Reader<Reader<Buffer>> {
-    let passed = false;
+/// * `reader = multiplexReader(reader, fields)`
+///   Wraps raw Buffer readers and returns a reader of multiple reader.
+export function multiplexReader(readers: Reader<Buffer>[]): Reader<Reader<Buffer>> {
+    let readerIndex = 0;
     return new Reader<Reader<Buffer>>(() => {
-        if (passed) {
+        if (readerIndex >= readers.length) {
             return;
         }
         const partReader = new Reader<Buffer>(() => {
-            return reader.read();
+            return readers[readerIndex].read();
         });
-        partReader.headers = headers;
-        passed = true;
+        partReader.headers = readers[readerIndex].headers;
+        readerIndex++;
         return partReader;
     });
 }
+

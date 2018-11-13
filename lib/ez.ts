@@ -188,7 +188,7 @@ export {
 } from './helpers/binary';
 
 export {
-	reader as multipartReader
+	reader as multiplexReader
 } from './helpers/multipart';
 
 export {
