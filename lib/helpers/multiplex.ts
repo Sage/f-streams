@@ -16,7 +16,7 @@ export function reader(readers: Reader<Buffer>[]): Reader<Reader<Buffer>> {
             return;
         }
         const partReader = new Reader<Buffer>(() => {
-            return readers[readerIndex].read();
+            return readers[readerIndex - 1].read();
         });
         partReader.headers = readers[readerIndex].headers;
         readerIndex++;
