@@ -181,6 +181,8 @@ export {
 } from './devices/uturn';
 
 export {
+	BinaryReader,
+	BinaryWriter,
 	ReaderOptions as BinaryReaderOptions,
 	WriterOptions as BinaryWriterOptions,
 	reader as binaryReader,
