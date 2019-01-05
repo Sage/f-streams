@@ -1,2 +1,3 @@
 import * as binary from './binary';
-export { binary }; 
+import * as multiplex from './multiplex';
+export { binary, multiplex };

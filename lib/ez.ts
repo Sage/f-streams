@@ -188,6 +188,10 @@ export {
 } from './helpers/binary';
 
 export {
+	reader as multiplexReader
+} from './helpers/multiplex';
+
+export {
 	stringify as stringConverter,
 	bufferify as bufferConverter,
 } from './mappers/convert';
