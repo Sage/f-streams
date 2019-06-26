@@ -23,4 +23,3 @@ export function reader(readers: Reader<Buffer>[]): Reader<Reader<Buffer>> {
         return partReader;
     });
 }
-

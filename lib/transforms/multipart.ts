@@ -1,8 +1,8 @@
 /// !doc
 /// ## Stream transform for MIME multipart
-/// 
-/// `import { multipartParser, multipartFormatter }from 'f-streams'`  
-/// 
+///
+/// `import { multipartParser, multipartFormatter }from 'f-streams'`
+///
 import { handshake } from 'f-promise';
 import * as generic from '../devices/generic';
 import * as binary from '../helpers/binary';
@@ -17,19 +17,19 @@ interface MultipartContentType {
 }
 
 function parseContentType(contentType?: string): MultipartContentType | null {
-	if (!contentType) throw new Error('content-type missing');
-	const match = /^multipart\/([\w\-]*)/.exec(contentType);
-	if (!match) return null;
-	const subType = match[1] as MultipartSubType;
-	const atbs: any = contentType.split(/\s*;\s*/).reduce((r: any, s: string) => {
-		const kv = s.split(/\s*=\s*/);
-		r[kv[0]] = kv[1];
-		return r;
-	}, {});
-	return {
-		subType: subType,
-		boundary: atbs.boundary,
-	};
+    if (!contentType) throw new Error('content-type missing');
+    const match = /^multipart\/([\w\-]*)/.exec(contentType);
+    if (!match) return null;
+    const subType = match[1] as MultipartSubType;
+    const atbs: any = contentType.split(/\s*;\s*/).reduce((r: any, s: string) => {
+        const kv = s.split(/\s*=\s*/);
+        r[kv[0]] = kv[1];
+        return r;
+    }, {});
+    return {
+        subType: subType,
+        boundary: atbs.boundary,
+    };
 }
 
 function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer: Writer<any>) => void {
@@ -213,7 +213,6 @@ function formDataFormatter(ct: MultipartContentType): (reader: Reader<Reader<Buf
                 writer.write(data);
             });
             writer.write(Buffer.from(CR_LF));
-
         }
         writer.write(Buffer.from(boundary + '--'));
     };
@@ -224,43 +223,45 @@ function formDataFormatter(ct: MultipartContentType): (reader: Reader<Reader<Buf
 ///   The content type, which includes the boundary,
 ///   is passed via `options['content-type']`.
 export type ParserOptions = {
-	[name: string]: string;
+    [name: string]: string;
 };
 
 export function parser(options: ParserOptions): (reader: Reader<Buffer>, writer: Writer<any>) => void {
-	const ct = parseContentType(options && options['content-type']);
-	if (!ct || !ct.boundary) throw new Error('multipart boundary missing');
-
-	const multipartType = (ct && ct.subType) || 'mixed';
-	switch (multipartType) {
-	case 'mixed':
-		return mixedParser(ct);
-	case 'form-data':
-		return formDataParser(ct);
-	default:
-		throw new Error(`Unhandled multipart subtype: ${multipartType}`);
-	}
-}
-
-/// * `transform = multipartFormatter(options)`  
-///   Creates a formatter transform.
-///   The content type, which includes the boundary,
-///   is passed via `options['content-type']`.
-export interface FormatterOptions {
-	[name: string]: string;
-}
-
-export function formatter(options?: FormatterOptions): (reader: Reader<Reader<Buffer>>, writer: Writer<Buffer>) => void {
-	const ct = parseContentType(options && options['content-type']);
+    const ct = parseContentType(options && options['content-type']);
     if (!ct || !ct.boundary) throw new Error('multipart boundary missing');
 
     const multipartType = (ct && ct.subType) || 'mixed';
     switch (multipartType) {
-    case 'mixed':
-        return mixedFormatter(ct);
-    case 'form-data':
-        return formDataFormatter(ct);
-    default:
-        throw new Error(`Unhandled multipart subtype: ${multipartType}`);
+        case 'mixed':
+            return mixedParser(ct);
+        case 'form-data':
+            return formDataParser(ct);
+        default:
+            throw new Error(`Unhandled multipart subtype: ${multipartType}`);
+    }
+}
+
+/// * `transform = multipartFormatter(options)`
+///   Creates a formatter transform.
+///   The content type, which includes the boundary,
+///   is passed via `options['content-type']`.
+export interface FormatterOptions {
+    [name: string]: string;
+}
+
+export function formatter(
+    options?: FormatterOptions,
+): (reader: Reader<Reader<Buffer>>, writer: Writer<Buffer>) => void {
+    const ct = parseContentType(options && options['content-type']);
+    if (!ct || !ct.boundary) throw new Error('multipart boundary missing');
+
+    const multipartType = (ct && ct.subType) || 'mixed';
+    switch (multipartType) {
+        case 'mixed':
+            return mixedFormatter(ct);
+        case 'form-data':
+            return formDataFormatter(ct);
+        default:
+            throw new Error(`Unhandled multipart subtype: ${multipartType}`);
     }
 }

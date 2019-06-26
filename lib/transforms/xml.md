@@ -1,17 +1,17 @@
-
 # Simple XML parser and formatter
 
 Transforms back and forth between XML and JS.
 Tries to generate a JS object which is as simple as possible, without losing information.
 
 Uses the following rules when converting from XML to JS:
-* all values are returned as strings. No attempt to convert numbers and booleans
-* attributes are mapped to a `$` subobject.
-* simple values are mapped to an object with a `$value` property if the tag has attributes. 
-* simple values are mapped to a string if the tag does not have attributes.
-* repeating tags are mapped to an array.
-* CDATA sections are mapped to an object with a `$cdata` property.
-* self-closing tags are returned as an empty object.
+
+-   all values are returned as strings. No attempt to convert numbers and booleans
+-   attributes are mapped to a `$` subobject.
+-   simple values are mapped to an object with a `$value` property if the tag has attributes.
+-   simple values are mapped to a string if the tag does not have attributes.
+-   repeating tags are mapped to an array.
+-   CDATA sections are mapped to an object with a `$cdata` property.
+-   self-closing tags are returned as an empty object.
 
 Some examples:
 
@@ -28,12 +28,12 @@ See the `test/server/xml-test._js` unit test for more examples.
 
 ## API
 
-`import { xmlParser, xmlFormatter }from 'f-streams'`  
+`import { xmlParser, xmlFormatter }from 'f-streams'`
 
-* `transform = xmlParser(options)`  
-  creates a parser transform. The following options can be set:  
-  - `tags`: the list of tags that enclose each item returned by the reader
-* `transform = xmlFormatter(options)`  
-  creates a formatter transform. The following options can be set:  
-  - `tags`: the list of tags that enclose each item returned by the reader
-  - `indent`: optional indentation string, should only contain spaces.
+-   `transform = xmlParser(options)`  
+    creates a parser transform. The following options can be set:
+    -   `tags`: the list of tags that enclose each item returned by the reader
+-   `transform = xmlFormatter(options)`  
+    creates a formatter transform. The following options can be set:
+    -   `tags`: the list of tags that enclose each item returned by the reader
+    -   `indent`: optional indentation string, should only contain spaces.

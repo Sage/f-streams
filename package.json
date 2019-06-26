@@ -1,43 +1,43 @@
 {
-  "name": "f-streams",
-  "description": "node.js streams with promises and coroutines",
-  "version": "2.2.2",
-  "license": "MIT",
-  "author": {
-    "name": "Bruno Jouhier",
-    "email": "bruno.jouhier@sage.com"
-  },
-  "main": "build/index.js",
-  "typings": "build/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/Sage/f-streams.git"
-  },
-  "engines": {
-    "node": ">=6.0.0"
-  },
-  "dependencies": {
-    "@types/mz": "0.0.30",
-    "f-promise": "^1.3.6",
-    "mz": "^2.7.0"
-  },
-  "devDependencies": {
-    "@types/chai": "^3.4.34",
-    "@types/mocha": "^2.2.43",
-    "@types/node": "^8.10.32",
-    "chai": "^3.5.0",
-    "f-mocha": "^1.1.4",
-    "mocha": "^5.2.0",
-    "typescript": "^2.9.2"
-  },
-  "scripts": {
-    "prepare": "rm -rf build; tsc",
-    "test": "mocha build/test/unit --exit --timeout 5000",
-    "lint": "tslint -e 'node_modules/**' {lib,test}/**/*.ts"
-  },
-  "readmeFilename": "README.md",
-  "bugs": {
-    "url": "https://github.com/Sage/f-streams/issues"
-  },
-  "homepage": "https://github.com/Sage/f-streams#readme"
+    "name": "f-streams",
+    "description": "node.js streams with promises and coroutines",
+    "version": "2.3.0",
+    "license": "MIT",
+    "author": {
+        "name": "Bruno Jouhier",
+        "email": "bruno.jouhier@sage.com"
+    },
+    "main": "build/index.js",
+    "typings": "build/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/Sage/f-streams.git"
+    },
+    "engines": {
+        "node": ">=6.0.0"
+    },
+    "dependencies": {
+        "@types/mz": "0.0.30",
+        "f-promise": "^1.3.6",
+        "mz": "^2.7.0"
+    },
+    "devDependencies": {
+        "@types/chai": "^3.4.34",
+        "@types/mocha": "^2.2.43",
+        "@types/node": "^8.10.32",
+        "chai": "^3.5.0",
+        "f-mocha": "^1.1.4",
+        "mocha": "^5.2.0",
+        "typescript": "^2.9.2"
+    },
+    "scripts": {
+        "prepare": "rm -rf build; tsc",
+        "test": "mocha build/test/unit --exit --timeout 5000",
+        "lint": "tslint -e 'node_modules/**' {lib,test}/**/*.ts"
+    },
+    "readmeFilename": "README.md",
+    "bugs": {
+        "url": "https://github.com/Sage/f-streams/issues"
+    },
+    "homepage": "https://github.com/Sage/f-streams#readme"
 }
