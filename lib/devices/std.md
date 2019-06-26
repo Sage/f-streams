@@ -2,6 +2,6 @@
 
 `import { stdInput, stdOutput, stdError } from 'f-streams'`
 
-* `reader = stdInput(encoding)`  
-* `writer = stdOutput(encoding)`  
-* `writer = stdError(encoding)`  
+-   `reader = stdInput(encoding)`
+-   `writer = stdOutput(encoding)`
+-   `writer = stdError(encoding)`
