@@ -985,7 +985,7 @@ export class SocketStream extends ReadableStream<net.Socket & NodeJS.ReadableStr
 	}
 	address() {
 		// TODO: remove as string cast: this is a temp hack to get around an inconsistency in node definition files
-		return this._emitter.address() as string;
+		return this._emitter.address();
 	}
 	get localAddress() { return this._emitter.localAddress; }
 	get localPort() { return this._emitter.localPort; }
