@@ -1,16 +1,16 @@
 import { assert } from 'chai';
-import { IncomingHttpHeaders } from 'http';
 import { setup } from 'f-mocha';
 import { wait } from 'f-promise';
+import { IncomingHttpHeaders } from 'http';
 import {
+    BinaryReader,
+    binaryReader,
     bufferReader,
     bufferWriter,
     multipartFormatter,
     multipartParser,
     Reader,
     Writer,
-    BinaryReader,
-    binaryReader,
 } from '../..';
 
 setup();
@@ -114,12 +114,12 @@ function testStreamFormData(body1?: string, body2?: string): Reader<Buffer> {
 }
 
 function yieldMapper(buffer: Buffer) {
-    wait(cb => setImmediate(cb));
+    wait(setImmediate);
     return buffer;
 }
 
 function binaryToBufferReaderTransformer(reader: BinaryReader, writer: Writer<Buffer>) {
-    let chunkSize = 40 * 1024;
+    const chunkSize = 40 * 1024;
     // With our setting:
     // - read the whole stream.
     // - chunkSize always bigger than file size.
