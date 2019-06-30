@@ -1,4 +1,5 @@
 import { assert } from 'chai';
+import { IncomingHttpHeaders } from 'http';
 import { setup } from 'f-mocha';
 import { wait } from 'f-promise';
 import {
@@ -11,7 +12,7 @@ import {
     BinaryReader,
     binaryReader,
 } from '../..';
-import { IncomingHttpHeaders } from 'http';
+
 setup();
 
 const { ok, strictEqual } = assert;
