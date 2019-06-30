@@ -113,6 +113,7 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
         const binReader = binary.reader(reader);
         const hk = handshake();
         while (true) {
+            let partEnded = false;
             const buf = binReader.readData(2048);
             if (!buf || !buf.length) return;
             const str = buf.toString('binary');
@@ -160,7 +161,11 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
                 const len = Math.max(boundary.length, 256);
                 const bbuf = binReader.readData(32 * len);
                 if (!bbuf || !bbuf.length) {
-                    hk.notify();
+                    // conditional notify: allow final read to be called twice
+                    if (!partEnded) {
+                        partEnded = true;
+                        hk.notify();
+                    }
                     return undefined;
                 }
                 // would be nice if Buffer had an indexOf. Would avoid a conversion to string.
@@ -170,7 +175,11 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
 
                 if (indexOfBoundaryInPart === 0) {
                     binReader.unread(bbuf.length);
-                    hk.notify();
+                    // conditional notify: allow final read to be called twice
+                    if (!partEnded) {
+                        partEnded = true;
+                        hk.notify();
+                    }
                     return undefined;
                 } else if (indexOfBoundaryInPart > 0) {
                     let r = 0;
