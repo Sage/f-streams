@@ -30,10 +30,9 @@
         "no-var-keyword": true,
         "prefer-object-spread": true,
         "triple-equals": [true, "allow-null-check"],
-        "typeof-compare": true,
         "use-isnan": true,
         // Maintainability rules
-        "indent": [true, "tabs", 4],
+        "indent": [true, "spaces", 4],
         "max-line-length": [true, 200],
         "prefer-const": true,
         // Style rules

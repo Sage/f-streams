@@ -28,12 +28,13 @@
         "chai": "^3.5.0",
         "f-mocha": "^2.0.0",
         "mocha": "^6.1.4",
+        "tslint": "^5.18.0",
         "typescript": "^3.5.2"
     },
     "scripts": {
         "prepare": "rm -rf build; tsc",
         "test": "mocha build/test/unit --exit --timeout 5000",
-        "lint": "tslint -e 'node_modules/**' {lib,test}/**/*.ts"
+        "lint": "tslint -e 'node_modules/**' -p ."
     },
     "readmeFilename": "README.md",
     "bugs": {
