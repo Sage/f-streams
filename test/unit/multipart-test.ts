@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
-import { bufferReader, bufferWriter, multipartFormatter, multipartParser } from '../..';
 import { IncomingHttpHeaders } from 'http';
+import { bufferReader, bufferWriter, multipartFormatter, multipartParser } from '../..';
 setup();
 
 const { equal, ok, strictEqual } = assert;
