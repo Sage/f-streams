@@ -801,7 +801,7 @@ export interface HttpClientOptions extends HttpClientResponseOptions {
     proxyAuthenticate?: any; // refine later
     isHttps?: boolean;
     socket?: net.Socket;
-    agent?: boolean;
+    agent?: http.Agent | boolean;
 }
 
 function _fixHttpClientOptions(options: HttpClientOptions) {
