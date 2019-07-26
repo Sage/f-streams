@@ -827,7 +827,7 @@ function _fixHttpClientOptions(options: HttpClientOptions) {
         },
         {} as http.IncomingHttpHeaders,
     );
-    opts.module = require(opts.protocol.substring(0, opts.protocol.length - 1));
+    opts.module = options.module || require(opts.protocol.substring(0, opts.protocol.length - 1));
     if (opts.user != null) {
         // assumes basic auth for now
         let token = opts.user + ':' + (opts.password || '');
