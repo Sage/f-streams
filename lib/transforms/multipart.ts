@@ -50,7 +50,7 @@ function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer:
                 return h;
             }, {});
             i = str.indexOf('\n', i);
-            binReader.unread(str.length - i - 1);
+            binReader.unread(buf.length - i - 1);
 
             const read = () => {
                 const len = Math.max(boundary.length, 256);
@@ -155,7 +155,7 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
                 beginOfData++;
             }
 
-            binReader.unread(str.length - beginOfData);
+            binReader.unread(buf.length - beginOfData);
 
             const read = () => {
                 const len = Math.max(boundary.length, 256);
