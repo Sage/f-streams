@@ -40,7 +40,7 @@ function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer:
         while (true) {
             const buf = binReader.readData(2048);
             if (!buf || !buf.length) return;
-            const str = buf.toString('binary');
+            const str = buf.toString('utf8');
             let i = str.indexOf(boundary);
             if (i < 0) throw new Error('boundary not found');
             const lines = str.substring(0, i).split(/\r?\n/);
@@ -50,7 +50,7 @@ function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer:
                 return h;
             }, {});
             i = str.indexOf('\n', i);
-            binReader.unread(buf.length - i - 1);
+            binReader.unread(str.length - i - 1);
 
             const read = () => {
                 const len = Math.max(boundary.length, 256);
@@ -95,7 +95,7 @@ function mixedFormatter(ct: MultipartContentType) {
             const headers = part.headers;
             if (!headers) throw new Error('part does not have headers');
             Object.keys(part.headers).forEach(key => {
-                writer.write(Buffer.from(key + ': ' + headers[key] + '\n', 'binary'));
+                writer.write(Buffer.from(key + ': ' + headers[key] + '\n', 'utf8'));
             });
             writer.write(Buffer.from('\n' + boundary + '\n'));
             // cannot use pipe because pipe writes undefined at end.
@@ -116,7 +116,7 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
             let partEnded = false;
             const buf = binReader.readData(2048);
             if (!buf || !buf.length) return;
-            const str = buf.toString('binary');
+            const str = buf.toString('utf8');
 
             let endBoundaryIndex = str.indexOf(boundary) + boundary.length;
             if (endBoundaryIndex < 0) throw new Error('boundary not found');
@@ -155,7 +155,7 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
                 beginOfData++;
             }
 
-            binReader.unread(buf.length - beginOfData);
+            binReader.unread(str.length - beginOfData);
 
             const read = () => {
                 const len = Math.max(boundary.length, 256);
@@ -214,7 +214,7 @@ function formDataFormatter(ct: MultipartContentType): (reader: Reader<Reader<Buf
             const headers = part.headers;
             if (!headers) throw new Error('part does not have headers');
             Object.keys(part.headers).forEach(key => {
-                writer.write(Buffer.from(key + ': ' + headers[key] + CR_LF, 'binary'));
+                writer.write(Buffer.from(key + ': ' + headers[key] + CR_LF, 'utf8'));
             });
             // cannot use pipe because pipe writes undefined at end.;
             writer.write(Buffer.from(CR_LF));
