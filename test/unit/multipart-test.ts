@@ -142,7 +142,7 @@ function binaryToBufferReaderTransformer(reader: BinaryReader, writer: Writer<Bu
     }
 }
 
-describe.only(module.id, () => {
+describe(module.id, () => {
     it('basic multipart/mixed', () => {
         const data = testStreamMixed();
         const stream = data.reader.transform(multipartParser(headers('mixed')));
