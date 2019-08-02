@@ -40,12 +40,12 @@ function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer:
         while (true) {
             const buf = binReader.readData(2048);
             if (!buf || !buf.length) return;
-            const str = buf.toString('utf8');
+            const str = buf.toString('binary');
             let i = str.indexOf(boundary);
             if (i < 0) throw new Error('boundary not found');
             const lines = str.substring(0, i).split(/\r?\n/);
             const headers = lines.slice(0, lines.length - 2).reduce((h: any, l: string) => {
-                const kv = l.split(/\s*:\s*/);
+                const kv = Buffer.from(l, 'binary').toString('utf8').split(/\s*:\s*/);
                 h[kv[0].toLowerCase()] = kv[1];
                 return h;
             }, {});
@@ -116,7 +116,7 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
             let partEnded = false;
             const buf = binReader.readData(2048);
             if (!buf || !buf.length) return;
-            const str = buf.toString('utf8');
+            const str = buf.toString('binary');
 
             let endBoundaryIndex = str.indexOf(boundary) + boundary.length;
             if (endBoundaryIndex < 0) throw new Error('boundary not found');
@@ -136,7 +136,7 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
 
             const lines = str.substring(endBoundaryIndex, endOfHeaders).split(/\r?\n/);
             const headers = lines.slice(0, lines.length).reduce((h: any, l: string) => {
-                const kv = l.split(/\s*:\s*/);
+                const kv = Buffer.from(l, 'binary').toString('utf8').split(/\s*:\s*/);
                 h[kv[0].toLowerCase()] = kv[1];
                 return h;
             }, {});
