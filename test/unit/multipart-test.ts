@@ -73,7 +73,8 @@ function testStreamMixed(body1?: string, body2?: string): ITestStreamData {
     }
     return {
         reader: bufferReader(Buffer.from(parts.map(formatPart).join(''))),
-        expectedResult: "a: VÀ1\nb: VB1\ncontent-type: text/plain\n\n------------myBoundary\nC1\n------------myBoundary\ncontent-type: text/plain\na: VA2\nb: VB2\n\n------------myBoundary\nC2\n------------myBoundary\n"
+        expectedResult: 'a: VÀ1\nb: VB1\ncontent-type: text/plain\n\n------------myBoundary\nC1\n------------myBoundary\n' +
+            'content-type: text/plain\na: VA2\nb: VB2\n\n------------myBoundary\nC2\n------------myBoundary\n'
     };
 }
 
@@ -118,7 +119,9 @@ function testStreamFormData(body1?: string, body2?: string): ITestStreamData {
     }
     return {
         reader: bufferReader(Buffer.from(CR_LF + parts.map(formatPartWithFormData).join('') + CR_LF + '--' + boundary + '--')),
-        expectedResult: '--------------myBoundary\r\na: VÀ1\r\nb: VB1\r\ncontent-type: text/plain\r\ncontent-disposition: form-data; name=\"c1\";\r\n\r\nC1\r\n--------------myBoundary\r\ncontent-type: text/plain\r\ncontent-disposition: form-data; name=\"c2\";\r\na: VA2\r\nb: VB2\r\n\r\nC2\r\n--------------myBoundary--'
+        expectedResult: '--------------myBoundary\r\na: VÀ1\r\nb: VB1\r\ncontent-type: text/plain\r\n' +
+            'content-disposition: form-data; name=\"c1\";\r\n\r\nC1\r\n--------------myBoundary\r\ncontent-type: text/plain\r\n' +
+            'content-disposition: form-data; name=\"c2\";\r\na: VA2\r\nb: VB2\r\n\r\nC2\r\n--------------myBoundary--'
     };
 }
 
