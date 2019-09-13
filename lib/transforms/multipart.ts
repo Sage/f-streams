@@ -32,6 +32,10 @@ function parseContentType(contentType?: string): MultipartContentType | null {
     };
 }
 
+function latin1toUtf8(text: string): string {
+    return Buffer.from(text, 'binary').toString('utf8');
+}
+
 function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer: Writer<any>) => void {
     const boundary = ct.boundary;
     return (reader: Reader<Buffer>, writer: Writer<any>) => {
@@ -45,7 +49,7 @@ function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer:
             if (i < 0) throw new Error('boundary not found');
             const lines = str.substring(0, i).split(/\r?\n/);
             const headers = lines.slice(0, lines.length - 2).reduce((h: any, l: string) => {
-                const kv = Buffer.from(l, 'binary').toString('utf8').split(/\s*:\s*/);
+                const kv = latin1toUtf8(l).split(/\s*:\s*/);
                 h[kv[0].toLowerCase()] = kv[1];
                 return h;
             }, {});
@@ -136,7 +140,7 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
 
             const lines = str.substring(endBoundaryIndex, endOfHeaders).split(/\r?\n/);
             const headers = lines.slice(0, lines.length).reduce((h: any, l: string) => {
-                const kv = Buffer.from(l, 'binary').toString('utf8').split(/\s*:\s*/);
+                const kv = latin1toUtf8(l).split(/\s*:\s*/);
                 h[kv[0].toLowerCase()] = kv[1];
                 return h;
             }, {});

@@ -39,7 +39,7 @@ function testStreamMixed(body1?: string, body2?: string): ITestStreamData {
     const parts = [
         {
             headers: {
-                A: 'VÀ1',
+                A: 'Và1',
                 B: 'VB1',
                 'Content-Type': 'text/plain',
             },
@@ -73,7 +73,7 @@ function testStreamMixed(body1?: string, body2?: string): ITestStreamData {
     }
     return {
         reader: bufferReader(Buffer.from(parts.map(formatPart).join(''))),
-        expectedResult: 'a: VÀ1\nb: VB1\ncontent-type: text/plain\n\n------------myBoundary\nC1\n------------myBoundary\n' +
+        expectedResult: 'a: Và1\nb: VB1\ncontent-type: text/plain\n\n------------myBoundary\nC1\n------------myBoundary\n' +
             'content-type: text/plain\na: VA2\nb: VB2\n\n------------myBoundary\nC2\n------------myBoundary\n'
     };
 }
@@ -82,7 +82,7 @@ function testStreamFormData(body1?: string, body2?: string): ITestStreamData {
     const parts = [
         {
             headers: {
-                A: 'VÀ1',
+                A: 'Và1',
                 B: 'VB1',
                 'Content-Type': 'text/plain',
                 'content-disposition': 'form-data; name="c1";',
@@ -119,7 +119,7 @@ function testStreamFormData(body1?: string, body2?: string): ITestStreamData {
     }
     return {
         reader: bufferReader(Buffer.from(CR_LF + parts.map(formatPartWithFormData).join('') + CR_LF + '--' + boundary + '--')),
-        expectedResult: '--------------myBoundary\r\na: VÀ1\r\nb: VB1\r\ncontent-type: text/plain\r\n' +
+        expectedResult: '--------------myBoundary\r\na: Và1\r\nb: VB1\r\ncontent-type: text/plain\r\n' +
             'content-disposition: form-data; name=\"c1\";\r\n\r\nC1\r\n--------------myBoundary\r\ncontent-type: text/plain\r\n' +
             'content-disposition: form-data; name=\"c2\";\r\na: VA2\r\nb: VB2\r\n\r\nC2\r\n--------------myBoundary--'
     };
@@ -151,7 +151,7 @@ describe(module.id, () => {
         const stream = data.reader.transform(multipartParser(headers('mixed')));
         let part = stream.read();
         ok(part != null, 'part != null');
-        strictEqual(part.headers.a, 'VÀ1', 'header A');
+        strictEqual(part.headers.a, 'Và1', 'header A');
         strictEqual(part.headers.b, 'VB1', 'header B');
         strictEqual(part.headers['content-type'], 'text/plain', 'content-type');
         let r = part.read();
@@ -196,7 +196,7 @@ describe(module.id, () => {
         const stream = data.reader.transform(multipartParser(headers('form-data')));
         let part = stream.read();
         ok(part != null, 'part != null');
-        strictEqual(part.headers.a, 'VÀ1', 'header A');
+        strictEqual(part.headers.a, 'Và1', 'header A');
         strictEqual(part.headers.b, 'VB1', 'header B');
         strictEqual(part.headers['content-type'], 'text/plain', 'content-type');
         strictEqual(part.headers['content-disposition'], 'form-data; name="c1";', 'content-disposition');
