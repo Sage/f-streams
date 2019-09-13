@@ -74,7 +74,7 @@ function testStreamMixed(body1?: string, body2?: string): ITestStreamData {
     return {
         reader: bufferReader(Buffer.from(parts.map(formatPart).join(''))),
         expectedResult: 'a: Và1\nb: VB1\ncontent-type: text/plain\n\n------------myBoundary\nC1\n------------myBoundary\n' +
-            'content-type: text/plain\na: VA2\nb: VB2\n\n------------myBoundary\nC2\n------------myBoundary\n'
+            'content-type: text/plain\na: VA2\nb: VB2\n\n------------myBoundary\nC2\n------------myBoundary\n',
     };
 }
 
