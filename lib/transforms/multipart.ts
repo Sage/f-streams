@@ -32,6 +32,10 @@ function parseContentType(contentType?: string): MultipartContentType | null {
     };
 }
 
+function latin1toUtf8(text: string): string {
+    return Buffer.from(text, 'binary').toString('utf8');
+}
+
 function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer: Writer<any>) => void {
     const boundary = ct.boundary;
     return (reader: Reader<Buffer>, writer: Writer<any>) => {
@@ -45,7 +49,7 @@ function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer:
             if (i < 0) throw new Error('boundary not found');
             const lines = str.substring(0, i).split(/\r?\n/);
             const headers = lines.slice(0, lines.length - 2).reduce((h: any, l: string) => {
-                const kv = l.split(/\s*:\s*/);
+                const kv = latin1toUtf8(l).split(/\s*:\s*/);
                 h[kv[0].toLowerCase()] = kv[1];
                 return h;
             }, {});
@@ -95,7 +99,7 @@ function mixedFormatter(ct: MultipartContentType) {
             const headers = part.headers;
             if (!headers) throw new Error('part does not have headers');
             Object.keys(part.headers).forEach(key => {
-                writer.write(Buffer.from(key + ': ' + headers[key] + '\n', 'binary'));
+                writer.write(Buffer.from(key + ': ' + headers[key] + '\n', 'utf8'));
             });
             writer.write(Buffer.from('\n' + boundary + '\n'));
             // cannot use pipe because pipe writes undefined at end.
@@ -136,7 +140,7 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
 
             const lines = str.substring(endBoundaryIndex, endOfHeaders).split(/\r?\n/);
             const headers = lines.slice(0, lines.length).reduce((h: any, l: string) => {
-                const kv = l.split(/\s*:\s*/);
+                const kv = latin1toUtf8(l).split(/\s*:\s*/);
                 h[kv[0].toLowerCase()] = kv[1];
                 return h;
             }, {});
@@ -214,7 +218,7 @@ function formDataFormatter(ct: MultipartContentType): (reader: Reader<Reader<Buf
             const headers = part.headers;
             if (!headers) throw new Error('part does not have headers');
             Object.keys(part.headers).forEach(key => {
-                writer.write(Buffer.from(key + ': ' + headers[key] + CR_LF, 'binary'));
+                writer.write(Buffer.from(key + ': ' + headers[key] + CR_LF, 'utf8'));
             });
             // cannot use pipe because pipe writes undefined at end.;
             writer.write(Buffer.from(CR_LF));
