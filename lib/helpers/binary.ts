@@ -52,7 +52,7 @@ export class Reader extends BaseReader<Buffer> {
     readData(len?: number, peekOnly?: boolean): Buffer | undefined {
         if (this.buf === undefined) return undefined;
         if (len === undefined) {
-            if (this.pos < this.buf.length) return this.readData(this.buf.length - this.pos);
+            if (this.pos < this.buf.length) return this.readData(this.buf.length - this.pos, peekOnly);
             else {
                 this.buf = this.reader.read();
                 this.pos = this.buf && !peekOnly ? this.buf.length : 0;
