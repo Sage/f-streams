@@ -1,7 +1,7 @@
 {
     "name": "f-streams",
     "description": "node.js streams with promises and coroutines",
-    "version": "2.3.2",
+    "version": "2.3.3",
     "license": "MIT",
     "author": {
         "name": "Bruno Jouhier",
