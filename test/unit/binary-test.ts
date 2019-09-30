@@ -51,4 +51,34 @@ describe(module.id, () => {
             equal(reader.read(), undefined, 'EOF roundtrip');
         });
     });
+
+    describe('peekAll should not consume the reader', () => {
+        it('buffer is empty', () => {
+            const originalBuffer = Buffer.from([]);
+            const reader = binaryReader(bufferReader(originalBuffer));
+            equal(reader.peekAll(), undefined, 'peekAll');
+            equal(reader.readAll(), undefined, 'readAll');
+        });
+
+        it('buffer length smaller than chunk size', () => {
+            const originalBuffer = Buffer.allocUnsafe(256);
+            const reader = binaryReader(bufferReader(originalBuffer));
+            eqbuf(reader.peekAll(), originalBuffer, 'peekAll');
+            eqbuf((reader.readAll() as Buffer), originalBuffer, 'readAll');
+        });
+
+        it('buffer length equal to chunk size', () => {
+            const originalBuffer = Buffer.allocUnsafe(1024);
+            const reader = binaryReader(bufferReader(originalBuffer));
+            eqbuf(reader.peekAll(), originalBuffer, 'peekAll');
+            eqbuf((reader.readAll() as Buffer), originalBuffer, 'readAll');
+        });
+
+        it('buffer length greater than chunk size', () => {
+            const originalBuffer = Buffer.allocUnsafe(1600);
+            const reader = binaryReader(bufferReader(originalBuffer));
+            eqbuf(reader.peekAll(), originalBuffer, 'peekAll');
+            eqbuf((reader.readAll() as Buffer), originalBuffer, 'readAll');
+        });
+    });
 });

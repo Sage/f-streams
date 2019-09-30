@@ -95,6 +95,25 @@ export class Reader extends BaseReader<Buffer> {
     }
 
     ///
+    /// * `reader.peekAll()`
+    ///   Same as `readAll` but does not advance the read pointer.
+    peekAll(): Buffer | undefined {
+        if (this.buf === undefined) return undefined;
+        while (true) {
+            const nextChunk = this.reader.read();
+            if (nextChunk === undefined) {
+                if (this.buf && this.buf.length) {
+                    this.pos = 0;
+                    return this.buf;
+                }
+                return;
+            }
+            this.buf = this.buf ? Buffer.concat([this.buf, nextChunk]) : nextChunk;
+            this.pos = this.buf.length;
+        }
+    }
+
+    ///
     /// * `reader.unread(len)`
     ///   Unread the last `len` bytes read.
     ///   `len` cannot exceed the size of the last read.
