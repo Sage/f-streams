@@ -95,6 +95,15 @@ export class Reader extends BaseReader<Buffer> {
     }
 
     ///
+    /// * `reader.peekAll()`
+    ///   Same as `readAll` but does not advance the read pointer.
+    peekAll(): Buffer | undefined {
+        this.buf = this.readAll() as Buffer;
+        this.pos = 0;
+        return this.buf;
+    }
+
+    ///
     /// * `reader.unread(len)`
     ///   Unread the last `len` bytes read.
     ///   `len` cannot exceed the size of the last read.
