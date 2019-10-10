@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
-import { run, wait } from 'f-promise';
-import { binaryReader, binaryWriter, bufferReader, bufferWriter, cutter } from '../..';
+import { binaryReader, binaryWriter, bufferReader, bufferWriter, cutter, genericReader, genericWriter } from '../..';
+
 setup();
 
 const { equal } = assert;
@@ -80,5 +80,27 @@ describe(module.id, () => {
             eqbuf(reader.peekAll(), originalBuffer, 'peekAll');
             eqbuf((reader.readAll() as Buffer), originalBuffer, 'readAll');
         });
+    });
+
+    it('should stop underlying reader', () => {
+        const stopError = new Error('stop read stream');
+        let foundError: Error | undefined;
+        binaryReader(genericReader<Buffer>(() => {
+            return Buffer.allocUnsafe(1);
+        }, (e: Error) => {
+            foundError = e;
+        })).stop(stopError);
+        assert.equal(foundError, stopError);
+    });
+
+    it('should stop underlying writer', () => {
+        const stopError = new Error('stop write stream');
+        let foundError: Error | undefined;
+        binaryWriter(genericWriter<Buffer>(() => {
+            return ;
+        }, (e: Error) => {
+            foundError = e;
+        })).stop(stopError);
+        assert.equal(foundError, stopError);
     });
 });
