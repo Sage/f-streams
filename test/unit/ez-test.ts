@@ -1,10 +1,11 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
-import { run, wait } from 'f-promise';
-import { cutter, HttpServer, httpServer, reader as fReader, writer as fWriter } from '../..';
+import { cutter, emptyReader, HttpServer, httpServer, reader as fReader, writer as fWriter } from '../..';
+import { createEmptyReader, createEmptyWriter } from '../../lib';
+
 setup();
 
-const { equal, ok, strictEqual, deepEqual } = assert;
+const { ok, strictEqual, deepEqual } = assert;
 
 let server: HttpServer;
 
@@ -101,5 +102,22 @@ describe(module.id, () => {
         const writer = fWriter(Buffer.alloc(0));
         const reply = fReader(buf).pipe(writer);
         deepEqual(writer.result.toString('utf8'), buf.toString('utf8'));
+    });
+
+    it('emptyReader should be usable many times', () => {
+        assert.isUndefined(emptyReader.readAll());
+        assert.isUndefined(emptyReader.readAll());
+    });
+
+    it('createEmptyReader() should be usable many times', () => {
+        assert.isUndefined(createEmptyReader().readAll());
+        assert.isUndefined(createEmptyReader().readAll());
+    });
+
+    it('createEmptyWriter() should be usable many times', () => {
+        assert.doesNotThrow(() => {
+            fReader('string:hello world').pipe(createEmptyWriter());
+            fReader([2, 3, 4]).pipe(createEmptyWriter());
+        });
     });
 });

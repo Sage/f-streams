@@ -114,8 +114,12 @@ export {
     list as directoryReader,
 } from './devices/file';
 
+/** @deprecated - use createEmptyReader() instead */
 export const emptyReader = devices.generic.empty.reader;
+/** @deprecated - this writer is buggy, use createEmptyWriter() instead */
 export const emptyWriter = devices.generic.empty.writer;
+export const createEmptyReader = devices.generic.empty.createReader;
+export const createEmptyWriter = devices.generic.empty.createWriter;
 export { reader as genericReader, writer as genericWriter } from './devices/generic';
 
 export {
