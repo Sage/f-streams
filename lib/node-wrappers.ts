@@ -25,6 +25,7 @@ import * as http from 'http';
 import * as https from 'https';
 import * as net from 'net';
 import * as os from 'os';
+import * as stream from 'stream';
 import { parse as parseUrl } from 'url';
 import * as generic from './devices/generic';
 import { Reader } from './reader';
@@ -125,6 +126,7 @@ export class Wrapper<EmitterT extends Emitter> {
 export interface ReadableOptions {
     lowMark?: number;
     highMark?: number;
+    destroyOnStop?: boolean;
 }
 
 export type Data = string | Buffer;
@@ -139,6 +141,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
     _done: boolean;
     _encoding: string | null;
     _onData: (err?: Error, chunk?: Data) => void;
+    _destroyOnClose: boolean;
     /// * `reader = stream.reader`
     ///   returns a clean f reader.
     reader: Reader<any>;
@@ -154,6 +157,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
         // initialize _onData before setting listeners because listeners may emit data events immediately
         // (during the `on` call!)
         this._onData = this._trackData;
+        this._destroyOnClose = options.destroyOnStop || false;
 
         emitter.on('error', (err: Error) => {
             this._onData(err);
@@ -301,7 +305,12 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 
     stop(arg?: any) {
         if (arg && arg !== true) this._error = this._error || arg;
-        this.unwrap();
+        if (!this.closed) {
+            this.unwrap();
+            if (this._destroyOnClose && this._emitter instanceof stream.Readable) {
+                this._emitter.destroy();
+            }
+        }
     }
 
     get events() {
@@ -1225,11 +1234,11 @@ exports.using = function(
 ) {
     if (!fn && typeof options === 'function') (fn = options), (options = null);
     if (!fn) throw new Error('using body missing');
-    const stream = new constructor(emitter, options);
+    const _stream = new constructor(emitter, options);
     try {
-        return fn.call(this, stream);
+        return fn.call(this, _stream);
     } finally {
-        stream.close();
+        _stream.close();
     }
 };
 
