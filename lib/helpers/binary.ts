@@ -41,7 +41,7 @@ export class Reader extends BaseReader<Buffer> {
         ///   returns `undefined`.
         ///   If the `len` parameter is omitted, the call returns the next available chunk of data.
         // peekOnly is internal and not documented
-        super(() => this.readData());
+        super(() => this.readData(), (arg?: any) => rd.stop(arg));
         this.reader = rd;
         this.options = options;
         this.pos = 0;
@@ -180,7 +180,7 @@ export class Writer extends BaseWriter<Buffer> {
         super((buf: Buffer) => {
             this.writeDate(buf);
             return this;
-        });
+        }, (arg?: any) => wr.stop(arg));
         options = options || {};
         this.writer = wr;
         this.options = options;
