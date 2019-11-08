@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
-import { wait } from 'f-promise';
+import { sleep, wait } from 'f-promise';
 import { IncomingHttpHeaders } from 'http';
 import {
     BinaryReader,
@@ -156,8 +156,11 @@ describe(module.id, () => {
         strictEqual(part.headers['content-type'], 'text/plain', 'content-type');
         let r = part.read();
         strictEqual(r.toString('binary'), 'C1', 'body C1');
+        sleep(1); // sleeps are here to let asynchrous operation like hk.notify occure
         r = part.read();
         strictEqual(r, undefined, 'end of part 1');
+        sleep(1);
+        strictEqual(part.read(), undefined, 'end of part 1 again');
 
         part = stream.read();
         ok(part != null, 'part != null');
@@ -166,8 +169,11 @@ describe(module.id, () => {
         strictEqual(part.headers['content-type'], 'text/plain', 'content-type');
         r = part.read();
         strictEqual(r.toString('binary'), 'C2', 'body C2');
+        sleep(1);
         r = part.read();
         strictEqual(r, undefined, 'end of part 2');
+        sleep(1);
+        strictEqual(part.read(), undefined, 'end of part 2 again');
 
         part = stream.read();
         assert.isUndefined(part);
@@ -202,8 +208,11 @@ describe(module.id, () => {
         strictEqual(part.headers['content-disposition'], 'form-data; name="c1";', 'content-disposition');
         let r = part.read();
         strictEqual(r.toString('binary'), 'C1', 'body C1');
+        sleep(1); // sleeps are here to let asynchrous operation like hk.notify occure
         r = part.read();
         strictEqual(r, undefined, 'end of part 1');
+        sleep(1);
+        strictEqual(part.read(), undefined, 'end of part 1 again');
 
         part = stream.read();
         ok(part != null, 'part != null');
@@ -213,8 +222,11 @@ describe(module.id, () => {
         strictEqual(part.headers['content-disposition'], 'form-data; name="c2";', 'content-disposition');
         r = part.read();
         strictEqual(r.toString('binary'), 'C2', 'body C2');
+        sleep(1);
         r = part.read();
         strictEqual(r, undefined, 'end of part 2');
+        sleep(1);
+        strictEqual(part.read(), undefined, 'end of part 2 again');
 
         part = stream.read();
         assert.isUndefined(part);
@@ -267,7 +279,7 @@ describe(module.id, () => {
     // Moving handshake does not fix the problem.
     // I suspect a bug inside mixed parser function that does not support multiple read in part last chunk (return undefined),
     // because of binaryReader with transformer
-    it.skip('multipart/mixed with binaryReader and applying transformation', () => {
+    it('multipart/mixed with binaryReader and applying transformation', () => {
         const expectedLength = [10 * 1024, 20 * 1024];
 
         const heads = headers('mixed');

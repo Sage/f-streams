@@ -42,6 +42,7 @@ function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer:
         const binReader = binary.reader(reader);
         const hk = handshake();
         while (true) {
+            let partEnded = false;
             const buf = binReader.readData(2048);
             if (!buf || !buf.length) return;
             const str = buf.toString('binary');
@@ -57,10 +58,12 @@ function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer:
             binReader.unread(buf.length - i - 1);
 
             const read = () => {
+                if (partEnded) return undefined;
                 const len = Math.max(boundary.length, 256);
                 const bbuf = binReader.readData(32 * len);
                 if (!bbuf || !bbuf.length) {
                     hk.notify();
+                    partEnded = true;
                     return;
                 }
                 // would be nice if Buffer had an indexOf. Would avoid a conversion to string.
@@ -72,6 +75,7 @@ function mixedParser(ct: MultipartContentType): (reader: Reader<Buffer>, writer:
                     if (j < 0) throw new Error('newline missing after boundary');
                     binReader.unread(bbuf.length - j - 1);
                     hk.notify();
+                    partEnded = true;
                     return undefined;
                 } else if (ii > 0) {
                     let j = s.lastIndexOf('\n', ii);
@@ -162,6 +166,7 @@ function formDataParser(ct: MultipartContentType): (reader: Reader<Buffer>, writ
             binReader.unread(buf.length - beginOfData);
 
             const read = () => {
+                if (partEnded) return undefined;
                 const len = Math.max(boundary.length, 256);
                 const bbuf = binReader.readData(32 * len);
                 if (!bbuf || !bbuf.length) {
