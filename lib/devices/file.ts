@@ -1,5 +1,5 @@
 import { wait } from 'f-promise';
-import * as fs from 'mz/fs';
+import * as fs from 'fs';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
 import * as generic from './generic';
@@ -81,7 +81,7 @@ export function list(path: string, options?: ListOptions) {
     const postorder = recurse === 'postorder';
     return generic.empty.reader.transform<ListEntry>((reader, writer) => {
         function process(p: string, name: string, depth: number) {
-            const stat = wait(fs.stat(p));
+            const stat = wait(cb => fs.stat(p, cb));
             const entry = {
                 path: p,
                 name: name,
@@ -91,7 +91,7 @@ export function list(path: string, options?: ListOptions) {
             if (accept && !accept(entry)) return;
             if ((recurse || depth === 1) && !postorder) writer.write(entry);
             if ((recurse || depth === 0) && stat.isDirectory()) {
-                wait(fs.readdir(p)).forEach(pp => {
+                wait(cb => fs.readdir(p, cb)).forEach((pp: string) => {
                     process(p + '/' + pp, pp, depth + 1);
                 });
             }

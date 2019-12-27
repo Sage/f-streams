@@ -1,8 +1,8 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { wait } from 'f-promise';
+import * as fs from 'fs';
 import { lsof } from 'list-open-files';
-import * as fs from 'mz/fs';
 import { binaryFileReader, binaryFileWriter, genericReader, textFileReader, textFileWriter } from '../..';
 
 setup();
@@ -16,7 +16,7 @@ describe(module.id, () => {
     });
 
     after(() => {
-        wait(fs.rmdir(tmpDir));
+        wait(cb => fs.rmdir(tmpDir, cb));
     });
 
     function writeBinaryFile(filePath: string, nbChunk32k: number) {
@@ -52,7 +52,7 @@ describe(module.id, () => {
     describe('binaryFileWriter', () => {
 
         afterEach(() => {
-            wait(fs.unlink(tmpFilePath));
+            wait(cb => fs.unlink(tmpFilePath, cb));
         });
 
         it('end() should close fd', () => {
@@ -87,7 +87,7 @@ describe(module.id, () => {
         });
 
         after(() => {
-            wait(fs.unlink(tmpFilePath));
+            wait(cb => fs.unlink(tmpFilePath, cb));
         });
 
         it('end() should close fd', () => {
@@ -114,7 +114,7 @@ describe(module.id, () => {
     describe('textFileWriter', () => {
 
         afterEach(() => {
-            wait(fs.unlink(tmpFilePath));
+            wait(cb => fs.unlink(tmpFilePath, cb));
         });
 
         it('end() should close fd', () => {
@@ -149,7 +149,7 @@ describe(module.id, () => {
         });
 
         after(() => {
-            wait(fs.unlink(tmpFilePath));
+            wait(cb => fs.unlink(tmpFilePath, cb));
         });
 
         it('end() should close fd', () => {
