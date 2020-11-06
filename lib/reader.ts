@@ -34,7 +34,7 @@ import * as stopException from './stop-exception';
 import { nextTick } from './util';
 import { Writer } from './writer';
 
-function tryCatch<R>(that: any, fn: () => R) {
+function tryCatch<R>(that: any, fn: () => R): R {
     try {
         return fn.call(that);
     } catch (ex) {
@@ -112,7 +112,7 @@ export class Reader<T> {
     ///   The `fn` function is called as `fn(elt)`.
     ///   Returns true at the end of stream if `fn` returned true on every entry.
     ///   Stops streaming and returns false as soon as `fn` returns false on an entry.
-    every(fn: ((value: T) => boolean) | {}) {
+    every(fn: ((value: T) => boolean) | {}): boolean {
         const f = resolvePredicate(fn);
         return tryCatch(this, () => {
             while (true) {
@@ -126,12 +126,31 @@ export class Reader<T> {
         });
     }
 
-    /// * `result = reader.some(fn)`
+    /// * `element = reader.find(fn)`
+    ///   Similar to `find` on arrays.
+    ///   The `fn` function is called as `fn(elt)`.
+    ///   Returns undefined at the end of stream if `fn` returned false on every entry.
+    ///   Otherwise returns the first element on which `fn` returns true.
+    find(fn: ((value: T) => boolean) | {}): T | undefined {
+        const f = resolvePredicate(fn);
+        return tryCatch(this, () => {
+            while (true) {
+                const val = this.read();
+                if (val === undefined) return undefined;
+                if (f.call(null, val)) {
+                    this.stop();
+                    return val;
+                }
+            }
+        });
+    }
+
+        /// * `result = reader.some(fn)`
     ///   Similar to `some` on arrays.
     ///   The `fn` function is called as `fn(elt)`.
     ///   Returns false at the end of stream if `fn` returned false on every entry.
     ///   Stops streaming and returns true as soon as `fn` returns true on an entry.
-    some(fn: ((value: T) => boolean) | {}) {
+    some(fn: ((value: T) => boolean) | {}): boolean {
         const f = resolvePredicate(fn);
         return tryCatch(this, () => {
             while (true) {

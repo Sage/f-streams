@@ -169,6 +169,18 @@ describe(module.id, () => {
         source.finalCheck();
     });
 
+    it('find', () => {
+        let source: TestReader;
+        strictEqual((source = numbers(5)).find(function (num) {
+            return num >= 2.1;
+        }), 3);
+        source.finalCheck();
+        strictEqual((source = numbers(5)).find(function (num) {
+            return num >= 5;
+        }), undefined);
+        source.finalCheck();
+    });
+
     it('reduce', () => {
         const source = numbers(5);
         strictEqual(source.reduce(function (r, num) {
