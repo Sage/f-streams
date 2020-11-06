@@ -22,7 +22,7 @@ function scanDirs(dir: string) {
         if (!fs.existsSync(pkgPath)) return;
         try {
             // add factories from package.json
-            const pk = require(pkgPath);
+            const pk = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
             if (pk && pk.f && pk.f.factories) {
                 pk.f.factories.forEach((crt: PackageFactory) => {
                     if (crt.protocol && crt.module) {
