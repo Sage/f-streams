@@ -17,9 +17,7 @@
         "node": ">=8.0.0"
     },
     "dependencies": {
-        "@types/mz": "0.0.30",
-        "f-promise": "^2.0.3",
-        "mz": "^2.7.0"
+        "f-promise": "^2.0.3"
     },
     "devDependencies": {
         "@types/chai": "^3.4.34",
