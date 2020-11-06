@@ -1,12 +1,11 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
+import * as fs from 'fs';
 import { binaryFileReader, cutter, stringReader, textFileReader, textFileWriter, xmlFormatter, xmlParser } from '../..';
 setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
-
-import * as fs from 'mz/fs';
 
 function short(s: string) {
     return s.length < 50 ? s : s.substring(0, 47) + '...';
@@ -207,7 +206,7 @@ describe(module.id, () => {
     });
 
     it('rss roundtrip', () => {
-        let expected = wait(fs.readFile(__dirname + '/../../../test/fixtures/rss-sample.xml', 'utf8'));
+        let expected = wait(cb => fs.readFile(__dirname + '/../../../test/fixtures/rss-sample.xml', 'utf8', cb));
         let result = textFileReader(__dirname + '/../../../test/fixtures/rss-sample.xml') //
             .transform(cutter(5)) //
             .transform(xmlParser('rss/channel/item')) //

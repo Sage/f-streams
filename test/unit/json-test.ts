@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
+import * as fs from 'fs';
 import { bufferReader, jsonFormatter, jsonParser, stringReader, stringWriter, textFileReader } from '../..';
 setup();
 
@@ -8,7 +9,6 @@ const { equal, ok, strictEqual, deepEqual } = assert;
 
 const inputFile = require('os').tmpdir() + '/jsonInput.json';
 const outputFile = require('os').tmpdir() + '/jsonOutput.json';
-const fs = require('mz/fs');
 
 const mixedData =
     '[' + //
@@ -23,7 +23,7 @@ const mixedData =
     '\n true]';
 
 function nodeStream(text: string) {
-    wait(fs.writeFile(inputFile, text, 'utf8'));
+    wait(cb => fs.writeFile(inputFile, text, 'utf8', cb));
     return textFileReader(inputFile);
 }
 
