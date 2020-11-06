@@ -41,7 +41,7 @@ export class Reader extends BaseReader<Buffer> {
         ///   returns `undefined`.
         ///   If the `len` parameter is omitted, the call returns the next available chunk of data.
         // peekOnly is internal and not documented
-        super(() => this.readData());
+        super(() => this.readData(), (arg?: any) => rd.stop(arg));
         this.reader = rd;
         this.options = options;
         this.pos = 0;
@@ -52,7 +52,7 @@ export class Reader extends BaseReader<Buffer> {
     readData(len?: number, peekOnly?: boolean): Buffer | undefined {
         if (this.buf === undefined) return undefined;
         if (len === undefined) {
-            if (this.pos < this.buf.length) return this.readData(this.buf.length - this.pos);
+            if (this.pos < this.buf.length) return this.readData(this.buf.length - this.pos, peekOnly);
             else {
                 this.buf = this.reader.read();
                 this.pos = this.buf && !peekOnly ? this.buf.length : 0;
@@ -92,6 +92,15 @@ export class Reader extends BaseReader<Buffer> {
     ///   Another `read` would read the same data again.
     peek(len: number) {
         return this.readData(len, true);
+    }
+
+    ///
+    /// * `reader.peekAll()`
+    ///   Same as `readAll` but does not advance the read pointer.
+    peekAll(): Buffer | undefined {
+        this.buf = this.readAll() as Buffer;
+        this.pos = 0;
+        return this.buf;
     }
 
     ///
@@ -171,7 +180,7 @@ export class Writer extends BaseWriter<Buffer> {
         super((buf: Buffer) => {
             this.writeDate(buf);
             return this;
-        });
+        }, (arg?: any) => wr.stop(arg));
         options = options || {};
         this.writer = wr;
         this.options = options;

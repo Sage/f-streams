@@ -19,6 +19,7 @@ export const text = {
             fs.createReadStream(path, {
                 encoding: encoding || 'utf8',
             }),
+            { destroyOnStop: true },
         );
     },
     /// * `writer = textFileWriter(path, encoding)`
@@ -37,7 +38,7 @@ export const binary = {
     /// * `reader = binaryFileReader(path)`
     ///   creates a reader that reads from a binary file.
     reader(path: string) {
-        return node.reader<Buffer>(fs.createReadStream(path));
+        return node.reader<Buffer>(fs.createReadStream(path), { destroyOnStop: true });
     },
     /// * `writer = binaryFileWriter(path)`
     ///   creates a writer that writes to a binary file.
@@ -96,6 +97,7 @@ export function list(path: string, options?: ListOptions) {
             }
             if ((recurse || depth === 1) && postorder) writer.write(entry);
         }
+
         process(path, path.substring(path.lastIndexOf('/') + 1), 0);
     });
 }

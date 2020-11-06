@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { setup } from 'f-mocha';
-import { run, wait } from 'f-promise';
-import { binaryReader, binaryWriter, bufferReader, bufferWriter, cutter } from '../..';
+import { binaryReader, binaryWriter, bufferReader, bufferWriter, cutter, genericReader, genericWriter } from '../..';
+
 setup();
 
 const { equal } = assert;
@@ -50,5 +50,57 @@ describe(module.id, () => {
             equal(reader.readInt8(), 5, 'int8 roundtrip again');
             equal(reader.read(), undefined, 'EOF roundtrip');
         });
+    });
+
+    describe('peekAll should not consume the reader', () => {
+        it('buffer is empty', () => {
+            const originalBuffer = Buffer.from([]);
+            const reader = binaryReader(bufferReader(originalBuffer));
+            equal(reader.peekAll(), undefined, 'peekAll');
+            equal(reader.readAll(), undefined, 'readAll');
+        });
+
+        it('buffer length smaller than chunk size', () => {
+            const originalBuffer = Buffer.allocUnsafe(256);
+            const reader = binaryReader(bufferReader(originalBuffer));
+            eqbuf(reader.peekAll(), originalBuffer, 'peekAll');
+            eqbuf((reader.readAll() as Buffer), originalBuffer, 'readAll');
+        });
+
+        it('buffer length equal to chunk size', () => {
+            const originalBuffer = Buffer.allocUnsafe(1024);
+            const reader = binaryReader(bufferReader(originalBuffer));
+            eqbuf(reader.peekAll(), originalBuffer, 'peekAll');
+            eqbuf((reader.readAll() as Buffer), originalBuffer, 'readAll');
+        });
+
+        it('buffer length greater than chunk size', () => {
+            const originalBuffer = Buffer.allocUnsafe(1600);
+            const reader = binaryReader(bufferReader(originalBuffer));
+            eqbuf(reader.peekAll(), originalBuffer, 'peekAll');
+            eqbuf((reader.readAll() as Buffer), originalBuffer, 'readAll');
+        });
+    });
+
+    it('should stop underlying reader', () => {
+        const stopError = new Error('stop read stream');
+        let foundError: Error | undefined;
+        binaryReader(genericReader<Buffer>(() => {
+            return Buffer.allocUnsafe(1);
+        }, (e: Error) => {
+            foundError = e;
+        })).stop(stopError);
+        assert.equal(foundError, stopError);
+    });
+
+    it('should stop underlying writer', () => {
+        const stopError = new Error('stop write stream');
+        let foundError: Error | undefined;
+        binaryWriter(genericWriter<Buffer>(() => {
+            return ;
+        }, (e: Error) => {
+            foundError = e;
+        })).stop(stopError);
+        assert.equal(foundError, stopError);
     });
 });

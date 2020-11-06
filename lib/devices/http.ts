@@ -126,8 +126,8 @@ export function factory(url: string) {
                     if (data === undefined) return (this._result = endWrite(cli));
                     else return cli.write(type === 'application/json' ? JSON.stringify(data) : data);
                 },
-                get result(this: FactoryWriter) {
-                    return this._result;
+                get result(): any {
+                    return (this as FactoryWriter)._result;
                 },
             };
         },
