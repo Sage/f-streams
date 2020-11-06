@@ -86,7 +86,6 @@ export class Reader<T> {
             for (i = 0; (val = this.read()) !== undefined; i++) {
                 fn.call(null, val, i);
             }
-            return i;
         });
     }
 
