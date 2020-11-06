@@ -20,6 +20,11 @@
     The `fn` function is called as `fn(elt)`.  
     Returns false at the end of stream if `fn` returned false on every entry.  
     Stops streaming and returns true as soon as `fn` returns true on an entry.
+-   `result = reader.find(fn)`  
+    Similar to `find` on arrays.  
+    The `fn` function is called as `fn(elt)`.  
+    Returns undefined at the end of stream if `fn` returned false on every entry.  
+    Otherwise returns the first element on which `fn` returns true.
 -   `result = reader.reduce(fn, initial)`  
     Similar to `reduce` on arrays.  
     The `fn` function is called as `fn(current, elt)` where `current` is `initial` on the first entry and

@@ -130,7 +130,7 @@ export class Reader<T> {
     ///   Similar to `find` on arrays.
     ///   The `fn` function is called as `fn(elt)`.
     ///   Returns undefined at the end of stream if `fn` returned false on every entry.
-    ///   Stops streaming and returns true as soon as `fn` returns true on an entry.
+    ///   Otherwise returns the first element on which `fn` returns true.
     find(fn: ((value: T) => boolean) | {}): T | undefined {
         const f = resolvePredicate(fn);
         return tryCatch(this, () => {
