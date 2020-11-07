@@ -79,7 +79,7 @@ export function list(path: string, options?: ListOptions) {
         accept = arguments[2];
     }
     const postorder = recurse === 'postorder';
-    return generic.empty.reader.transform<ListEntry>((reader, writer) => {
+    return generic.empty.createReader().transform<ListEntry>((reader, writer) => {
         function process(p: string, name: string, depth: number) {
             const stat = wait(cb => fs.stat(p, cb));
             const entry = {

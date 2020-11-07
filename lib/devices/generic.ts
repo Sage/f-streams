@@ -5,13 +5,15 @@ import { Writer } from '../writer';
 ///
 /// `import { emptyReader, emptyWriter } from 'f-streams'`
 ///
-/// * `emptyReader`
-/// * `emptyWriter`
-///   Empty streams. `emptyReader.read()` returns `undefined`.
-///   `emptyWRiter` is a null sink. It just discards anything you would write to it.
+/// * `emptyReader` deprecated, use createEmptyReader()
+/// * `emptyWriter` deprecated, use createEmptyWriter()
+///   Empty streams. `createEmptyReader().read()` returns `undefined`.
+///   `createEmptyWriter()` create a null sink. It just discards anything you would write to it.
 export const empty = {
     reader: new Reader(function(this: Reader<any>) {}),
     writer: new Writer(function(this: Writer<any>, value: any) {}),
+    createReader: () => new Reader(function(this: Reader<any>) {}),
+    createWriter: () => new Writer(function(this: Writer<any>, value: any) {}),
 };
 
 /// !doc
