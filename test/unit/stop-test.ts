@@ -2,6 +2,7 @@ import { assert } from 'chai';
 import { setup } from 'f-mocha';
 import { run, wait } from 'f-promise';
 import { arrayWriter, genericReader, Reader } from '../..';
+import { nextTick } from '../../lib/util';
 setup();
 
 const { equal, ok, strictEqual, deepEqual } = assert;
@@ -17,6 +18,7 @@ function numbers(limit: number): TestReader {
     let i = 0;
     return genericReader(
         function read(this: TestReader) {
+            nextTick();
             if (this.stoppedReason) throw new Error('attempt to read after stop: ' + i);
             return i >= limit ? undefined : i++;
         },

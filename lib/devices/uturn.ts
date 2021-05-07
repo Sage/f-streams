@@ -99,7 +99,7 @@ export function create<T>(): Uturn<T> {
                         case 'reading':
                             state = 'done';
                             // send undefined or exception to read
-                            bounceReader(arg && arg !== 1 ? arg : null);
+                            bounceReader(arg && arg !== true ? arg : null);
                             // acknowledge the stop
                             cb(undefined);
                             break;
@@ -171,7 +171,7 @@ export function create<T>(): Uturn<T> {
                         case 'reading':
                             // send undefined or exception to read
                             state = 'done';
-                            bounceReader(arg && arg !== 1 ? arg : null);
+                            bounceReader(arg && arg !== true ? arg : null);
                             // acknowledge the stop
                             cb(undefined);
                             break;
