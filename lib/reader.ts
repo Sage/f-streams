@@ -604,7 +604,9 @@ export class Reader<T> {
     /// * `reader = reader.nodeTransform(duplex)`
     ///   pipes the reader into a node duplex stream. Returns another reader.
     nodeTransform<U>(duplex: nodeStream.Duplex): Reader<U> {
-        return require('./devices/node').reader(this.nodify().pipe(duplex));
+        const readable = this.nodify();
+        readable.on('error', (err: Error) => duplex.emit('error', err));
+        return require('./devices/node').reader(readable.pipe(duplex));
     }
 
     /// * `cmp = reader1.compare(reader2)`
